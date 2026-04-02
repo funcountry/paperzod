@@ -142,7 +142,7 @@ describe("extended surface renderers", () => {
       {
         "coordination_surface": "# Lessons PSMobile Bootstrap
 
-      This file owns attached-checkout startup and runtime handling.
+      This coordination document records shared execution expectations.
 
       <a id="bootstrap"></a>
       ## Bootstrap
@@ -151,11 +151,11 @@ describe("extended surface renderers", () => {
 
       - Coordination source: \`paperclip_home/project_homes/lessons/shared/agent_coordination/LESSONS_PSMOBILE_BOOTSTRAP.md\`.
       ",
-        "gate_surface": "# Lessons Acceptance Critic Criteria
+        "gate_surface": "# Lessons Acceptance Critic
 
       This file owns what Lessons Acceptance Critic checks before work moves on.
 
-      Use it with the governing workflow and quality-bar surfaces for this gate.
+      Use it with the governing workflow and any supporting standards for this gate.
 
       <a id="what-the-critic-judges"></a>
       ## What the critic judges
@@ -167,7 +167,7 @@ describe("extended surface renderers", () => {
       ",
         "how_to_surface": "# Lessons GitHub Access Protocol
 
-      This file is the shared GitHub access guide for the Lessons project.
+      This how-to document explains a repeatable operational procedure.
 
       <a id="github-access"></a>
       ## GitHub Access
@@ -178,27 +178,23 @@ describe("extended surface renderers", () => {
       ",
         "reference_surface": "# Poker KB
 
-      This file owns the Lessons-local PokerKB runner path, URL routing, query discipline, and example commands.
-
-      Use it when the current task needs repo-owned PokerKB runner or query discipline guidance.
+      This file records the project-local reference contract for Poker KB.
 
       <a id="poker-kb"></a>
       ## Poker KB
 
-      Use this section when the current task needs the local PokerKB runner or query-discipline guidance.
+      Use this section when the current task depends on \`Poker KB\`.
 
       - Reference source: \`paperclip_home/project_homes/lessons/shared/technical_references/POKER_KB.md\`.
       ",
         "standard_surface": "# Lessons Packet Shapes
 
-      This file owns the packet families used to start Lessons work.
-
-      Use it to answer one question: what packet shape should I create for this job?
+      This file records the shared standard for Lessons Packet Shapes.
 
       <a id="packet-shape"></a>
       ## Packet Shape
 
-      Use this section when the current job needs the canonical packet-shape rule.
+      Use this section as the shared standard for \`Packet Shape Standard\`.
 
       - Current standard source: \`Packet Shape Standard\`.
       ",

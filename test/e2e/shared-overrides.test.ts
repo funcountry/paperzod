@@ -71,7 +71,7 @@ describe("shared_overrides e2e", () => {
 
       This file owns what Shared Gate checks before work moves on.
 
-      Use it with the governing workflow and quality-bar surfaces for this gate.
+      Use it with the governing workflow and any supporting standards for this gate.
 
       <a id="criteria"></a>
       ## Criteria
@@ -135,7 +135,7 @@ describe("shared_overrides e2e", () => {
 
       This file owns what Shared Gate checks before work moves on.
 
-      Use it with the governing workflow and quality-bar surfaces for this gate.
+      Use it with the governing workflow and any supporting standards for this gate.
 
       <a id="criteria"></a>
       ## Criteria

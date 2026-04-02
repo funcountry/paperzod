@@ -177,6 +177,8 @@ export interface SurfaceDef {
   setupId: string;
   surfaceClass: SurfaceClass;
   runtimePath: string;
+  title?: string;
+  intro?: AuthoredContentBlock[];
   preamble?: AuthoredContentBlock[];
 }
 

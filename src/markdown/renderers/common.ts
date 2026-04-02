@@ -114,7 +114,7 @@ export function getNodeDisplayName(graph: DoctrineGraph, nodeId: string): string
     case "artifact":
       return node.name;
     case "surface":
-      return getDocumentTitle(node, graph);
+      return node.title ?? getDocumentTitle(node, graph);
     case "surface_section":
       return titleCase(node.stableSlug.replaceAll("-", "_"));
     case "reference":
@@ -398,6 +398,21 @@ function getIntro(surfaceClass: SurfaceDef["surfaceClass"]): ParagraphNode {
   return paragraph(messages[surfaceClass]);
 }
 
+function resolveSurfaceTitle(surface: SurfaceDef, graph: DoctrineGraph, fallbackTitle: string | undefined): string {
+  return surface.title ?? fallbackTitle ?? getDocumentTitle(surface, graph);
+}
+
+function resolveSurfaceIntroBlocks(
+  surface: SurfaceDef,
+  fallbackIntroBlocks: NonSectionDocBlockNode[] | undefined
+): NonSectionDocBlockNode[] {
+  if (surface.intro && surface.intro.length > 0) {
+    return authoredBlocksToDocBlocks(surface.intro);
+  }
+
+  return fallbackIntroBlocks ?? [getIntro(surface.surfaceClass)];
+}
+
 export function renderSurfaceDocumentAst(
   graph: DoctrineGraph,
   plan: CompilePlan,
@@ -412,7 +427,7 @@ export function renderSurfaceDocumentAst(
   const sectionNodes = buildPlannedSectionTree(graph, plan, document.id, undefined, 2, options);
 
   const preambleBlocks = surface.preamble ? authoredBlocksToDocBlocks(surface.preamble) : [];
-  const introBlocks = options?.introBlocks ?? [getIntro(surface.surfaceClass)];
+  const introBlocks = resolveSurfaceIntroBlocks(surface, options?.introBlocks);
 
-  return doc(options?.title ?? getDocumentTitle(surface, graph), [...introBlocks, ...preambleBlocks, ...sectionNodes]);
+  return doc(resolveSurfaceTitle(surface, graph, options?.title), [...introBlocks, ...preambleBlocks, ...sectionNodes]);
 }

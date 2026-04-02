@@ -16,8 +16,8 @@ shape in `../paperclip_agents`, while still remaining general-purpose.
 
 Status as of 2026-04-01:
 
-- the current prototype implements and proves the core compiler path described
-  here against fixture-based proving cases
+- the current repo implements and proves the core compiler path described here
+  against canonical repo-local setups plus fixture-based proving cases
 - this document remains normative product scope, not a changelog
 - exact live path parity with every current `paperclip_agents` surface is an
   example-layer concern and should not be confused with the core product

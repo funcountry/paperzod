@@ -283,7 +283,7 @@ describe("setup normalization", () => {
             {
               kind: "example",
               title: "Example compile command",
-              blocks: [{ kind: "code_block", code: "paperzod compile setups/lessons/setup.ts", language: "sh" }]
+              blocks: [{ kind: "code_block", code: "paperzod compile setups/lessons/index.ts", language: "sh" }]
             },
             {
               kind: "good_bad_examples",
@@ -315,7 +315,7 @@ describe("setup normalization", () => {
               kind: "ordered_steps",
               items: ["Open README.", { text: "Open AUTHORITATIVE workflow.", children: ["Then open only the named owner."] }]
             },
-            { kind: "code_block", code: "paperzod compile setups/lessons/setup.ts", language: "sh" }
+            { kind: "code_block", code: "paperzod compile setups/lessons/index.ts", language: "sh" }
           ]
         }
       ],
@@ -370,7 +370,7 @@ describe("setup normalization", () => {
           {
             kind: "example",
             title: "Example compile command",
-            blocks: [{ kind: "code_block", code: "paperzod compile setups/lessons/setup.ts", language: "sh" }]
+            blocks: [{ kind: "code_block", code: "paperzod compile setups/lessons/index.ts", language: "sh" }]
           },
           {
             kind: "good_bad_examples",
@@ -404,7 +404,7 @@ describe("setup normalization", () => {
             kind: "ordered_steps",
             items: ["Open README.", { text: "Open AUTHORITATIVE workflow.", children: ["Then open only the named owner."] }]
           },
-          { kind: "code_block", code: "paperzod compile setups/lessons/setup.ts", language: "sh" }
+          { kind: "code_block", code: "paperzod compile setups/lessons/index.ts", language: "sh" }
         ]
       }
     ]);

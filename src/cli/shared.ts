@@ -27,12 +27,19 @@ export async function loadSetupInput(filePath: string): Promise<unknown> {
     return JSON.parse(await readFile(absolutePath, "utf8")) as unknown;
   }
 
-  if (extension === ".js" || extension === ".mjs" || extension === ".cjs") {
+  if (
+    extension === ".js" ||
+    extension === ".mjs" ||
+    extension === ".cjs" ||
+    extension === ".ts" ||
+    extension === ".mts" ||
+    extension === ".cts"
+  ) {
     const module = (await import(pathToFileURL(absolutePath).href)) as { default?: unknown };
     return module.default ?? module;
   }
 
-  fail(`Unsupported setup file extension "${extension}". Use .json, .js, .mjs, or .cjs.`);
+  fail(`Unsupported setup file extension "${extension}". Use .json, .js, .mjs, .cjs, .ts, .mts, or .cts.`);
 }
 
 export function analyzeSetupInput(input: unknown): AnalyzeResult {

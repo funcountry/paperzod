@@ -75,11 +75,9 @@ describe("workflow and packet renderers", () => {
     );
 
     expect(markdown).toMatchInlineSnapshot(`
-      "# Lessons Workflow
+      "# Workflow Owner
 
-      This is the top-level workflow for Lessons.
-
-      Use this file for lane order, same-issue handoff, and owner routing.
+      Use this file for represented workflow order, owner routing, and lane contracts.
 
       <a id="owner-map"></a>
       ## Owner Map

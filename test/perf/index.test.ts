@@ -3,8 +3,8 @@ import { performance } from "node:perf_hooks";
 import { describe, expect, it } from "vitest";
 
 import { compileSetup, createPaperclipMarkdownTarget, createTargetAdapter } from "../../src/index.js";
+import lessonsSetup from "../../setups/lessons/index.ts";
 import demoMinimalSeed from "../fixtures/source/demo-minimal.js";
-import lessonsFullSeed from "../fixtures/source/lessons-full.js";
 
 function compileDemo() {
   return compileSetup(
@@ -19,7 +19,7 @@ function compileDemo() {
 
 function compileLessonsFull() {
   return compileSetup(
-    lessonsFullSeed,
+    lessonsSetup,
     createPaperclipMarkdownTarget({
       repoRoot: "/repo",
       outputRoot: "paperclip_agents"

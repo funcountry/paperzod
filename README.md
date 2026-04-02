@@ -84,7 +84,7 @@ let the compiler keep the generated output aligned.
 ## Small Example
 
 The example below shows the product surface: reusable templates, setup-local
-facts, authored fragments, and direct `.ts` compilation.
+facts, authored fragments, and repo-local `.ts` compilation.
 
 ```ts
 import {
@@ -181,18 +181,24 @@ Markdown owns the prose humans should write directly.
 For a generic setup:
 
 ```sh
-paperzod doctor setups/editorial/setup.ts
-paperzod compile setups/editorial/setup.ts --repo-root . --output-root generated --write
+paperzod doctor setups/editorial/index.ts
+paperzod compile setups/editorial/index.ts --repo-root . --output-root generated --write
 ```
 
 For a Paperclip runtime tree:
 
 ```sh
-paperzod doctor setups/product_docs/setup.ts
-paperzod compile setups/product_docs/setup.ts --target paperclip --repo-root . --output-root . --write
+paperzod doctor setups/product_docs/index.ts
+paperzod compile setups/product_docs/index.ts --target paperclip --repo-root . --output-root . --write
 ```
 
-The compiler accepts authored `.ts` setup files directly.
+The compiler accepts repo-local authored `.ts`, `.mts`, and `.cts` setup files directly.
+That path is intentionally narrow:
+
+- use Node `>=24.12.0`
+- keep setup modules to erasable TypeScript
+- use explicit local file extensions when you import another repo-local `.ts` file
+- do not rely on `tsconfig`-only runtime features such as path aliases
 
 ## What Comes Back
 
@@ -281,15 +287,9 @@ One reasonable repo layout looks like this:
 .
 ├── setups/
 │   ├── editorial/
-│       ├── setup.ts
-│       ├── roles.ts
-│       ├── workflow.ts
-│       ├── packet_contracts.ts
-│       ├── surfaces.ts
-│       ├── references.ts
-│       └── targets.ts
+│   │   └── index.ts
 │   └── support_docs/
-│       └── setup.ts
+│       └── index.ts
 ├── fragments/
 │   ├── editorial/
 │   └── support_docs/
@@ -309,7 +309,8 @@ npm run build
 
 When you are extending the system:
 
-- start with a proving fixture under `test/fixtures/source/`
+- put canonical repo-local setup truth under `setups/**`
+- use `test/fixtures/source/**` for synthetic fixtures, mutations, or thin re-exports of canonical setups
 - add or tighten the nearest layer-specific test first
 - change implementation second
 - keep rendered output changes deliberate and reviewable

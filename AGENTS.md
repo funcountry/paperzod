@@ -19,6 +19,7 @@
 ## Red Lines
 
 - Do not edit `vendor/zod/**` unless the task is explicitly about the vendored reference checkout.
+- Keep `src/**` framework-only. Setup-local doctrine, authored setup prose, and proving-package specifics belong in `setups/**`, not in core compiler code.
 - Do not special-purpose public docs, APIs, or examples to Lessons. Treat Lessons fixtures and goldens as one proving case for a generic compiler.
 - Do not update snapshots or `test/goldens/lessons-live/**` just to force green tests. Read the rendered change first and explain why the output contract changed.
 - Treat `docs/ref/**` as grounding input and reference material, not generated output.
@@ -48,5 +49,6 @@
 
 ## Test Truth Surfaces
 
-- `test/fixtures/source/**`: authored proving fixtures.
+- `setups/**`: canonical repo-local proving setups when the task touches setup truth.
+- `test/fixtures/source/**`: authored proving fixtures and synthetic mutation inputs.
 - `test/goldens/lessons-live/**`: one frozen parity corpus for a proving case.

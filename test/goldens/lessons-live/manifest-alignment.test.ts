@@ -4,7 +4,7 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 
 import { compileSetup, createPaperclipMarkdownTarget } from "../../../src/index.js";
-import lessonsFullSeed from "../../fixtures/source/lessons-full.js";
+import lessonsSetup from "../../../setups/lessons/index.ts";
 
 interface InventoryDocument {
   order: number;
@@ -29,7 +29,7 @@ function readInventory(): InventoryFile {
 
 function compileLessonsFull() {
   return compileSetup(
-    lessonsFullSeed,
+    lessonsSetup,
     createPaperclipMarkdownTarget({
       repoRoot: "/repo",
       outputRoot: "paperclip_agents"

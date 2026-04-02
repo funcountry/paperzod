@@ -43,25 +43,16 @@ export function renderPacketWorkflowDocument(graph: DoctrineGraph, plan: Compile
         (node): node is Extract<DoctrineGraph["nodes"][number], { kind: "workflow_step" }> => node.kind === "workflow_step"
       );
 
-      switch (surfaceSection.stableSlug) {
-        case "what-this-lane-must-do":
-        case "lane-order":
-        case "default-order":
-        case "release-shape": {
-          if (!step) {
-            return undefined;
-          }
-
-          const facts = getWorkflowStepFacts(graph, step);
-          return [
-            ...(packetContract ? [paragraph(`Use this section as the lane contract for the \`${packetContract.name}\` packet.`)] : []),
-            paragraph(step.purpose),
-            unorderedList(facts)
-          ];
-        }
-        default:
-          return undefined;
+      if (!step) {
+        return undefined;
       }
+
+      const facts = getWorkflowStepFacts(graph, step);
+      return [
+        ...(packetContract ? [paragraph(`Use this section as the lane contract for the \`${packetContract.name}\` packet.`)] : []),
+        paragraph(step.purpose),
+        unorderedList(facts)
+      ];
     }
   });
 }

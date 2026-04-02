@@ -623,10 +623,13 @@ That keeps setup authoring readable and reviewable.
 The Lessons example should live as a first-class example setup, not as a pile
 of special cases embedded in the compiler.
 
-In the current prototype, the executable Lessons proving fixtures live under:
+The canonical Lessons proving setup now lives in:
+
+- `setups/lessons/index.ts`
+
+The narrower Lessons proving slice still lives under:
 
 - `test/fixtures/source/lessons-vertical-slice.ts`
-- `test/fixtures/source/lessons-full.ts`
 
 Its job is to prove that `paperzod` can model:
 
@@ -655,7 +658,7 @@ core behavior should be test-first and fixture-driven.
 - fixture tests for compile plans
 - snapshot tests for rendered markdown
 - a vertical-slice Lessons compile fixture
-- a full Lessons compile fixture
+- a canonical Lessons compile setup under `setups/lessons/index.ts`
 
 Recommended golden outputs:
 
@@ -675,7 +678,8 @@ The safest implementation order is:
 4. `src/plan/`
 5. `src/doc/` plus `src/markdown/`
 6. `src/emit/` and `src/cli/`
-7. proving fixtures under `test/fixtures/source/` and `test/e2e/`
+7. canonical setups under `setups/**`, then proving fixtures and e2e coverage
+   under `test/**`
 
 That gives us a narrow vertical slice without mixing concerns too early.
 

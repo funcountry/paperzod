@@ -111,11 +111,9 @@ describe("hierarchical section authoring", () => {
     ]);
 
     expect(result.data.documents[0]?.markdown).toMatchInlineSnapshot(`
-      "# Lessons Shared Doctrine
+      "# Shared Entrypoint
 
-      This folder is the live shared doctrine home for the Lessons project.
-
-      Start here, then open the one surface that owns your current question.
+      This shared entrypoint introduces the setup-wide doctrine surface.
 
       Start here, then open the one file that owns the question.
 

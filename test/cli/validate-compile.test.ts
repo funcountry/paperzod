@@ -16,6 +16,10 @@ function fixtureModuleSource(setupLiteral: string): string {
   return `export default ${setupLiteral};\n`;
 }
 
+function tsFixtureModuleSource(setupLiteral: string): string {
+  return `const setup = ${setupLiteral} as const;\nexport default setup;\n`;
+}
+
 beforeAll(async () => {
   const build = await runProcess(npmCommand(), ["run", "build"], repoRoot);
   expect(build.code).toBe(0);
@@ -72,6 +76,26 @@ describe("cli validate and compile", () => {
     });
   });
 
+  it("validates a good TypeScript setup and exits zero", async () => {
+    await withTempDir(async (dir) => {
+      const fixturePath = path.join(dir, "valid-setup.ts");
+      await writeFile(
+        fixturePath,
+        tsFixtureModuleSource(`{
+          id: "cli_valid_ts",
+          name: "CLI Valid TS",
+          surfaces: [{ id: "surface_1", surfaceClass: "workflow_owner", runtimePath: "generated/WORKFLOW.md" }],
+          generatedTargets: [{ id: "target_1", path: "generated/WORKFLOW.md", sourceIds: ["surface_1"] }]
+        }`),
+        "utf8"
+      );
+
+      const result = await runNodeScript(["dist/cli/index.js", "validate", fixturePath], repoRoot);
+      expect(result.code).toBe(0);
+      expect(result.stdout).toContain("VALID cli_valid_ts");
+    });
+  });
+
   it("reports validation failures and exits nonzero", async () => {
     await withTempDir(async (dir) => {
       const fixturePath = path.join(dir, "invalid-setup.mjs");
@@ -123,6 +147,12 @@ describe("cli validate and compile", () => {
       expect(result.stdout).toContain("dry-run");
       expect(result.stdout).toContain("create");
     });
+  });
+
+  it("validates the canonical core_dev setup from setups/**", async () => {
+    const result = await runNodeScript(["dist/cli/index.js", "validate", "setups/core_dev/index.ts"], repoRoot);
+    expect(result.code).toBe(0);
+    expect(result.stdout).toContain("VALID core_dev");
   });
 
   it("reports compile failures and exits nonzero", async () => {

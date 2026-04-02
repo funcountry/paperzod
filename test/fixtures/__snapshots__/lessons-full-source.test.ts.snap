@@ -63,10 +63,10 @@ exports[`lessons_full source model > represents the full Lessons requirement sha
     },
   ],
   "setup": {
-    "description": "A broader proving fixture for the full Lessons doctrine requirement set.",
-    "id": "lessons_full",
+    "description": "The canonical Lessons proving setup for the full doctrine requirement set.",
+    "id": "lessons",
     "kind": "setup",
-    "name": "Lessons Full",
+    "name": "Lessons",
   },
   "surfaceClasses": [
     "coordination",

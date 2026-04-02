@@ -11,12 +11,11 @@ Lessons reference case without flattening the real pod shape.
 
 Status as of 2026-04-01:
 
-- the executable Lessons proving examples in this repo live in
-  `test/fixtures/source/lessons-vertical-slice.ts` and
-  `test/fixtures/source/lessons-full.ts`
-- those fixtures prove the semantic model and most shared-surface path shapes
-- they do not yet mirror the live `paperclip_home/agents/...` role-home tree
-  exactly
+- the canonical Lessons proving setup now lives in `setups/lessons/index.ts`
+- `test/fixtures/source/lessons-full.ts` is a thin test-facing re-export of
+  that canonical setup
+- `test/fixtures/source/lessons-vertical-slice.ts` remains a narrower Lessons
+  slice for focused proof
 
 ## The modeling rule this example forces
 
@@ -57,26 +56,18 @@ It also needs to preserve the fact that some of these are:
 
 ## Source package shape
 
-One clean way to represent Lessons in `paperzod` would be:
+The first-cut canonical Lessons package in this repo now uses the simplest
+reviewable shape:
 
 ```text
 paperzod/
   setups/
     lessons/
-      setup.ts
-      roles.ts
-      workflow.ts
-      packet_contracts.ts
-      surfaces.ts
-      references.ts
-      targets.ts
+      index.ts
 ```
 
-That source package would define one setup graph with enough information to
+That source package defines one setup graph with enough information to
 generate the runtime markdown surfaces for the Lessons pod.
-
-The current repo does not ship this `setups/lessons/` package yet.
-Today, the executable proving examples live under `test/fixtures/source/`.
 
 ## Lessons setup model
 

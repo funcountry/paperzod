@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
 
 import { compileSetup, createPaperclipMarkdownTarget, createTargetAdapter, emitDocuments } from "../../src/index.js";
-import lessonsFullSeed from "../fixtures/source/lessons-full.js";
+import lessonsSetup from "../../setups/lessons/index.ts";
 import demoMinimalSeed from "../fixtures/source/demo-minimal.js";
 import { withTempDir } from "../helpers/fs.js";
 
 function compileLessonsFull() {
   return compileSetup(
-    lessonsFullSeed,
+    lessonsSetup,
     createPaperclipMarkdownTarget({
       repoRoot: "/repo",
       outputRoot: "paperclip_agents"

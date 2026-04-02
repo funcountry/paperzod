@@ -55,7 +55,7 @@ exports[`lessons_full e2e > compiles the full Lessons proving fixture with stabl
 
 This file owns what Lessons Acceptance Critic checks before work moves on.
 
-Use it with the governing workflow and quality-bar surfaces for this gate.
+Use it with the governing workflow and any supporting standards for this gate.
 
 <a id="what-the-critic-judges"></a>
 ## What the critic judges

@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import { normalizeSetup } from "../../src/index.js";
-import secondSetupSeed from "../fixtures/source/second-setup.js";
+import coreDevSetup from "../../setups/core_dev/index.ts";
 
 describe("second_setup source model", () => {
   it("represents a non-Lessons setup with a different surface mix and path shape", () => {
-    const result = normalizeSetup(secondSetupSeed);
+    const result = normalizeSetup(coreDevSetup);
     expect(result.success).toBe(true);
     if (!result.success) {
       return;

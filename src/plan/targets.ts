@@ -68,21 +68,19 @@ function paperclipPathError(document: PlannedDocument, message: string): Diagnos
 
 function validatePaperclipSurfacePath(document: PlannedDocument): Diagnostic[] {
   const relativePath = document.path;
+  const isSharedMarkdownPath = (pathValue: string) =>
+    /^paperclip_home\/project_homes\/[^/]+\/shared\/.+\.md$/.test(pathValue) && !pathValue.endsWith("/README.md");
   const validators: Record<SurfaceClass, (pathValue: string) => boolean> = {
     role_home: (pathValue) => /^paperclip_home\/agents\/[^/]+\/AGENTS\.md$/.test(pathValue),
     project_home_root: (pathValue) => /^paperclip_home\/project_homes\/[^/]+\/README\.md$/.test(pathValue),
     shared_entrypoint: (pathValue) => /^paperclip_home\/project_homes\/[^/]+\/shared\/README\.md$/.test(pathValue),
-    workflow_owner: (pathValue) =>
-      /^paperclip_home\/project_homes\/[^/]+\/shared\/[^/]+\.md$/.test(pathValue) &&
-      !pathValue.endsWith("/README.md"),
-    packet_workflow: (pathValue) => /^paperclip_home\/project_homes\/[^/]+\/shared\/proof_packets\/[^/]+\.md$/.test(pathValue),
-    standard: (pathValue) =>
-      /^paperclip_home\/project_homes\/[^/]+\/shared\/(?:lessons_content_standards|standards)\/[^/]+\.md$/.test(pathValue),
-    gate: (pathValue) =>
-      /^paperclip_home\/project_homes\/[^/]+\/shared\/(?:lessons_content_standards|gates)\/[^/]+\.md$/.test(pathValue),
-    technical_reference: (pathValue) => /^paperclip_home\/project_homes\/[^/]+\/shared\/technical_references\/[^/]+\.md$/.test(pathValue),
-    how_to: (pathValue) => /^paperclip_home\/project_homes\/[^/]+\/shared\/(?:how_to_guides|how_to)\/[^/]+\.md$/.test(pathValue),
-    coordination: (pathValue) => /^paperclip_home\/project_homes\/[^/]+\/shared\/(?:agent_coordination|coordination)\/[^/]+\.md$/.test(pathValue)
+    workflow_owner: isSharedMarkdownPath,
+    packet_workflow: isSharedMarkdownPath,
+    standard: isSharedMarkdownPath,
+    gate: isSharedMarkdownPath,
+    technical_reference: isSharedMarkdownPath,
+    how_to: isSharedMarkdownPath,
+    coordination: isSharedMarkdownPath
   };
 
   return validators[document.surfaceClass](relativePath)

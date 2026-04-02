@@ -7,9 +7,9 @@ exports[`second_setup e2e > compiles the same pipeline for a non-Lessons setup 1
     "documentPaths": {
       "coordinator_home": "/repo/paperclip_agents/paperclip_home/agents/coordinator/AGENTS.md",
       "core_dev_readme": "/repo/paperclip_agents/paperclip_home/project_homes/core_dev/shared/README.md",
-      "release_gate_surface": "/repo/paperclip_agents/paperclip_home/project_homes/core_dev/shared/lessons_content_standards/RELEASE_READINESS_GATE.md",
-      "release_how_to_surface": "/repo/paperclip_agents/paperclip_home/project_homes/core_dev/shared/how_to_guides/RELEASE_PROTOCOL.md",
-      "release_workflow_surface": "/repo/paperclip_agents/paperclip_home/project_homes/core_dev/shared/AUTHORITATIVE_CORE_DEV_WORKFLOW.md",
+      "release_gate_surface": "/repo/paperclip_agents/paperclip_home/project_homes/core_dev/shared/gates/RELEASE_READINESS_GATE.md",
+      "release_how_to_surface": "/repo/paperclip_agents/paperclip_home/project_homes/core_dev/shared/runbooks/RELEASE_PROTOCOL.md",
+      "release_workflow_surface": "/repo/paperclip_agents/paperclip_home/project_homes/core_dev/shared/workflows/AUTHORITATIVE_CORE_DEV_WORKFLOW.md",
     },
     "outputRoot": "paperclip_agents",
     "repoRoot": "/repo",
@@ -37,29 +37,24 @@ Coordinate the core-dev workflow and keep the shared release doctrine coherent.
 ",
     "core_dev_readme": "# Core Dev Shared Doctrine
 
-This folder is the live shared doctrine home for the Core Dev project.
+This folder is the shared doctrine home for the Core Dev setup.
 
-Start here, then open the one surface that owns your current question.
+Start here, then open the one surface that owns your current release question.
 
-<a id="release-order"></a>
+<a id="read-order"></a>
 ## Release Order
 
-Prepare the release-readiness packet and route it into the final review.
+After this map, read in this order.
 
-- Current owner: Shared Role
-- Read before acting: none
-- Required inputs: none
-- Support inputs: Release Protocol
-- Interim artifacts: none
-- Outputs the next owner may trust: RELEASE_READINESS.md
-- Stop line: Stop once the release packet is stable enough for final review.
-- Hand off to gate: Release Readiness Gate
+1. \`paperclip_home/project_homes/core_dev/shared/workflows/AUTHORITATIVE_CORE_DEV_WORKFLOW.md\`
+
+Open packet workflows, standards, and coordination docs only when the workflow owner points you there.
 ",
     "release_gate_surface": "# Release Readiness Gate
 
 This file owns what Release Readiness Gate checks before work moves on.
 
-Use it with the governing workflow and quality-bar surfaces for this gate.
+Use it with the governing workflow and any supporting standards for this gate.
 
 <a id="final-checks"></a>
 ## Final Checks
@@ -71,20 +66,20 @@ Judge whether the release packet is ready for handoff.
 ",
     "release_how_to_surface": "# Release Protocol
 
-This file is the shared procedure guide for the Core Dev project.
+This how-to document explains a repeatable operational procedure.
 
 <a id="protocol"></a>
 ## Protocol
 
 Use this guide when the current task depends on \`Release Protocol\`.
 
-- Procedure source: \`paperclip_home/project_homes/core_dev/shared/how_to_guides/RELEASE_PROTOCOL.md\`.
+- Procedure source: \`paperclip_home/project_homes/core_dev/shared/runbooks/RELEASE_PROTOCOL.md\`.
 ",
     "release_workflow_surface": "# Core Dev Workflow
 
-This is the top-level workflow for Core Dev.
+This file owns the top-level Core Dev release workflow.
 
-Use this file for lane order, same-issue handoff, and owner routing.
+Use it for release order, owner routing, and final handoff expectations.
 
 <a id="release-shape"></a>
 ## Release Shape

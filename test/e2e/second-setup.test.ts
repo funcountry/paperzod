@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { compileSetup, createPaperclipMarkdownTarget } from "../../src/index.js";
-import secondSetupSeed from "../fixtures/source/second-setup.js";
+import coreDevSetup from "../../setups/core_dev/index.ts";
 
 function compile(input: unknown) {
   return compileSetup(
@@ -15,7 +15,7 @@ function compile(input: unknown) {
 
 describe("second_setup e2e", () => {
   it("compiles the same pipeline for a non-Lessons setup", () => {
-    const result = compile(secondSetupSeed);
+    const result = compile(coreDevSetup);
     expect(result.success).toBe(true);
     if (!result.success) {
       return;
@@ -28,7 +28,7 @@ describe("second_setup e2e", () => {
   });
 
   it("preserves the setup-local role override through rendering", () => {
-    const result = compile(secondSetupSeed);
+    const result = compile(coreDevSetup);
     expect(result.success).toBe(true);
     if (!result.success) {
       return;

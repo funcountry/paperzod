@@ -66,7 +66,7 @@ describe("authored doctrine content flow", () => {
               kind: "ordered_steps",
               items: ["Open the shared README.", { text: "Then open the named owner.", children: ["Only then open packet doctrine."] }]
             },
-            { kind: "code_block", code: "paperzod doctor setups/lessons/setup.ts", language: "sh" }
+            { kind: "code_block", code: "paperzod doctor setups/lessons/index.ts", language: "sh" }
           ]
         },
         {
@@ -132,7 +132,7 @@ describe("authored doctrine content flow", () => {
         1. Only then open packet doctrine.
 
       \`\`\`sh
-      paperzod doctor setups/lessons/setup.ts
+      paperzod doctor setups/lessons/index.ts
       \`\`\`
 
       <a id="role-contract"></a>

@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 import { compileSetup, createPaperclipMarkdownTarget } from "../../src/index.js";
-import lessonsFullSeed from "../fixtures/source/lessons-full.js";
+import lessonsSetup from "../../setups/lessons/index.ts";
 import lessonsVerticalSliceSeed from "../fixtures/source/lessons-vertical-slice.js";
-import secondSetupSeed from "../fixtures/source/second-setup.js";
+import coreDevSetup from "../../setups/core_dev/index.ts";
 
 function compile(input: unknown) {
   return compileSetup(
@@ -18,8 +18,8 @@ function compile(input: unknown) {
 describe("mutation suite", () => {
   it("catches packet rename drift", () => {
     const result = compile({
-      ...lessonsFullSeed,
-      packetContracts: lessonsFullSeed.packetContracts.map((contract) =>
+      ...lessonsSetup,
+      packetContracts: lessonsSetup.packetContracts.map((contract) =>
         contract.id === "section_dossier_contract"
           ? { ...contract, conceptualArtifactIds: ["section_dossier_packet_renamed"] }
           : contract
@@ -56,8 +56,8 @@ describe("mutation suite", () => {
 
   it("catches role-contract drift", () => {
     const result = compile({
-      ...secondSetupSeed,
-      workflowSteps: secondSetupSeed.workflowSteps.map((step) =>
+      ...coreDevSetup,
+      workflowSteps: coreDevSetup.workflowSteps.map((step) =>
         step.id === "release_readiness_step" ? { ...step, roleId: "missing_role" } : step
       )
     });
@@ -70,8 +70,8 @@ describe("mutation suite", () => {
 
   it("catches gate-check drift", () => {
     const result = compile({
-      ...lessonsFullSeed,
-      reviewGates: lessonsFullSeed.reviewGates.map((gate) =>
+      ...lessonsSetup,
+      reviewGates: lessonsSetup.reviewGates.map((gate) =>
         gate.id === "lessons_acceptance_critic_gate" ? { ...gate, checkIds: ["missing_packet"] } : gate
       )
     });
@@ -84,8 +84,8 @@ describe("mutation suite", () => {
 
   it("catches downstream consumer-or-gate drift", () => {
     const result = compile({
-      ...secondSetupSeed,
-      reviewGates: secondSetupSeed.reviewGates.map((gate) =>
+      ...coreDevSetup,
+      reviewGates: coreDevSetup.reviewGates.map((gate) =>
         gate.id === "release_readiness_gate" ? { ...gate, checkIds: ["release_protocol_standard"] } : gate
       )
     });
@@ -100,8 +100,8 @@ describe("mutation suite", () => {
 
   it("catches compatibility-mapping drift", () => {
     const result = compile({
-      ...lessonsFullSeed,
-      packetContracts: lessonsFullSeed.packetContracts.map((contract) =>
+      ...lessonsSetup,
+      packetContracts: lessonsSetup.packetContracts.map((contract) =>
         contract.id === "lesson_plan_contract" ? { ...contract, runtimeArtifactIds: ["section_dossier_packet"] } : contract
       )
     });
@@ -114,8 +114,8 @@ describe("mutation suite", () => {
 
   it("catches exact-section reads drift", () => {
     const result = compile({
-      ...lessonsFullSeed,
-      links: lessonsFullSeed.links.map((link) =>
+      ...lessonsSetup,
+      links: lessonsSetup.links.map((link) =>
         link.id === "lesson_step_reads_quality_bar" ? { ...link, to: "missing_quality_bar_section" } : link
       )
     });
@@ -175,9 +175,9 @@ describe("mutation suite", () => {
 
   it("catches typed artifact-flow link drift", () => {
     const result = compile({
-      ...secondSetupSeed,
+      ...coreDevSetup,
       links: [
-        ...secondSetupSeed.links,
+        ...coreDevSetup.links,
         { id: "bad_produces_target", kind: "produces", from: "release_readiness_step", to: "release_how_to_surface" },
         { id: "bad_consumes_source", kind: "consumes", from: "shared_role", to: "release_readiness_contract" },
         { id: "bad_supports_target", kind: "supports", from: "release_readiness_step", to: "shared_release_order" }
@@ -198,9 +198,9 @@ describe("mutation suite", () => {
 
   it("catches typed ownership and reference-link drift", () => {
     const result = compile({
-      ...lessonsFullSeed,
+      ...lessonsSetup,
       links: [
-        ...lessonsFullSeed.links,
+        ...lessonsSetup.links,
         { id: "bad_owns_source", kind: "owns", from: "packet_shape_standard_artifact", to: "packet_shape_section" },
         { id: "bad_grounds_source", kind: "grounds", from: "section_dossier_packet", to: "lessons_simple_clear_ref" },
         { id: "bad_references_source", kind: "references", from: "section_dossier_packet", to: "poker_kb_reference" }
@@ -221,9 +221,9 @@ describe("mutation suite", () => {
 
   it("catches link-level maps_to_runtime drift", () => {
     const valid = {
-      ...lessonsFullSeed,
+      ...lessonsSetup,
       links: [
-        ...lessonsFullSeed.links,
+        ...lessonsSetup.links,
         {
           id: "lesson_plan_contract_maps_to_runtime_workflow",
           kind: "maps_to_runtime",

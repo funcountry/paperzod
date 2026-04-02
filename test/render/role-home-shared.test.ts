@@ -222,9 +222,9 @@ describe("role-home and shared renderers", () => {
     );
 
     expect(markdown).toMatchInlineSnapshot(`
-      "# Lessons Project Home
+      "# Project Home
 
-      This is the repo home for Lessons shared doctrine and role-local runtime guidance.
+      This project-home root maps the runtime doctrine surface for one Paperclip project home.
 
       <a id="project-home-map"></a>
       ## Project Home Map

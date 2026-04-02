@@ -111,11 +111,9 @@ describe("lessons_vertical_slice e2e", () => {
           },
           {
             "id": "lessons_readme",
-            "markdown": "# Lessons Shared Doctrine
+            "markdown": "# Shared Entrypoint
 
-      This folder is the live shared doctrine home for the Lessons project.
-
-      Start here, then open the one surface that owns your current question.
+      This shared entrypoint introduces the setup-wide doctrine surface.
 
       <a id="read-order"></a>
       ## Read Order
@@ -163,9 +161,7 @@ describe("lessons_vertical_slice e2e", () => {
             "id": "packet_shapes_standard",
             "markdown": "# Lessons Packet Shapes
 
-      This file owns the packet families used to start Lessons work.
-
-      Use it to answer one question: what packet shape should I create for this job?
+      This file records the shared standard for Lessons Packet Shapes.
 
       <a id="comment-shape"></a>
       ## Comment Shape
@@ -185,11 +181,11 @@ describe("lessons_vertical_slice e2e", () => {
           },
           {
             "id": "acceptance_critic_gate_surface",
-            "markdown": "# Lessons Acceptance Critic Criteria
+            "markdown": "# Lessons Acceptance Critic
 
       This file owns what Lessons Acceptance Critic checks before work moves on.
 
-      Use it with the governing workflow and quality-bar surfaces for this gate.
+      Use it with the governing workflow and any supporting standards for this gate.
 
       <a id="what-the-critic-judges"></a>
       ## What the critic judges

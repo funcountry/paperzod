@@ -102,7 +102,7 @@ describe("source node schemas", () => {
             title: "Example command",
             blocks: [
               { kind: "paragraph", text: "Use this command when validating the setup." },
-              { kind: "code_block", code: "paperzod doctor setups/lessons/setup.ts", language: "sh" }
+              { kind: "code_block", code: "paperzod doctor setups/lessons/index.ts", language: "sh" }
             ]
           },
           {
@@ -144,7 +144,7 @@ describe("source node schemas", () => {
             kind: "ordered_steps",
             items: ["Open the shared README.", { text: "Then read the owner map.", children: ["Only after that open lane doctrine."] }]
           },
-          { kind: "code_block", code: "paperzod doctor setups/lessons/setup.ts", language: "sh" }
+          { kind: "code_block", code: "paperzod doctor setups/lessons/index.ts", language: "sh" }
         ]
       }).success
     ).toBe(true);

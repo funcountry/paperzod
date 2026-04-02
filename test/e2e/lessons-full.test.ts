@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { compileSetup, createPaperclipMarkdownTarget } from "../../src/index.js";
-import lessonsFullSeed from "../fixtures/source/lessons-full.js";
+import lessonsSetup from "../../setups/lessons/index.ts";
 
 function compile(input: unknown) {
   return compileSetup(
@@ -15,7 +15,7 @@ function compile(input: unknown) {
 
 describe("lessons_full e2e", () => {
   it("compiles the full Lessons proving fixture with stable manifest, traces, and markdown", () => {
-    const result = compile(lessonsFullSeed);
+    const result = compile(lessonsSetup);
     expect(result.success).toBe(true);
     if (!result.success) {
       return;
@@ -70,8 +70,8 @@ describe("lessons_full e2e", () => {
 
   it("fails loudly on standards, gate, and runtime-mapping drift", () => {
     const standardsDrift = compile({
-      ...lessonsFullSeed,
-      links: lessonsFullSeed.links.map((link) =>
+      ...lessonsSetup,
+      links: lessonsSetup.links.map((link) =>
         link.id === "packet_shape_section_documents_artifact" ? { ...link, to: "missing_standard_artifact" } : link
       )
     });
@@ -81,8 +81,8 @@ describe("lessons_full e2e", () => {
     }
 
     const gateDrift = compile({
-      ...lessonsFullSeed,
-      reviewGates: lessonsFullSeed.reviewGates.map((gate) =>
+      ...lessonsSetup,
+      reviewGates: lessonsSetup.reviewGates.map((gate) =>
         gate.id === "lessons_acceptance_critic_gate" ? { ...gate, checkIds: ["missing_packet"] } : gate
       )
     });
@@ -92,8 +92,8 @@ describe("lessons_full e2e", () => {
     }
 
     const mappingDrift = compile({
-      ...lessonsFullSeed,
-      packetContracts: lessonsFullSeed.packetContracts.map((contract) =>
+      ...lessonsSetup,
+      packetContracts: lessonsSetup.packetContracts.map((contract) =>
         contract.id === "lesson_plan_contract" ? { ...contract, runtimeArtifactIds: ["section_dossier_packet"] } : contract
       )
     });

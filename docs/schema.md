@@ -13,6 +13,8 @@ If the schema language cannot express that example cleanly, it is not ready.
 Status as of 2026-04-01:
 
 - the current prototype implements this schema family closely
+- canonical repo-local setups now ship as plain `SetupInput` modules under
+  `setups/**`
 - where the shipped authoring DSL is narrower than the full schema, plain
   object authoring is used for the remaining node families
 

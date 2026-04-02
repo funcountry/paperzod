@@ -107,6 +107,8 @@ function normalizeSurfaces(setupId: string, surfaces: readonly SurfaceInput[]): 
     setupId,
     surfaceClass: surface.surfaceClass,
     runtimePath: surface.runtimePath,
+    ...(surface.title !== undefined ? { title: surface.title } : {}),
+    ...(surface.intro !== undefined ? { intro: surface.intro } : {}),
     ...(surface.preamble !== undefined ? { preamble: surface.preamble } : {})
   }));
 }

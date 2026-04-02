@@ -128,7 +128,7 @@ describe("demo_minimal e2e", () => {
             "id": "workflow_surface",
             "markdown": "# Workflow Owner
 
-      This workflow owner document describes the operational turn order and stop lines.
+      Use this file for represented workflow order, owner routing, and lane contracts.
 
       <a id="default-order"></a>
       ## Default Order

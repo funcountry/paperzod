@@ -169,7 +169,11 @@ slice.
 
 ### `lessons_full`
 
-A high-fidelity Lessons proving fixture.
+A high-fidelity Lessons proving setup.
+
+The canonical repo-local source now lives in `setups/lessons/index.ts`.
+`test/fixtures/source/lessons-full.ts` is only a thin test-facing import
+surface when a fixture-shaped path is still useful.
 
 It must model the live surface families called out in the requirements:
 
@@ -197,6 +201,8 @@ Its job is proving that the full Lessons requirement set is truly satisfied.
 ### `second_setup`
 
 A second non-Lessons setup.
+
+The canonical repo-local source now lives in `setups/core_dev/index.ts`.
 
 Candidates:
 

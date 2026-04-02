@@ -154,6 +154,8 @@ export const surfaceSchema = z.object({
     "coordination"
   ]),
   runtimePath: nonEmptyStringSchema,
+  title: nonEmptyStringSchema.optional(),
+  intro: z.array(contentBlockSchema).optional(),
   preamble: z.array(contentBlockSchema).optional()
 }) satisfies z.ZodType<SurfaceInput>;
 

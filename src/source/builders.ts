@@ -53,6 +53,8 @@ export interface SurfaceInput {
   id: string;
   surfaceClass: SurfaceClass;
   runtimePath: string;
+  title?: string | undefined;
+  intro?: AuthoredContentBlock[] | undefined;
   preamble?: AuthoredContentBlock[] | undefined;
 }
 
