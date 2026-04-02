@@ -35,35 +35,41 @@ describe("Paperclip markdown target", () => {
         {
           id: "role_home_author",
           surfaceClass: "role_home",
-          runtimePath: "project_homes/lessons/roles/author/AGENTS.md"
+          runtimePath: "paperclip_home/agents/author/AGENTS.md"
+        },
+        {
+          id: "project_home_root",
+          surfaceClass: "project_home_root",
+          runtimePath: "paperclip_home/project_homes/lessons/README.md"
         },
         {
           id: "shared_readme",
           surfaceClass: "shared_entrypoint",
-          runtimePath: "project_homes/lessons/shared/README.md"
+          runtimePath: "paperclip_home/project_homes/lessons/shared/README.md"
         },
         {
           id: "workflow_owner",
           surfaceClass: "workflow_owner",
-          runtimePath: "project_homes/lessons/shared/AUTHORITATIVE_LESSONS_WORKFLOW.md"
+          runtimePath: "paperclip_home/project_homes/lessons/shared/AUTHORITATIVE_LESSONS_WORKFLOW.md"
         },
         {
           id: "technical_ref",
           surfaceClass: "technical_reference",
-          runtimePath: "project_homes/lessons/shared/technical_references/POKER_KB.md"
+          runtimePath: "paperclip_home/project_homes/lessons/shared/technical_references/POKER_KB.md"
         }
       ],
       generatedTargets: [
-        { id: "target_role", path: "project_homes/lessons/roles/author/AGENTS.md", sourceIds: ["role_home_author"] },
-        { id: "target_shared", path: "project_homes/lessons/shared/README.md", sourceIds: ["shared_readme"] },
+        { id: "target_role", path: "paperclip_home/agents/author/AGENTS.md", sourceIds: ["role_home_author"] },
+        { id: "target_root", path: "paperclip_home/project_homes/lessons/README.md", sourceIds: ["project_home_root"] },
+        { id: "target_shared", path: "paperclip_home/project_homes/lessons/shared/README.md", sourceIds: ["shared_readme"] },
         {
           id: "target_workflow",
-          path: "project_homes/lessons/shared/AUTHORITATIVE_LESSONS_WORKFLOW.md",
+          path: "paperclip_home/project_homes/lessons/shared/AUTHORITATIVE_LESSONS_WORKFLOW.md",
           sourceIds: ["workflow_owner"]
         },
         {
           id: "target_ref",
-          path: "project_homes/lessons/shared/technical_references/POKER_KB.md",
+          path: "paperclip_home/project_homes/lessons/shared/technical_references/POKER_KB.md",
           sourceIds: ["technical_ref"]
         }
       ]
@@ -83,10 +89,11 @@ describe("Paperclip markdown target", () => {
     }
 
     expect(result.data.documentPaths).toEqual({
-      role_home_author: "/repo/paperclip_agents/project_homes/lessons/roles/author/AGENTS.md",
-      shared_readme: "/repo/paperclip_agents/project_homes/lessons/shared/README.md",
-      technical_ref: "/repo/paperclip_agents/project_homes/lessons/shared/technical_references/POKER_KB.md",
-      workflow_owner: "/repo/paperclip_agents/project_homes/lessons/shared/AUTHORITATIVE_LESSONS_WORKFLOW.md"
+      project_home_root: "/repo/paperclip_agents/paperclip_home/project_homes/lessons/README.md",
+      role_home_author: "/repo/paperclip_agents/paperclip_home/agents/author/AGENTS.md",
+      shared_readme: "/repo/paperclip_agents/paperclip_home/project_homes/lessons/shared/README.md",
+      technical_ref: "/repo/paperclip_agents/paperclip_home/project_homes/lessons/shared/technical_references/POKER_KB.md",
+      workflow_owner: "/repo/paperclip_agents/paperclip_home/project_homes/lessons/shared/AUTHORITATIVE_LESSONS_WORKFLOW.md"
     });
   });
 
@@ -98,17 +105,17 @@ describe("Paperclip markdown target", () => {
         {
           id: "surface_a",
           surfaceClass: "shared_entrypoint",
-          runtimePath: "project_homes/lessons/shared/README.md"
+          runtimePath: "paperclip_home/project_homes/lessons/shared/README.md"
         },
         {
           id: "surface_b",
-          surfaceClass: "workflow_owner",
-          runtimePath: "project_homes/lessons/shared/README.md"
+          surfaceClass: "shared_entrypoint",
+          runtimePath: "paperclip_home/project_homes/lessons/shared/README.md"
         }
       ],
       generatedTargets: [
-        { id: "target_a", path: "project_homes/lessons/shared/README.md", sourceIds: ["surface_a"] },
-        { id: "target_b", path: "project_homes/lessons/shared/README.md", sourceIds: ["surface_b"] }
+        { id: "target_a", path: "paperclip_home/project_homes/lessons/shared/README.md", sourceIds: ["surface_a"] },
+        { id: "target_b", path: "paperclip_home/project_homes/lessons/shared/README.md", sourceIds: ["surface_b"] }
       ]
     });
 

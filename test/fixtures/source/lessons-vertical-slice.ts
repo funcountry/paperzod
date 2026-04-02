@@ -61,27 +61,27 @@ const lessonsVerticalSliceSeed = defineSetup({
     {
       id: "dossier_role_home",
       surfaceClass: "role_home",
-      runtimePath: "project_homes/lessons/roles/section_dossier_engineer/AGENTS.md"
+      runtimePath: "paperclip_home/agents/section_dossier_engineer/AGENTS.md"
     },
     {
       id: "lessons_readme",
       surfaceClass: "shared_entrypoint",
-      runtimePath: "project_homes/lessons/shared/README.md"
+      runtimePath: "paperclip_home/project_homes/lessons/shared/README.md"
     },
     {
       id: "section_dossier_workflow",
       surfaceClass: "packet_workflow",
-      runtimePath: "project_homes/lessons/shared/proof_packets/SECTION_DOSSIER_ENGINEER_WORKFLOW.md"
+      runtimePath: "paperclip_home/project_homes/lessons/shared/proof_packets/SECTION_DOSSIER_ENGINEER_WORKFLOW.md"
     },
     {
       id: "packet_shapes_standard",
       surfaceClass: "standard",
-      runtimePath: "project_homes/lessons/shared/lessons_content_standards/LESSONS_PACKET_SHAPES.md"
+      runtimePath: "paperclip_home/project_homes/lessons/shared/lessons_content_standards/LESSONS_PACKET_SHAPES.md"
     },
     {
       id: "acceptance_critic_gate_surface",
       surfaceClass: "gate",
-      runtimePath: "project_homes/lessons/shared/lessons_content_standards/LESSONS_ACCEPTANCE_CRITIC_CRITERIA.md"
+      runtimePath: "paperclip_home/project_homes/lessons/shared/lessons_content_standards/LESSONS_ACCEPTANCE_CRITIC_CRITERIA.md"
     }
   ],
   surfaceSections: [
@@ -124,43 +124,43 @@ const lessonsVerticalSliceSeed = defineSetup({
   generatedTargets: [
     {
       id: "dossier_role_home_read_first_target",
-      path: "project_homes/lessons/roles/section_dossier_engineer/AGENTS.md",
+      path: "paperclip_home/agents/section_dossier_engineer/AGENTS.md",
       sourceIds: ["section_dossier_engineer"],
       sectionId: "role_read_first"
     },
     {
       id: "dossier_role_home_role_contract_target",
-      path: "project_homes/lessons/roles/section_dossier_engineer/AGENTS.md",
+      path: "paperclip_home/agents/section_dossier_engineer/AGENTS.md",
       sourceIds: ["section_dossier_engineer"],
       sectionId: "role_contract"
     },
     {
       id: "lessons_readme_target",
-      path: "project_homes/lessons/shared/README.md",
+      path: "paperclip_home/project_homes/lessons/shared/README.md",
       sourceIds: ["section_dossier_step"],
       sectionId: "shared_read_order"
     },
     {
       id: "section_dossier_workflow_target",
-      path: "project_homes/lessons/shared/proof_packets/SECTION_DOSSIER_ENGINEER_WORKFLOW.md",
+      path: "paperclip_home/project_homes/lessons/shared/proof_packets/SECTION_DOSSIER_ENGINEER_WORKFLOW.md",
       sourceIds: ["section_dossier_step"],
       sectionId: "workflow_lane_contract"
     },
     {
       id: "packet_shapes_comment_shape_target",
-      path: "project_homes/lessons/shared/lessons_content_standards/LESSONS_PACKET_SHAPES.md",
+      path: "paperclip_home/project_homes/lessons/shared/lessons_content_standards/LESSONS_PACKET_SHAPES.md",
       sourceIds: ["comment_shape_standard"],
       sectionId: "standard_comment_shape"
     },
     {
       id: "packet_shapes_specialist_turn_shape_target",
-      path: "project_homes/lessons/shared/lessons_content_standards/LESSONS_PACKET_SHAPES.md",
+      path: "paperclip_home/project_homes/lessons/shared/lessons_content_standards/LESSONS_PACKET_SHAPES.md",
       sourceIds: ["specialist_turn_shape_standard"],
       sectionId: "standard_specialist_turn_shape"
     },
     {
       id: "acceptance_critic_gate_target",
-      path: "project_homes/lessons/shared/lessons_content_standards/LESSONS_ACCEPTANCE_CRITIC_CRITERIA.md",
+      path: "paperclip_home/project_homes/lessons/shared/lessons_content_standards/LESSONS_ACCEPTANCE_CRITIC_CRITERIA.md",
       sourceIds: ["lessons_acceptance_critic_gate"],
       sectionId: "gate_what_critic_judges"
     }

@@ -164,6 +164,9 @@ export function buildCompilePlan(graph: DoctrineGraph): CompilePlanResult {
     }
   }
 
+  const surfaceOrder = new Map(graph.nodeIdsByKind.surface.map((surfaceId, index) => [surfaceId, index]));
+  const sectionOrder = new Map(graph.nodeIdsByKind.surface_section.map((sectionId, index) => [sectionId, index]));
+
   for (const surfaceId of graph.nodeIdsByKind.surface) {
     const surface = graph.nodeById[surfaceId];
     if (!surface || surface.kind !== "surface") {
@@ -188,7 +191,10 @@ export function buildCompilePlan(graph: DoctrineGraph): CompilePlanResult {
       continue;
     }
 
-    const sectionIds = [...(graph.indexes.surfaceSectionIdsBySurfaceId[surface.id] ?? [])].sort();
+    const sectionIds = graph.nodeIdsByKind.surface_section.filter((sectionId) => {
+      const section = graph.nodeById[sectionId];
+      return section?.kind === "surface_section" && section.surfaceId === surface.id;
+    });
     for (const sectionId of sectionIds) {
       const ownerIds = graph.indexes.ownerIdsByNodeId[sectionId] ?? [];
       if (ownerIds.length > 1) {
@@ -225,7 +231,7 @@ export function buildCompilePlan(graph: DoctrineGraph): CompilePlanResult {
       surfaceId: surface.id,
       surfaceClass: surface.surfaceClass,
       path: surface.runtimePath,
-      generatedTargetIds: [...generatedTargetIds].sort(),
+      generatedTargetIds: [...generatedTargetIds],
       sourceIds: buildDocumentSourceIds(graph, surface.id, sectionIds, generatedTargetIds),
       sectionIds
     };
@@ -243,6 +249,7 @@ export function buildCompilePlan(graph: DoctrineGraph): CompilePlanResult {
         surfaceSectionId: section.id,
         stableSlug: section.stableSlug,
         title: section.title,
+        ...(section.parentSectionId ? { parentSectionId: section.parentSectionId } : {}),
         sourceIds: buildSectionSourceIds(graph, generatedTargetIds, section.id)
       });
     }
@@ -253,9 +260,13 @@ export function buildCompilePlan(graph: DoctrineGraph): CompilePlanResult {
     return { success: false, diagnostics: sortedDiagnostics };
   }
 
-  const sortedDocuments = [...documents].sort((left, right) => left.path.localeCompare(right.path));
-  const sortedSections = [...sections].sort((left, right) =>
-    left.documentId.localeCompare(right.documentId) || left.stableSlug.localeCompare(right.stableSlug)
+  const sortedDocuments = [...documents].sort(
+    (left, right) => (surfaceOrder.get(left.surfaceId) ?? Number.MAX_SAFE_INTEGER) - (surfaceOrder.get(right.surfaceId) ?? Number.MAX_SAFE_INTEGER)
+  );
+  const sortedSections = [...sections].sort(
+    (left, right) =>
+      (sectionOrder.get(left.surfaceSectionId) ?? Number.MAX_SAFE_INTEGER) -
+      (sectionOrder.get(right.surfaceSectionId) ?? Number.MAX_SAFE_INTEGER)
   );
 
   return {

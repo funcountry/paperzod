@@ -4,9 +4,11 @@ import {
   blockquote,
   codeBlock,
   doc,
+  listItem,
   paragraph,
   renderMarkdown,
   section,
+  table,
   unorderedList
 } from "../../src/doc/index.js";
 
@@ -16,9 +18,11 @@ describe("markdown stringifier", () => {
       paragraph("Intro text."),
       section("read-first", "Read First", [
         paragraph("Start here."),
-        unorderedList(["One thing", "Another thing"]),
+        unorderedList(["One thing", listItem("Another thing", [listItem("Nested thing")])]),
+        table(["Owner", "Reads"], [["Project Lead", "README.md"]]),
         blockquote([paragraph("Grounding note.")]),
-        codeBlock("ts", "export const demo = true;")
+        codeBlock("ts", "export const demo = true;"),
+        section("workflow-items", "Workflow Items", [paragraph("This subsection narrows the owner map.")], 3)
       ])
     ]);
 
@@ -34,12 +38,22 @@ describe("markdown stringifier", () => {
 
       - One thing
       - Another thing
+        - Nested thing
+
+      | Owner | Reads |
+      | --- | --- |
+      | Project Lead | README.md |
 
       > Grounding note.
 
       \`\`\`ts
       export const demo = true;
       \`\`\`
+
+      <a id="workflow-items"></a>
+      ### Workflow Items
+
+      This subsection narrows the owner map.
       "
     `);
   });

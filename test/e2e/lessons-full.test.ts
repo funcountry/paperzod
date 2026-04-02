@@ -21,9 +21,21 @@ describe("lessons_full e2e", () => {
       return;
     }
 
+    expect(result.data.manifest.documentPaths.lessons_project_home_root).toBe(
+      "/repo/paperclip_agents/paperclip_home/project_homes/lessons/README.md"
+    );
+
+    for (const document of result.data.documents) {
+      expect(document.markdown).not.toContain("Artifact class:");
+      expect(document.markdown).not.toContain("Reference class:");
+      expect(document.markdown).not.toContain("Conceptual only:");
+      expect(document.markdown).not.toContain("Compatibility only:");
+    }
+
     const sectionTraces = result.data.plan.sections
       .filter((section) =>
         [
+          "project_home_map",
           "workflow_comment_shape",
           "workflow_specialist_turn_shape",
           "section_dossier_lane_contract",

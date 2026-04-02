@@ -16,6 +16,7 @@ export interface PlannedSection {
   surfaceSectionId: string;
   stableSlug: string;
   title: string;
+  parentSectionId?: string | undefined;
   sourceIds: string[];
 }
 

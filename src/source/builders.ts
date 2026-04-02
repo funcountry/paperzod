@@ -1,4 +1,5 @@
 import type {
+  AuthoredContentBlock,
   ArtifactClass,
   LinkKind,
   ReferenceClass,
@@ -52,6 +53,7 @@ export interface SurfaceInput {
   id: string;
   surfaceClass: SurfaceClass;
   runtimePath: string;
+  preamble?: AuthoredContentBlock[] | undefined;
 }
 
 export interface SurfaceSectionInput {
@@ -59,6 +61,8 @@ export interface SurfaceSectionInput {
   surfaceId: string;
   stableSlug: string;
   title: string;
+  parentSectionId?: string | undefined;
+  body?: AuthoredContentBlock[] | undefined;
 }
 
 export interface ReferenceInput {
@@ -76,12 +80,23 @@ export interface GeneratedTargetInput {
   sectionId?: string | undefined;
 }
 
-export interface LinkInput {
+export interface BaseLinkInput {
   id: string;
-  kind: LinkKind;
   from: string;
   to: string;
 }
+
+export interface ReadLinkInput extends BaseLinkInput {
+  kind: "reads";
+  condition?: string | undefined;
+  context?: string | undefined;
+}
+
+export interface GenericLinkInput extends BaseLinkInput {
+  kind: Exclude<LinkKind, "reads">;
+}
+
+export type LinkInput = GenericLinkInput | ReadLinkInput;
 
 export interface SetupInput {
   id: string;

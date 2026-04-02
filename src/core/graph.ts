@@ -5,8 +5,12 @@ export interface DoctrineGraphIndexes {
   workflowStepIdsByRoleId: Record<string, string[]>;
   ownerIdsByNodeId: Record<string, string[]>;
   ownedNodeIdsByOwnerId: Record<string, string[]>;
+  readTargetIdsByReaderId: Record<string, string[]>;
+  readerIdsByReadTargetId: Record<string, string[]>;
   readSectionIdsByReaderId: Record<string, string[]>;
   readerIdsBySectionId: Record<string, string[]>;
+  readSurfaceIdsByReaderId: Record<string, string[]>;
+  readerIdsBySurfaceId: Record<string, string[]>;
   producerIdsByArtifactId: Record<string, string[]>;
   consumerIdsByArtifactId: Record<string, string[]>;
   supporterIdsByArtifactId: Record<string, string[]>;
@@ -16,7 +20,10 @@ export interface DoctrineGraphIndexes {
   routeTargetIdsByNodeId: Record<string, string[]>;
   routeSourceIdsByNodeId: Record<string, string[]>;
   surfaceSectionIdsBySurfaceId: Record<string, string[]>;
+  rootSectionIdsBySurfaceId: Record<string, string[]>;
+  childSectionIdsBySectionId: Record<string, string[]>;
   surfaceIdBySectionId: Record<string, string>;
+  parentSectionIdBySectionId: Record<string, string>;
   documentedByNodeId: Record<string, string[]>;
   groundingReferenceIdsByNodeId: Record<string, string[]>;
   referenceIdsByNodeId: Record<string, string[]>;

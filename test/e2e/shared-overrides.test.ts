@@ -49,48 +49,53 @@ describe("shared_overrides e2e", () => {
           },
           "rendered": [
             {
-              "id": "alpha_gate_surface",
-              "markdown": "# Gate: Shared Gate
-
-      This gate document records review and acceptance checks.
-
-      <a id="criteria"></a>
-      ## Criteria
-
-      Shared gate with alpha wording.
-
-      - Checks: alpha_packet
-      - Reads: none
-      ",
-            },
-            {
-              "id": "alpha_packet_surface",
-              "markdown": "# Packet Workflow: Alpha Contract
-
-      This packet workflow document describes the trusted packet contract.
-
-      <a id="packet-shape"></a>
-      ## Packet Shape
-
-      Packet contract for Alpha Contract.
-
-      - Reads: none
-      - Conceptual artifacts: alpha_packet
-      - Runtime artifacts: none
-      ",
-            },
-            {
               "id": "alpha_home",
-              "markdown": "# Role Home: Shared Role
+              "markdown": "# Shared Role
 
-      This role-home document states the contract for one runtime role.
+      You are the Shared Role.
+
+      Your repo-owned role home is \`generated/alpha/roles/shared_role/AGENTS.md\`.
 
       <a id="role-contract"></a>
       ## Role Contract
 
       Reusable role.
 
-      - Reads: none
+      - No additional role boundaries are declared yet.
+      - No additional shared doctrine reads are declared yet.
+      ",
+            },
+            {
+              "id": "alpha_gate_surface",
+              "markdown": "# Shared Gate
+
+      This file owns what Shared Gate checks before work moves on.
+
+      Use it with the governing workflow and quality-bar surfaces for this gate.
+
+      <a id="criteria"></a>
+      ## Criteria
+
+      Shared gate with alpha wording.
+
+      - Checks that must pass: ALPHA_PACKET.md
+      - Read before acting: none
+      ",
+            },
+            {
+              "id": "alpha_packet_surface",
+              "markdown": "# Alpha Contract Workflow
+
+      This packet workflow document describes the trusted packet contract.
+
+      <a id="packet-shape"></a>
+      ## Packet Shape
+
+      Use Alpha Contract as the packet this surface expects readers to trust.
+
+      - Read before acting: none
+      - Conceptual artifacts: ALPHA_PACKET.md
+      - Runtime artifacts: none
       ",
             },
           ],
@@ -108,48 +113,53 @@ describe("shared_overrides e2e", () => {
           },
           "rendered": [
             {
-              "id": "beta_gate_surface",
-              "markdown": "# Gate: Shared Gate
-
-      This gate document records review and acceptance checks.
-
-      <a id="criteria"></a>
-      ## Criteria
-
-      Shared gate with beta wording.
-
-      - Checks: beta_packet
-      - Reads: none
-      ",
-            },
-            {
-              "id": "beta_packet_surface",
-              "markdown": "# Packet Workflow: Beta Contract
-
-      This packet workflow document describes the trusted packet contract.
-
-      <a id="packet-shape"></a>
-      ## Packet Shape
-
-      Packet contract for Beta Contract.
-
-      - Reads: none
-      - Conceptual artifacts: beta_packet
-      - Runtime artifacts: beta_packet_runtime
-      ",
-            },
-            {
               "id": "beta_home",
-              "markdown": "# Role Home: Shared Role
+              "markdown": "# Shared Role
 
-      This role-home document states the contract for one runtime role.
+      You are the Shared Role.
+
+      Your repo-owned role home is \`generated/beta/roles/shared_role/AGENTS.md\`.
 
       <a id="role-contract"></a>
       ## Role Contract
 
       Reusable role with beta-local wording.
 
-      - Reads: none
+      - No additional role boundaries are declared yet.
+      - No additional shared doctrine reads are declared yet.
+      ",
+            },
+            {
+              "id": "beta_gate_surface",
+              "markdown": "# Shared Gate
+
+      This file owns what Shared Gate checks before work moves on.
+
+      Use it with the governing workflow and quality-bar surfaces for this gate.
+
+      <a id="criteria"></a>
+      ## Criteria
+
+      Shared gate with beta wording.
+
+      - Checks that must pass: BETA_PACKET.md
+      - Read before acting: none
+      ",
+            },
+            {
+              "id": "beta_packet_surface",
+              "markdown": "# Beta Contract Workflow
+
+      This packet workflow document describes the trusted packet contract.
+
+      <a id="packet-shape"></a>
+      ## Packet Shape
+
+      Use Beta Contract as the packet this surface expects readers to trust.
+
+      - Read before acting: none
+      - Conceptual artifacts: BETA_PACKET.md
+      - Runtime artifacts: BETA_PACKET_RUNTIME.md
       ",
             },
           ],
@@ -174,6 +184,6 @@ describe("shared_overrides e2e", () => {
 
     expect(alphaHome).toContain("Reusable role.");
     expect(betaHome).toContain("Reusable role with beta-local wording.");
-    expect(betaPacket).toContain("Runtime artifacts: beta_packet_runtime");
+    expect(betaPacket).toContain("Runtime artifacts: BETA_PACKET_RUNTIME.md");
   });
 });

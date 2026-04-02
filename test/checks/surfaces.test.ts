@@ -45,7 +45,14 @@ describe("surface and reference checks", () => {
         references: [{ id: "ref_1", referenceClass: "grounding_reference", name: "Grounding Ref", sourcePath: "docs/ref/GROUNDING.md" }],
         links: [
           { id: "owns_1", kind: "owns", from: "role_1", to: "section_1" },
-          { id: "reads_1", kind: "reads", from: "role_1", to: "section_1" },
+          {
+            id: "reads_1",
+            kind: "reads",
+            from: "role_1",
+            to: "surface_1",
+            condition: "When you need the whole workflow owner.",
+            context: "Read the whole owner doc before checking lane-specific sections."
+          },
           { id: "checks_1", kind: "checks", from: "gate_1", to: "section_1" },
           { id: "documents_1", kind: "documents", from: "section_1", to: "step_1" },
           { id: "grounds_1", kind: "grounds", from: "step_1", to: "ref_1" },
@@ -144,5 +151,66 @@ describe("surface and reference checks", () => {
     });
 
     expect(diagnostics.map((diagnostic) => diagnostic.code)).toEqual(["check.ownership.conflicting_owner"]);
+  });
+
+  it("accepts nested section hierarchies and does not orphan grouping parents", () => {
+    expect(
+      runChecksFor({
+        id: "surface_section_hierarchy_valid",
+        name: "Surface Section Hierarchy Valid",
+        roles: [{ id: "role_1", name: "Role 1", purpose: "Own doctrine." }],
+        surfaces: [{ id: "surface_1", surfaceClass: "shared_entrypoint", runtimePath: "paperclip_home/project_homes/lessons/shared/README.md" }],
+        surfaceSections: [
+          { id: "terms", surfaceId: "surface_1", stableSlug: "terms", title: "Terms" },
+          { id: "workflow_items", surfaceId: "surface_1", stableSlug: "workflow-items", title: "Workflow Items", parentSectionId: "terms" }
+        ],
+        links: [
+          { id: "owns_1", kind: "owns", from: "role_1", to: "workflow_items" },
+          { id: "documents_1", kind: "documents", from: "workflow_items", to: "role_1" }
+        ]
+      })
+    ).toEqual([]);
+  });
+
+  it("rejects missing parents and cross-surface parent links", () => {
+    const diagnostics = runChecksFor({
+      id: "surface_section_parent_conflicts",
+      name: "Surface Section Parent Conflicts",
+      surfaces: [
+        { id: "surface_1", surfaceClass: "shared_entrypoint", runtimePath: "generated/README.md" },
+        { id: "surface_2", surfaceClass: "workflow_owner", runtimePath: "generated/WORKFLOW.md" }
+      ],
+      surfaceSections: [
+        { id: "terms", surfaceId: "surface_1", stableSlug: "terms", title: "Terms" },
+        { id: "missing_parent_child", surfaceId: "surface_1", stableSlug: "workflow-items", title: "Workflow Items", parentSectionId: "missing" },
+        { id: "cross_surface_child", surfaceId: "surface_2", stableSlug: "owner-map", title: "Owner Map", parentSectionId: "terms" }
+      ]
+    });
+
+    expect(diagnostics.map((diagnostic) => diagnostic.code)).toEqual([
+      "check.surface_section.missing_parent",
+      "check.surface_section.orphaned",
+      "check.surface_section.orphaned",
+      "check.surface_section.parent_surface_mismatch"
+    ]);
+  });
+
+  it("rejects child-before-parent subsection declarations", () => {
+    const diagnostics = runChecksFor({
+      id: "surface_section_parent_order_conflicts",
+      name: "Surface Section Parent Order Conflicts",
+      roles: [{ id: "role_1", name: "Role 1", purpose: "Own doctrine." }],
+      surfaces: [{ id: "surface_1", surfaceClass: "shared_entrypoint", runtimePath: "generated/README.md" }],
+      surfaceSections: [
+        { id: "workflow_items", surfaceId: "surface_1", stableSlug: "workflow-items", title: "Workflow Items", parentSectionId: "terms" },
+        { id: "terms", surfaceId: "surface_1", stableSlug: "terms", title: "Terms" }
+      ],
+      links: [
+        { id: "owns_1", kind: "owns", from: "role_1", to: "workflow_items" },
+        { id: "documents_1", kind: "documents", from: "workflow_items", to: "role_1" }
+      ]
+    });
+
+    expect(diagnostics.map((diagnostic) => diagnostic.code)).toEqual(["check.surface_section.parent_declared_after_child"]);
   });
 });

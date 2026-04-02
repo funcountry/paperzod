@@ -79,12 +79,12 @@ function isReadableSourceNode(node: DoctrineNodeDef | undefined): boolean {
   return node !== undefined && readableSourceKinds.has(node.kind);
 }
 
-function isReferenceSourceNode(node: DoctrineNodeDef | undefined): boolean {
-  return node !== undefined && referenceSourceKinds.has(node.kind);
+function isReadableTargetNode(node: DoctrineNodeDef | undefined): boolean {
+  return node?.kind === "surface" || node?.kind === "surface_section";
 }
 
-function isSurfaceSectionNode(node: DoctrineNodeDef | undefined): boolean {
-  return node?.kind === "surface_section";
+function isReferenceSourceNode(node: DoctrineNodeDef | undefined): boolean {
+  return node !== undefined && referenceSourceKinds.has(node.kind);
 }
 
 function isGateCheckTargetNode(node: DoctrineNodeDef | undefined): boolean {
@@ -578,6 +578,7 @@ export const surfaceAndReferenceSemanticsRule: CheckRule = {
   run(graph) {
     const diagnostics: Diagnostic[] = [];
     const seenSlugs = new Map<string, string>();
+    const sectionOrder = new Map(graph.nodeIdsByKind.surface_section.map((sectionId, index) => [sectionId, index]));
 
     for (const sectionId of graph.nodeIdsByKind.surface_section) {
       const section = graph.nodeById[sectionId];
@@ -595,6 +596,38 @@ export const surfaceAndReferenceSemanticsRule: CheckRule = {
             relatedIds: [section.surfaceId]
           })
         );
+      }
+
+      if (section.parentSectionId) {
+        const parentSection = graph.nodeById[section.parentSectionId];
+        if (!parentSection || parentSection.kind !== "surface_section") {
+          diagnostics.push(
+            createCheckDiagnostic({
+              code: "check.surface_section.missing_parent",
+              message: `Surface section "${section.id}" references missing parent section "${section.parentSectionId}".`,
+              nodeId: section.id,
+              relatedIds: [section.parentSectionId]
+            })
+          );
+        } else if (parentSection.surfaceId !== section.surfaceId) {
+          diagnostics.push(
+            createCheckDiagnostic({
+              code: "check.surface_section.parent_surface_mismatch",
+              message: `Surface section "${section.id}" must share a surface with parent "${section.parentSectionId}".`,
+              nodeId: section.id,
+              relatedIds: [section.parentSectionId, section.surfaceId, parentSection.surfaceId]
+            })
+          );
+        } else if ((sectionOrder.get(parentSection.id) ?? Number.MAX_SAFE_INTEGER) > (sectionOrder.get(section.id) ?? Number.MAX_SAFE_INTEGER)) {
+          diagnostics.push(
+            createCheckDiagnostic({
+              code: "check.surface_section.parent_declared_after_child",
+              message: `Surface section "${section.id}" must be declared after parent section "${section.parentSectionId}" to preserve authored doctrine order.`,
+              nodeId: section.id,
+              relatedIds: [section.parentSectionId]
+            })
+          );
+        }
       }
 
       const slugKey = `${section.surfaceId}::${section.stableSlug}`;
@@ -618,8 +651,9 @@ export const surfaceAndReferenceSemanticsRule: CheckRule = {
       const hasReaders = (graph.indexes.readerIdsBySectionId[section.id] ?? []).length > 0;
       const hasOwners = (graph.indexes.ownerIdsByNodeId[section.id] ?? []).length > 0;
       const hasCheckers = (graph.indexes.checkerIdsByNodeId[section.id] ?? []).length > 0;
+      const hasChildren = (graph.indexes.childSectionIdsBySectionId[section.id] ?? []).length > 0;
 
-      if (!hasOutgoingDocuments && !hasReaders && !hasOwners && !hasCheckers) {
+      if (!hasOutgoingDocuments && !hasReaders && !hasOwners && !hasCheckers && !hasChildren) {
         diagnostics.push(
           createCheckDiagnostic({
             code: "check.surface_section.orphaned",
@@ -627,6 +661,37 @@ export const surfaceAndReferenceSemanticsRule: CheckRule = {
             nodeId: section.id
           })
         );
+      }
+    }
+
+    for (const sectionId of graph.nodeIdsByKind.surface_section) {
+      const ancestry = new Set<string>([sectionId]);
+      let currentId = sectionId;
+
+      while (true) {
+        const parentSectionId = graph.indexes.parentSectionIdBySectionId[currentId];
+        if (!parentSectionId) {
+          break;
+        }
+
+        if (ancestry.has(parentSectionId)) {
+          diagnostics.push(
+            createCheckDiagnostic({
+              code: "check.surface_section.parent_cycle",
+              message: `Surface section "${sectionId}" participates in a parent-section cycle.`,
+              nodeId: sectionId,
+              relatedIds: [...ancestry, parentSectionId]
+            })
+          );
+          break;
+        }
+
+        ancestry.add(parentSectionId);
+        const parentSection = graph.nodeById[parentSectionId];
+        if (!parentSection || parentSection.kind !== "surface_section") {
+          break;
+        }
+        currentId = parentSectionId;
       }
     }
 
@@ -681,11 +746,11 @@ export const surfaceAndReferenceSemanticsRule: CheckRule = {
             );
           }
 
-          if (!isSurfaceSectionNode(graph.nodeById[link.to])) {
+          if (!isReadableTargetNode(graph.nodeById[link.to])) {
             diagnostics.push(
               createCheckDiagnostic({
                 code: "check.link.reads_target_invalid",
-                message: `Reads link "${link.id}" must target a surface section.`,
+                message: `Reads link "${link.id}" must target a runtime surface or exact surface section.`,
                 nodeId: link.id,
                 relatedIds: [link.to]
               })

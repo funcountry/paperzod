@@ -45,11 +45,11 @@ describe("lessons_vertical_slice source model", () => {
           "gate",
         ],
         "surfacePaths": [
-          "project_homes/lessons/roles/section_dossier_engineer/AGENTS.md",
-          "project_homes/lessons/shared/README.md",
-          "project_homes/lessons/shared/proof_packets/SECTION_DOSSIER_ENGINEER_WORKFLOW.md",
-          "project_homes/lessons/shared/lessons_content_standards/LESSONS_PACKET_SHAPES.md",
-          "project_homes/lessons/shared/lessons_content_standards/LESSONS_ACCEPTANCE_CRITIC_CRITERIA.md",
+          "paperclip_home/agents/section_dossier_engineer/AGENTS.md",
+          "paperclip_home/project_homes/lessons/shared/README.md",
+          "paperclip_home/project_homes/lessons/shared/proof_packets/SECTION_DOSSIER_ENGINEER_WORKFLOW.md",
+          "paperclip_home/project_homes/lessons/shared/lessons_content_standards/LESSONS_PACKET_SHAPES.md",
+          "paperclip_home/project_homes/lessons/shared/lessons_content_standards/LESSONS_ACCEPTANCE_CRITIC_CRITERIA.md",
         ],
       }
     `);

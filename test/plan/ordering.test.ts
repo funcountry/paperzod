@@ -21,7 +21,7 @@ function requireGraph(input: unknown) {
 }
 
 describe("compile plan ordering", () => {
-  it("orders documents and sections deterministically", () => {
+  it("preserves authored declaration order for documents and sections", () => {
     const canonical = requireGraph({
       id: "ordering_demo",
       name: "Ordering Demo",
@@ -67,9 +67,11 @@ describe("compile plan ordering", () => {
       return;
     }
 
-    expect(canonicalPlan.data.documents.map((document) => document.id)).toEqual(["surface_a", "surface_b"]);
-    expect(canonicalPlan.data.sections.map((section) => section.id)).toEqual(["section_a", "section_b"]);
-    expect(canonicalPlan.data).toEqual(reversedPlan.data);
+    expect(canonicalPlan.data.documents.map((document) => document.id)).toEqual(["surface_b", "surface_a"]);
+    expect(canonicalPlan.data.sections.map((section) => section.id)).toEqual(["section_b", "section_a"]);
+    expect(reversedPlan.data.documents.map((document) => document.id)).toEqual(["surface_a", "surface_b"]);
+    expect(reversedPlan.data.sections.map((section) => section.id)).toEqual(["section_a", "section_b"]);
+    expect(canonicalPlan.data).not.toEqual(reversedPlan.data);
   });
 
   it("fails when a section has conflicting owners", () => {

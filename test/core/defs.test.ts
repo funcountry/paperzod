@@ -7,6 +7,7 @@ describe("core defs", () => {
     expectTypeOf<ArtifactClass>().toEqualTypeOf<"required" | "conditional" | "support" | "reference" | "legacy">();
     expectTypeOf<SurfaceClass>().toEqualTypeOf<
       | "role_home"
+      | "project_home_root"
       | "shared_entrypoint"
       | "workflow_owner"
       | "packet_workflow"

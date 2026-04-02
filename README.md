@@ -1,436 +1,270 @@
 # paperzod
 
-`paperzod` is a working prototype toolkit for authoring Paperclip doctrine as
-structured source, validating the doctrine graph, and compiling it into plain
-markdown that Paperclip agents can read directly.
+`paperzod` is a doctrine compiler for Paperclip systems.
 
-This repo is still a prototype workspace rather than a polished release. The
-package is currently `private`, but the core compiler path now exists:
+It lets you define one structured source of truth for roles, workflow steps,
+packet contracts, standards, gates, references, and runtime doctrine surfaces,
+then compile the markdown that agents actually read.
 
-- structured source authoring via `defineSetup(...)`
-- source validation and normalization
-- graph linking and semantic checks
-- compile planning and markdown rendering
-- one-way emission
-- CLI commands for `validate`, `compile`, and `doctor`
+The point is simple: if a setup has ten role guides, a shared workflow owner,
+packet workflow docs, critic standards, gate rules, and a few technical
+references, you should not hand-maintain all of those files separately.
 
-## What `paperzod` is for
+With `paperzod`, you:
 
-Paperclip setups often end up with their real contract spread across many
-markdown files:
+- define the semantic graph once
+- define reusable document shapes once
+- keep long prose in normal markdown fragments where humans should own the words
+- compile repo-owned markdown output for runtime use
 
-- role-local `AGENTS.md`
-- shared workflow docs
-- packet or artifact docs
-- standards
-- critic criteria
-- helper and reference docs
+Structured source is the only semantic truth.
+Generated markdown is runtime output.
 
-That can work, but it is expensive to keep honest as workflows change.
-The real contract is a graph across files, not one file.
+## What You Get
 
-`paperzod` is meant to solve that problem by letting you:
+- reusable document shapes for role homes, workflow owners, packet workflows,
+  standards, gates, references, how-to guides, and coordination docs
+- setup-local roles, workflow steps, packet contracts, artifacts, read order,
+  handoff rules, stop lines, and output paths
+- authored markdown fragments for the sections where humans should write the
+  prose directly
+- graph validation for ownership, reads, routes, trust rules, gate checks, and
+  generation provenance
+- deterministic compile plans and plain markdown emission
+- target adapters for both generic output trees and real Paperclip
+  `paperclip_home/**` layouts
 
-1. define one structured source of truth for a setup
-2. validate the graph of roles, workflow steps, artifacts, standards, and
-   gates
-3. compile the runtime output back into ordinary markdown
+## The Core Idea
 
-The markdown output remains the runtime read surface.
-The structured source exists so you stop maintaining the graph by hand.
+Take a small workflow with three roles:
 
-## Scope
+- `Writer`
+- `Critic`
+- `Publisher`
 
-This is not a Lessons-only project.
+The human problem is not storing three nodes and a few edges.
+The real problem is keeping all of these runtime docs honest at the same time:
 
-Lessons is the forcing case that made the problem obvious, but the target is
-broader:
+- a role guide for `Writer`
+- a role guide for `Critic`
+- a role guide for `Publisher`
+- one shared workflow doc that shows the step order
+- one standards doc that tells the critic what to check
 
-- Lessons
-- Core Dev
-- copy or content pods
-- project-specific Paperclip setups
-- any future Paperclip runtime that needs role contracts and shared workflow
-  compiled into markdown
+In `paperzod`, you do not hand-write all of those surfaces separately.
 
-## Current model coverage
+You define:
 
-The current prototype can represent:
+- the reusable shape for a role home
+- the reusable shape for a workflow owner doc
+- the reusable shape for a standard
+- the actual workflow facts for this setup
+- the authored prose fragments that should stay in markdown
 
-- setups
-- roles and agent identities
-- workflow steps and handoff order
-- turn contracts
-- packet and artifact contracts
-- shared doctrine
-- standards and critic gates
-- optional support material
-- generated markdown targets
-- cross-file links and ownership
+Then `paperzod` compiles the runtime docs for you.
 
-## Quick example
+That same pattern scales up to larger and more demanding systems without
+changing the product boundary.
 
-Write a setup in structured source:
+## What A Setup Author Does
+
+The authoring flow has four parts:
+
+1. Define reusable document shapes.
+2. Fill those shapes with setup-local roles, workflow steps, standards, and
+   paths.
+3. Load authored markdown fragments for the prose humans should own directly.
+4. Compile the runtime markdown that agents will read.
+
+That means a setup author does not hand-maintain ten slightly different
+`AGENTS.md` files.
+They define one role-home shape, fill it with real facts for each role, and
+let the compiler keep the generated output aligned.
+
+## Small Example
+
+The example below shows the product surface: reusable templates, setup-local
+facts, authored fragments, and direct `.ts` compilation.
 
 ```ts
-import { defineSetup } from "paperzod";
+import {
+  defineSetup,
+  defineTemplate,
+  loadFragments,
+} from "paperzod";
 
-export default defineSetup({
-  id: "demo_lessons",
-  name: "Demo Lessons",
-  roles: [
-    {
-      id: "section_dossier_engineer",
-      name: "Section Dossier Engineer",
-      purpose: "Discovers what the learner should learn next.",
-    },
-    {
-      id: "acceptance_critic",
-      name: "Lessons Acceptance Critic",
-      purpose: "Checks packets before the next lane can trust them.",
-    },
-  ],
-  artifacts: [
-    {
-      id: "section_dossier",
-      name: "SECTION_DOSSIER.md",
-      artifactClass: "required",
-      runtimePath: "paperclip_home/project_homes/lessons/_authoring/SECTION_DOSSIER.md",
-    },
-  ],
-  workflowSteps: [
-    {
-      id: "build_section_dossier",
-      roleId: "section_dossier_engineer",
-      purpose: "Build the section dossier from the learner baseline and research.",
-      requiredInputIds: [],
-      requiredOutputIds: ["section_dossier"],
-      stopLine: "Stop after the dossier is complete and ready for critic review.",
-      nextGateId: "critic_review",
-    },
-  ],
-  reviewGates: [
-    {
-      id: "critic_review",
-      name: "Critic Review",
-      purpose: "Checks whether the packet is ready for the next lane.",
-      checkIds: ["section_dossier"],
-    },
-  ],
-  surfaces: [
-    {
-      id: "lessons_workflow_doc",
-      surfaceClass: "workflow_owner",
-      runtimePath: "project_homes/lessons/shared/AUTHORITATIVE_LESSONS_WORKFLOW.md",
-    },
-  ],
-  surfaceSections: [
-    {
-      id: "default_order",
-      surfaceId: "lessons_workflow_doc",
-      stableSlug: "default-order",
-      title: "Default Order",
-    },
-  ],
-  links: [
-    {
-      id: "workflow_section_documents_step",
-      kind: "documents",
-      from: "default_order",
-      to: "build_section_dossier",
-    },
-  ],
-  generatedTargets: [
-    {
-      id: "lessons_workflow_target",
-      path: "project_homes/lessons/shared/AUTHORITATIVE_LESSONS_WORKFLOW.md",
-      sourceIds: ["build_section_dossier"],
-      sectionId: "default_order",
-    },
-  ],
+const roleHome = defineTemplate({
+  id: "role_home",
+  surfaceClass: "role_home",
+  sections: ["read_first", "your_job", "inputs", "outputs", "stop_line"],
 });
-```
 
-Validate it in a published or linked install:
+const workflowOwner = defineTemplate({
+  id: "workflow_owner",
+  surfaceClass: "workflow_owner",
+  sections: ["goal", "step_order", "handoff_rules", "send_back_rules"],
+});
 
-```sh
-paperzod validate ./setup.mjs
-```
+const draftQuality = defineTemplate({
+  id: "draft_quality_standard",
+  surfaceClass: "standard",
+  sections: ["what_good_looks_like", "send_back_when", "examples"],
+});
 
-Compile it:
-
-```sh
-paperzod compile ./setup.mjs --repo-root . --output-root generated
-```
-
-Get plain markdown output:
-
-```md
-# Workflow Owner
-
-This workflow owner document describes the operational turn order and stop lines.
-
-<a id="default-order"></a>
-## Default Order
-
-Build the section dossier from the learner baseline and research.
-
-- Role: section_dossier_engineer
-- Reads: none
-- Required inputs: none
-- Support inputs: none
-- Interim artifacts: none
-- Required outputs: section_dossier
-- Stop line: Stop after the dossier is complete and ready for critic review.
-- Next gate: critic_review
-```
-
-Inspect graph and rule failures with:
-
-```sh
-paperzod doctor ./setup.mjs
-```
-
-## Getting started
-
-This section reflects the current prototype workflow.
-
-### 1. Install and build
-
-```sh
-npm install
-npm run build
-```
-
-For repo-local development, invoke the CLI as `node dist/cli/index.js ...`.
-The bare `paperzod ...` commands shown elsewhere in this README assume a
-published or linked install.
-
-### 2. Create a setup file
-
-Create `setup.mjs`:
-
-```ts
-import { defineSetup } from "paperzod";
+const workflowText = loadFragments("./fragments/workflow", {
+  goal: "goal.md",
+  handoffRules: "handoff_rules.md",
+  sendBackRules: "send_back_rules.md",
+});
 
 export default defineSetup({
-  id: "demo_lessons",
-  name: "Demo Lessons",
-  description: "A tiny contrived setup used to prove the compiler pipeline.",
+  id: "editorial",
+  name: "Editorial",
+  templates: [roleHome, workflowOwner, draftQuality],
   roles: [
     {
-      id: "section_dossier_engineer",
-      name: "Section Dossier Engineer",
-      purpose: "Discovers what the learner should learn next.",
-      boundaries: [
-        "Do not write final learner copy.",
-        "Do not take over critic or downstream packet work.",
+      id: "writer",
+      name: "Writer",
+      template: "role_home",
+      reads: ["shared.workflow", "standards.draft_quality", "packets.brief"],
+      writes: ["packets.draft"],
+      stopLine: "Stop when the draft is ready for critic review.",
+      nextRoleId: "critic",
+    },
+    {
+      id: "critic",
+      name: "Critic",
+      template: "role_home",
+      reads: ["shared.workflow", "standards.draft_quality", "packets.draft"],
+      writes: ["packets.review"],
+      stopLine: "Stop when the draft either passes or goes back with clear notes.",
+      nextRoleId: "publisher",
+    },
+  ],
+  workflows: [
+    {
+      id: "main",
+      template: "workflow_owner",
+      steps: ["writer", "critic", "publisher"],
+      sections: {
+        goal: workflowText.goal,
+        handoff_rules: workflowText.handoffRules,
+        send_back_rules: workflowText.sendBackRules,
+      },
+      rules: [
+        "Critic review must happen before publish.",
+        "Publisher cannot skip critic review.",
       ],
     },
-    {
-      id: "acceptance_critic",
-      name: "Lessons Acceptance Critic",
-      purpose: "Checks whether the current packet is acceptable.",
-    },
   ],
-  artifacts: [
+  standards: [
     {
-      id: "section_dossier",
-      name: "SECTION_DOSSIER.md",
-      artifactClass: "required",
-      runtimePath: "paperclip_home/project_homes/lessons/_authoring/SECTION_DOSSIER.md",
-    },
-    {
-      id: "section_dossier_comments",
-      name: "dossier research notes",
-      artifactClass: "support",
-    },
-  ],
-  reviewGates: [
-    {
-      id: "critic_review",
-      name: "Critic Review",
-      purpose: "Checks whether the dossier packet is acceptable.",
-      checkIds: ["section_dossier"],
-    },
-  ],
-  workflowSteps: [
-    {
-      id: "build_section_dossier",
-      roleId: "section_dossier_engineer",
-      purpose: "Build the section dossier from the learner baseline and research.",
-      requiredInputIds: [],
-      supportInputIds: ["section_dossier_comments"],
-      requiredOutputIds: ["section_dossier"],
-      stopLine: "Stop after the dossier is complete and ready for critic review.",
-      nextGateId: "critic_review",
-    },
-  ],
-  surfaces: [
-    {
-      id: "workflow_doc_surface",
-      surfaceClass: "workflow_owner",
-      runtimePath: "project_homes/demo_lessons/shared/AUTHORITATIVE_LESSONS_WORKFLOW.md",
-    },
-  ],
-  surfaceSections: [
-    {
-      id: "default_order",
-      surfaceId: "workflow_doc_surface",
-      stableSlug: "default-order",
-      title: "Default Order",
-    },
-  ],
-  links: [
-    {
-      id: "step_reads_support_notes",
-      kind: "supports",
-      from: "build_section_dossier",
-      to: "section_dossier_comments",
-    },
-    {
-      id: "step_produces_dossier",
-      kind: "produces",
-      from: "build_section_dossier",
-      to: "section_dossier",
-    },
-    {
-      id: "workflow_section_documents_step",
-      kind: "documents",
-      from: "default_order",
-      to: "build_section_dossier",
-    },
-  ],
-  generatedTargets: [
-    {
-      id: "workflow_doc",
-      path: "project_homes/demo_lessons/shared/AUTHORITATIVE_LESSONS_WORKFLOW.md",
-      sourceIds: ["build_section_dossier"],
-      sectionId: "default_order",
+      id: "draft_quality",
+      name: "Draft Quality Standard",
+      template: "draft_quality_standard",
     },
   ],
 });
 ```
 
-### 3. Validate the setup
+The long prose still lives in plain markdown files such as:
+
+- `fragments/workflow/goal.md`
+- `fragments/workflow/handoff_rules.md`
+- `fragments/workflow/send_back_rules.md`
+
+TypeScript owns the graph, ids, paths, routing, and validation.
+Markdown owns the prose humans should write directly.
+
+## What You Compile
+
+For a generic setup:
 
 ```sh
-node ./dist/cli/index.js validate ./setup.mjs
+paperzod doctor setups/editorial/setup.ts
+paperzod compile setups/editorial/setup.ts --repo-root . --output-root generated --write
 ```
 
-Example output:
-
-```text
-VALID demo_lessons
-documents=1 sections=1
-```
-
-### 4. Compile markdown
+For a Paperclip runtime tree:
 
 ```sh
-node ./dist/cli/index.js compile ./setup.mjs --repo-root . --output-root generated
+paperzod doctor setups/product_docs/setup.ts
+paperzod compile setups/product_docs/setup.ts --target paperclip --repo-root . --output-root . --write
 ```
 
-Example output:
+The compiler accepts authored `.ts` setup files directly.
 
-```text
-COMPILED demo_lessons
-mode=dry-run
-create workflow_doc_surface /abs/path/generated/project_homes/demo_lessons/shared/AUTHORITATIVE_LESSONS_WORKFLOW.md
-```
+## What Comes Back
 
-### 5. Review the generated output
+`paperzod` emits plain markdown.
 
-Example generated workflow doc:
+That output can include:
 
-```md
-# Workflow Owner
+- role homes under `paperclip_home/agents/<role>/AGENTS.md`
+- the project-home root `README.md`
+- shared entrypoint docs
+- authoritative workflow owner docs
+- per-lane packet workflow docs
+- standards
+- gate docs
+- technical references
+- how-to guides
+- coordination docs
 
-This workflow owner document describes the operational turn order and stop lines.
+The markdown remains the runtime read surface.
+The structured source exists so the graph does not have to be maintained by
+hand.
 
-<a id="default-order"></a>
-## Default Order
+## Proving The Generic System
 
-Build the section dossier from the learner baseline and research.
+This repo is a generic open source compiler.
+It is not a Lessons-specific product.
 
-- Role: section_dossier_engineer
-- Reads: none
-- Required inputs: none
-- Support inputs: section_dossier_comments
-- Interim artifacts: none
-- Required outputs: section_dossier
-- Stop line: Stop after the dossier is complete and ready for critic review.
-- Next gate: critic_review
-```
+The repo proves the generic system against multiple setup shapes, including one
+high-fidelity Lessons-shaped fixture because that is a demanding real-world
+case. That fixture is a proving target, not the public product boundary, and
+the open source project does not depend on proprietary Lessons source code.
 
-## One possible project layout
+What the proving cases are meant to show is generic:
 
-This is one reasonable shape for a real project using `paperzod`:
+- the compiler can own role homes, shared workflow docs, standards, gates, and
+  references for a real setup
+- the model can represent conceptual contracts separately from the current
+  runtime file bundle
+- section-level ownership, reads, gates, and generation provenance hold up
+  under pressure
+- the same compiler path works for more than one setup family
 
-```text
-.
-├── paperzod.config.ts
-├── paperzod/
-│   ├── setups/
-│   │   ├── demo-lessons.ts
-│   │   └── core-dev.ts
-│   ├── shared/
-│   │   ├── standards.ts
-│   │   └── renderers.ts
-│   └── references/
-│       └── packet-shapes.ts
-├── generated/
-│   ├── demo-lessons/
-│   └── core-dev/
-└── docs/
-```
+## One-Way By Design
 
-## Current CLI
+`paperzod` is a one-way compiler.
 
-### `paperzod validate`
+- authored source is the semantic truth
+- generated markdown is runtime output
+- generated markdown is not parsed back into source
 
-Validate source shapes, graph integrity, semantics, and compile planning
-without writing files.
+That keeps the ownership line clear.
 
-```sh
-node ./dist/cli/index.js validate ./setup.mjs
-```
+## Package Surface
 
-### `paperzod compile`
+Public exports:
 
-Validate and compile markdown output.
+- `paperzod`
+  - ergonomic authoring helpers and top-level compile entrypoints
+- `paperzod/core`
+  - stable low-level doctrine types, diagnostics, graph contracts, and compile
+    plan contracts
+- `paperzod/markdown`
+  - markdown rendering and surface emitters
+- `paperzod/testing`
+  - fixture and proving helpers
 
-```sh
-node ./dist/cli/index.js compile ./setup.mjs --repo-root . --output-root generated
-node ./dist/cli/index.js compile ./setup.mjs --repo-root . --output-root generated --write
-node ./dist/cli/index.js compile ./setup.mjs --repo-root . --output-root paperclip_agents --target paperclip
-```
-
-### `paperzod doctor`
-
-Explain graph drift and broken links in a more human-readable way.
-
-```sh
-node ./dist/cli/index.js doctor ./setup.mjs
-```
-
-Example output:
-
-```text
-Doctor report for demo_lessons
-
-No diagnostics.
-```
-
-## Current API surface
-
-The current library surface is still intentionally small.
+Typical library usage:
 
 ```ts
 import {
   defineSetup,
   validateSetup,
-  buildGraph,
   renderSetup,
   compileSetup,
   compileAndEmitSetup,
@@ -439,21 +273,31 @@ import {
 } from "paperzod";
 ```
 
-The split should stay clear:
+## Typical Repo Shape
 
-- Zod validates node shapes
-- custom graph logic validates cross-node workflow semantics
-- renderers turn validated source into markdown
-- `buildGraph(...)` consumes normalized data, usually the `data` returned by
-  `validateSetup(...)`
-- `compileSetup(...)` stays pure and returns the checked render plus target
-  manifest
-- `compileAndEmitSetup(...)` runs the same compile path and then emits or
-  dry-runs file writes
+One reasonable repo layout looks like this:
 
-## Contributor workflow
+```text
+.
+├── setups/
+│   ├── editorial/
+│       ├── setup.ts
+│       ├── roles.ts
+│       ├── workflow.ts
+│       ├── packet_contracts.ts
+│       ├── surfaces.ts
+│       ├── references.ts
+│       └── targets.ts
+│   └── support_docs/
+│       └── setup.ts
+├── fragments/
+│   ├── editorial/
+│   └── support_docs/
+├── generated/
+└── paperclip_home/
+```
 
-The current prototype loop is:
+## Contributor Workflow
 
 ```sh
 npm install
@@ -463,68 +307,26 @@ npm test
 npm run build
 ```
 
-If you are extending the proving cases, keep the fixture-first flow:
+When you are extending the system:
 
-- add or expand a source fixture under `test/fixtures/source/`
-- write the failing suite in the nearest layer-specific test directory
-- only then change implementation code
-- update `docs/implementation_plan.md` when a phase or release-gate claim changes
+- start with a proving fixture under `test/fixtures/source/`
+- add or tighten the nearest layer-specific test first
+- change implementation second
+- keep rendered output changes deliberate and reviewable
 
-## Why Zod
+## Docs Map
 
-Zod is a good base for this project because it gives us:
-
-- strong shape validation
-- type inference
-- recursive schema support
-- metadata registries
-- JSON Schema export when we want machine-readable views
-
-But Zod is only the foundation.
-The main product value is still the Paperclip-specific graph model and the
-markdown compiler on top of it.
-
-## Document map
-
+- [docs/ref/GENERIC_DOCTRINE_SYSTEM_PLAIN_EXAMPLE.md](/Users/aelaguiz/workspace/paperzod/docs/ref/GENERIC_DOCTRINE_SYSTEM_PLAIN_EXAMPLE.md)
+  - the shortest plain-English explanation of the finished product shape
 - [docs/requirements.md](/Users/aelaguiz/workspace/paperzod/docs/requirements.md)
-  - product requirements and design boundaries
+  - product contract and boundaries
 - [docs/schema.md](/Users/aelaguiz/workspace/paperzod/docs/schema.md)
-  - the language and domain model this repo should use
+  - source language and node model
 - [docs/architecture.md](/Users/aelaguiz/workspace/paperzod/docs/architecture.md)
-  - the compiler shape, module boundaries, and validation flow
+  - compiler layers and pipeline shape
 - [docs/testing.md](/Users/aelaguiz/workspace/paperzod/docs/testing.md)
-  - the end-to-end test plan and release gate for proving the product works
-- [docs/example_lessons.md](/Users/aelaguiz/workspace/paperzod/docs/example_lessons.md)
-  - the concrete Lessons proving case and where the current prototype still
-    simplifies the live `paperclip_agents` tree
-- [docs/implementation_plan.md](/Users/aelaguiz/workspace/paperzod/docs/implementation_plan.md)
-  - the phased, test-driven implementation plan for building the system
+  - proving standard and release gate
+- [docs/impl2.md](/Users/aelaguiz/workspace/paperzod/docs/impl2.md)
+  - one high-fidelity proving plan, not the product boundary
 - [docs/ref](/Users/aelaguiz/workspace/paperzod/docs/ref)
-  - grounding material copied from the current `paperclip_agents` reference
-  - this folder is reference input, not repo-owned draft output
-
-## Current status
-
-What this repo has today:
-
-- a working prototype compiler pipeline
-- a buildable package with subpath exports
-- a CLI for `validate`, `compile`, and `doctor`
-- an automated release gate currently green at `40` test files and `132`
-  tests
-- end-to-end proving fixtures for:
-  - `demo_minimal`
-  - `shared_overrides`
-  - `lessons_vertical_slice`
-  - `lessons_full`
-  - `second_setup`
-- release-gate style tests for mutations, determinism, and performance
-- a vendored Zod checkout for architecture grounding
-
-What it does not have yet:
-
-- polished packaging and release hygiene
-- a finalized public authoring UX
-- broad real-world fixture coverage beyond the proving cases in this repo
-- exact live `paperclip_home/agents/...` role-home parity in the `paperclip`
-  target adapter
+  - grounding material and reference inputs

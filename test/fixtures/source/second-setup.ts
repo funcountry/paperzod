@@ -55,27 +55,27 @@ const secondSetupSeed = defineSetup({
     {
       id: "coordinator_home",
       surfaceClass: "role_home",
-      runtimePath: "project_homes/core_dev/roles/coordinator/AGENTS.md"
+      runtimePath: "paperclip_home/agents/coordinator/AGENTS.md"
     },
     {
       id: "core_dev_readme",
       surfaceClass: "shared_entrypoint",
-      runtimePath: "project_homes/core_dev/shared/README.md"
+      runtimePath: "paperclip_home/project_homes/core_dev/shared/README.md"
     },
     {
       id: "release_workflow_surface",
       surfaceClass: "workflow_owner",
-      runtimePath: "project_homes/core_dev/shared/AUTHORITATIVE_CORE_DEV_WORKFLOW.md"
+      runtimePath: "paperclip_home/project_homes/core_dev/shared/AUTHORITATIVE_CORE_DEV_WORKFLOW.md"
     },
     {
       id: "release_gate_surface",
       surfaceClass: "gate",
-      runtimePath: "project_homes/core_dev/shared/lessons_content_standards/RELEASE_READINESS_GATE.md"
+      runtimePath: "paperclip_home/project_homes/core_dev/shared/lessons_content_standards/RELEASE_READINESS_GATE.md"
     },
     {
       id: "release_how_to_surface",
       surfaceClass: "how_to",
-      runtimePath: "project_homes/core_dev/shared/how_to_guides/RELEASE_PROTOCOL.md"
+      runtimePath: "paperclip_home/project_homes/core_dev/shared/how_to_guides/RELEASE_PROTOCOL.md"
     }
   ],
   surfaceSections: [
@@ -91,43 +91,43 @@ const secondSetupSeed = defineSetup({
       id: "release_protocol_reference",
       referenceClass: "support_reference",
       name: "Release Protocol",
-      sourcePath: "project_homes/core_dev/shared/how_to_guides/RELEASE_PROTOCOL.md"
+      sourcePath: "paperclip_home/project_homes/core_dev/shared/how_to_guides/RELEASE_PROTOCOL.md"
     }
   ],
   generatedTargets: [
     {
       id: "coordinator_home_read_first_target",
-      path: "project_homes/core_dev/roles/coordinator/AGENTS.md",
+      path: "paperclip_home/agents/coordinator/AGENTS.md",
       sourceIds: ["shared_role"],
       sectionId: "coordinator_read_first"
     },
     {
       id: "coordinator_home_role_contract_target",
-      path: "project_homes/core_dev/roles/coordinator/AGENTS.md",
+      path: "paperclip_home/agents/coordinator/AGENTS.md",
       sourceIds: ["shared_role"],
       sectionId: "coordinator_role_contract"
     },
     {
       id: "core_dev_readme_target",
-      path: "project_homes/core_dev/shared/README.md",
+      path: "paperclip_home/project_homes/core_dev/shared/README.md",
       sourceIds: ["release_readiness_step"],
       sectionId: "shared_release_order"
     },
     {
       id: "release_workflow_target",
-      path: "project_homes/core_dev/shared/AUTHORITATIVE_CORE_DEV_WORKFLOW.md",
+      path: "paperclip_home/project_homes/core_dev/shared/AUTHORITATIVE_CORE_DEV_WORKFLOW.md",
       sourceIds: ["release_readiness_step"],
       sectionId: "workflow_release_shape"
     },
     {
       id: "release_gate_target",
-      path: "project_homes/core_dev/shared/lessons_content_standards/RELEASE_READINESS_GATE.md",
+      path: "paperclip_home/project_homes/core_dev/shared/lessons_content_standards/RELEASE_READINESS_GATE.md",
       sourceIds: ["release_readiness_gate"],
       sectionId: "gate_final_checks"
     },
     {
       id: "release_how_to_target",
-      path: "project_homes/core_dev/shared/how_to_guides/RELEASE_PROTOCOL.md",
+      path: "paperclip_home/project_homes/core_dev/shared/how_to_guides/RELEASE_PROTOCOL.md",
       sourceIds: ["release_protocol_reference"],
       sectionId: "how_to_protocol"
     }

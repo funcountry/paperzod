@@ -1,16 +1,35 @@
-import type { BlockquoteNode, CodeBlockNode, DocBlockNode, DocumentNode, ListNode, ParagraphNode, SectionNode } from "./ast.js";
+import type { BlockquoteNode, CodeBlockNode, DocBlockNode, DocumentNode, ListItemNode, ListNode, ParagraphNode, SectionNode, TableNode } from "./ast.js";
 
 function renderParagraph(node: ParagraphNode): string {
   return node.text;
 }
 
-function renderList(node: ListNode): string {
-  return node.items
+function renderListItems(items: ListItemNode[], ordered: boolean, depth: number): string {
+  return items
     .map((item, index) => {
-      const marker = node.ordered ? `${index + 1}.` : "-";
-      return `${marker} ${item.text}`;
+      const indent = "  ".repeat(depth);
+      const marker = ordered ? `${index + 1}.` : "-";
+      const line = `${indent}${marker} ${item.text}`;
+      const children =
+        item.children && item.children.length > 0 ? `\n${renderListItems(item.children, ordered, depth + 1)}` : "";
+      return `${line}${children}`;
     })
     .join("\n");
+}
+
+function renderList(node: ListNode): string {
+  return renderListItems(node.items, node.ordered, 0);
+}
+
+function escapeTableCell(value: string): string {
+  return value.replaceAll("|", "\\|");
+}
+
+function renderTable(node: TableNode): string {
+  const header = `| ${node.headers.map(escapeTableCell).join(" | ")} |`;
+  const separator = `| ${node.headers.map(() => "---").join(" | ")} |`;
+  const rows = node.rows.map((row) => `| ${row.map(escapeTableCell).join(" | ")} |`);
+  return [header, separator, ...rows].join("\n");
 }
 
 function renderCodeBlock(node: CodeBlockNode): string {
@@ -34,6 +53,8 @@ function renderBlock(node: DocBlockNode): string {
       return renderParagraph(node);
     case "list":
       return renderList(node);
+    case "table":
+      return renderTable(node);
     case "code_block":
       return renderCodeBlock(node);
     case "blockquote":

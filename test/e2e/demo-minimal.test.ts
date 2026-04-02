@@ -108,16 +108,19 @@ describe("demo_minimal e2e", () => {
         "rendered": [
           {
             "id": "author_home",
-            "markdown": "# Role Home: Author
+            "markdown": "# Author
 
-      This role-home document states the contract for one runtime role.
+      You are the Author.
+
+      Your repo-owned role home is \`generated/roles/author/AGENTS.md\`.
 
       <a id="role-contract"></a>
       ## Role Contract
 
       Create the artifact.
 
-      - Reads: none
+      - No additional role boundaries are declared yet.
+      - No additional shared doctrine reads are declared yet.
       ",
             "path": "generated/roles/author/AGENTS.md",
           },
@@ -130,16 +133,19 @@ describe("demo_minimal e2e", () => {
       <a id="default-order"></a>
       ## Default Order
 
-      Draft the first packet.
+      Use this section to understand the represented workflow order for the current setup.
 
-      - Role: author
-      - Reads: none
+      1. Author: Draft the first packet.
+
+      This section currently documents the Author lane.
+
+      - Read before acting: none
       - Required inputs: none
-      - Support inputs: research_notes
-      - Interim artifacts: draft_notes
-      - Required outputs: packet_v1
+      - Support inputs: Research Notes
+      - Interim artifacts: Draft Notes
+      - Outputs the next owner may trust: PACKET_V1.md
       - Stop line: Stop after the first packet draft is ready for review.
-      - Next gate: critic_gate
+      - Hand off to gate: Critic Gate
       ",
             "path": "generated/WORKFLOW.md",
           },

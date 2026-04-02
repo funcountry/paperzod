@@ -106,7 +106,8 @@ function normalizeSurfaces(setupId: string, surfaces: readonly SurfaceInput[]): 
     id: surface.id,
     setupId,
     surfaceClass: surface.surfaceClass,
-    runtimePath: surface.runtimePath
+    runtimePath: surface.runtimePath,
+    ...(surface.preamble !== undefined ? { preamble: surface.preamble } : {})
   }));
 }
 
@@ -117,7 +118,9 @@ function normalizeSurfaceSections(setupId: string, sections: readonly SurfaceSec
     setupId,
     surfaceId: section.surfaceId,
     stableSlug: section.stableSlug,
-    title: section.title
+    title: section.title,
+    ...(section.parentSectionId !== undefined ? { parentSectionId: section.parentSectionId } : {}),
+    ...(section.body !== undefined ? { body: section.body } : {})
   }));
 }
 
@@ -150,7 +153,9 @@ function normalizeLinks(setupId: string, links: readonly LinkInput[]): LinkDef[]
     setupId,
     kind: link.kind,
     from: link.from,
-    to: link.to
+    to: link.to,
+    ...(link.kind === "reads" && link.condition !== undefined ? { condition: link.condition } : {}),
+    ...(link.kind === "reads" && link.context !== undefined ? { context: link.context } : {})
   }));
 }
 

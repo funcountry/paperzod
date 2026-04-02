@@ -12,6 +12,7 @@ export type NodeKind =
 
 export type SurfaceClass =
   | "role_home"
+  | "project_home_root"
   | "shared_entrypoint"
   | "workflow_owner"
   | "packet_workflow"
@@ -43,6 +44,72 @@ export type LinkKind =
   | "references"
   | "maps_to_runtime"
   | "generated_from";
+
+export interface AuthoredListItem {
+  text: string;
+  children?: AuthoredListEntry[] | undefined;
+}
+
+export type AuthoredListEntry = string | AuthoredListItem;
+
+export interface AuthoredDefinitionListItem {
+  term: string;
+  definitions: AuthoredListEntry[];
+}
+
+export type AuthoredSimpleContentBlock =
+  | {
+      kind: "paragraph";
+      text: string;
+    }
+  | {
+      kind: "unordered_list";
+      items: AuthoredListEntry[];
+    }
+  | {
+      kind: "ordered_list";
+      items: AuthoredListEntry[];
+    }
+  | {
+      kind: "ordered_steps";
+      items: AuthoredListEntry[];
+    }
+  | {
+      kind: "rule_list";
+      items: AuthoredListEntry[];
+    }
+  | {
+      kind: "definition_list";
+      items: AuthoredDefinitionListItem[];
+    }
+  | {
+      kind: "table";
+      headers: string[];
+      rows: string[][];
+    }
+  | {
+      kind: "code_block";
+      code: string;
+      language?: string | undefined;
+    };
+
+export interface AuthoredExampleCase {
+  title?: string | undefined;
+  blocks: AuthoredSimpleContentBlock[];
+}
+
+export type AuthoredContentBlock =
+  | AuthoredSimpleContentBlock
+  | {
+      kind: "example";
+      title?: string | undefined;
+      blocks: AuthoredSimpleContentBlock[];
+    }
+  | {
+      kind: "good_bad_examples";
+      good: AuthoredExampleCase[];
+      bad: AuthoredExampleCase[];
+    };
 
 export interface SetupMetaDef {
   kind: "setup";
@@ -110,6 +177,7 @@ export interface SurfaceDef {
   setupId: string;
   surfaceClass: SurfaceClass;
   runtimePath: string;
+  preamble?: AuthoredContentBlock[];
 }
 
 export interface SurfaceSectionDef {
@@ -119,6 +187,8 @@ export interface SurfaceSectionDef {
   surfaceId: string;
   stableSlug: string;
   title: string;
+  parentSectionId?: string | undefined;
+  body?: AuthoredContentBlock[];
 }
 
 export interface ReferenceDef {
@@ -140,13 +210,24 @@ export interface GeneratedTargetDef {
   sectionId?: string;
 }
 
-export interface LinkDef {
+export interface BaseLinkDef {
   id: string;
   setupId: string;
-  kind: LinkKind;
   from: string;
   to: string;
 }
+
+export interface ReadLinkDef extends BaseLinkDef {
+  kind: "reads";
+  condition?: string | undefined;
+  context?: string | undefined;
+}
+
+export interface GenericLinkDef extends BaseLinkDef {
+  kind: Exclude<LinkKind, "reads">;
+}
+
+export type LinkDef = GenericLinkDef | ReadLinkDef;
 
 export type DoctrineNodeDef =
   | RoleDef

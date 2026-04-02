@@ -69,17 +69,20 @@ function paperclipPathError(document: PlannedDocument, message: string): Diagnos
 function validatePaperclipSurfacePath(document: PlannedDocument): Diagnostic[] {
   const relativePath = document.path;
   const validators: Record<SurfaceClass, (pathValue: string) => boolean> = {
-    role_home: (pathValue) => pathValue.includes("/roles/") && pathValue.endsWith("/AGENTS.md"),
-    shared_entrypoint: (pathValue) => pathValue.includes("/shared/"),
-    workflow_owner: (pathValue) => pathValue.includes("/shared/"),
-    packet_workflow: (pathValue) => pathValue.includes("/proof_packets/") || pathValue.includes("/packet_workflow/") || pathValue.includes("/packets/"),
-    standard: (pathValue) => pathValue.includes("/lessons_content_standards/") || pathValue.includes("/standards/"),
+    role_home: (pathValue) => /^paperclip_home\/agents\/[^/]+\/AGENTS\.md$/.test(pathValue),
+    project_home_root: (pathValue) => /^paperclip_home\/project_homes\/[^/]+\/README\.md$/.test(pathValue),
+    shared_entrypoint: (pathValue) => /^paperclip_home\/project_homes\/[^/]+\/shared\/README\.md$/.test(pathValue),
+    workflow_owner: (pathValue) =>
+      /^paperclip_home\/project_homes\/[^/]+\/shared\/[^/]+\.md$/.test(pathValue) &&
+      !pathValue.endsWith("/README.md"),
+    packet_workflow: (pathValue) => /^paperclip_home\/project_homes\/[^/]+\/shared\/proof_packets\/[^/]+\.md$/.test(pathValue),
+    standard: (pathValue) =>
+      /^paperclip_home\/project_homes\/[^/]+\/shared\/(?:lessons_content_standards|standards)\/[^/]+\.md$/.test(pathValue),
     gate: (pathValue) =>
-      pathValue.includes("/lessons_content_standards/") ||
-      pathValue.includes("/gates/"),
-    technical_reference: (pathValue) => pathValue.includes("/technical_references/"),
-    how_to: (pathValue) => pathValue.includes("/how_to_guides/") || pathValue.includes("/how_to/"),
-    coordination: (pathValue) => pathValue.includes("/agent_coordination/") || pathValue.includes("/coordination/")
+      /^paperclip_home\/project_homes\/[^/]+\/shared\/(?:lessons_content_standards|gates)\/[^/]+\.md$/.test(pathValue),
+    technical_reference: (pathValue) => /^paperclip_home\/project_homes\/[^/]+\/shared\/technical_references\/[^/]+\.md$/.test(pathValue),
+    how_to: (pathValue) => /^paperclip_home\/project_homes\/[^/]+\/shared\/(?:how_to_guides|how_to)\/[^/]+\.md$/.test(pathValue),
+    coordination: (pathValue) => /^paperclip_home\/project_homes\/[^/]+\/shared\/(?:agent_coordination|coordination)\/[^/]+\.md$/.test(pathValue)
   };
 
   return validators[document.surfaceClass](relativePath)

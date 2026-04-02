@@ -49,17 +49,17 @@ exports[`lessons_full source model > represents the full Lessons requirement sha
     {
       "id": "poker_kb_reference",
       "referenceClass": "runtime_reference",
-      "sourcePath": "project_homes/lessons/shared/technical_references/POKER_KB.md",
+      "sourcePath": "paperclip_home/project_homes/lessons/shared/technical_references/POKER_KB.md",
     },
     {
       "id": "github_access_reference",
       "referenceClass": "support_reference",
-      "sourcePath": "project_homes/lessons/shared/how_to_guides/LESSONS_GITHUB_ACCESS_PROTOCOL.md",
+      "sourcePath": "paperclip_home/project_homes/lessons/shared/how_to_guides/LESSONS_GITHUB_ACCESS_PROTOCOL.md",
     },
     {
       "id": "mobile_bootstrap_reference",
       "referenceClass": "support_reference",
-      "sourcePath": "project_homes/lessons/shared/agent_coordination/LESSONS_PSMOBILE_BOOTSTRAP.md",
+      "sourcePath": "paperclip_home/project_homes/lessons/shared/agent_coordination/LESSONS_PSMOBILE_BOOTSTRAP.md",
     },
   ],
   "setup": {
@@ -73,6 +73,7 @@ exports[`lessons_full source model > represents the full Lessons requirement sha
     "gate",
     "how_to",
     "packet_workflow",
+    "project_home_root",
     "role_home",
     "shared_entrypoint",
     "standard",

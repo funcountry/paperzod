@@ -6,7 +6,8 @@ import type {
   ListNode,
   NonSectionDocBlockNode,
   ParagraphNode,
-  SectionNode
+  SectionNode,
+  TableNode
 } from "./ast.js";
 
 export function doc(title: string, children: NonSectionDocBlockNode[] | Array<NonSectionDocBlockNode | SectionNode>): DocumentNode {
@@ -20,7 +21,7 @@ export function doc(title: string, children: NonSectionDocBlockNode[] | Array<No
 export function section(
   stableSlug: string,
   title: string,
-  children: NonSectionDocBlockNode[],
+  children: Array<NonSectionDocBlockNode | SectionNode>,
   level = 2
 ): SectionNode {
   if (level < 1) {
@@ -40,23 +41,35 @@ export function paragraph(text: string): ParagraphNode {
   return { kind: "paragraph", text };
 }
 
-export function listItem(text: string): ListItemNode {
-  return { kind: "list_item", text };
-}
-
-export function unorderedList(items: string[]): ListNode {
+export function listItem(text: string, children?: ListItemNode[]): ListItemNode {
   return {
-    kind: "list",
-    ordered: false,
-    items: items.map(listItem)
+    kind: "list_item",
+    text,
+    ...(children && children.length > 0 ? { children: [...children] } : {})
   };
 }
 
-export function orderedList(items: string[]): ListNode {
+export function unorderedList(items: Array<string | ListItemNode>): ListNode {
+  return {
+    kind: "list",
+    ordered: false,
+    items: items.map((item) => (typeof item === "string" ? listItem(item) : item))
+  };
+}
+
+export function orderedList(items: Array<string | ListItemNode>): ListNode {
   return {
     kind: "list",
     ordered: true,
-    items: items.map(listItem)
+    items: items.map((item) => (typeof item === "string" ? listItem(item) : item))
+  };
+}
+
+export function table(headers: string[], rows: string[][]): TableNode {
+  return {
+    kind: "table",
+    headers: [...headers],
+    rows: rows.map((row) => [...row])
   };
 }
 

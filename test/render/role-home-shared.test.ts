@@ -42,29 +42,44 @@ describe("role-home and shared renderers", () => {
           }
         ],
         surfaces: [{ id: "author_home", surfaceClass: "role_home", runtimePath: "generated/roles/author/AGENTS.md" }],
-        surfaceSections: [{ id: "read_first", surfaceId: "author_home", stableSlug: "read-first", title: "Read First" }],
-        generatedTargets: [{ id: "target_1", path: "generated/roles/author/AGENTS.md", sourceIds: ["author"], sectionId: "read_first" }],
+        surfaceSections: [
+          { id: "read_first", surfaceId: "author_home", stableSlug: "read-first", title: "Read First" },
+          { id: "role_contract", surfaceId: "author_home", stableSlug: "role-contract", title: "Role Contract" }
+        ],
+        generatedTargets: [
+          { id: "target_1", path: "generated/roles/author/AGENTS.md", sourceIds: ["author"], sectionId: "read_first" },
+          { id: "target_2", path: "generated/roles/author/AGENTS.md", sourceIds: ["author"], sectionId: "role_contract" }
+        ],
         links: [
           { id: "documents_surface_role", kind: "documents", from: "author_home", to: "author" },
-          { id: "documents_section_role", kind: "documents", from: "read_first", to: "author" }
+          { id: "documents_read_first_role", kind: "documents", from: "read_first", to: "author" },
+          { id: "documents_role_contract_role", kind: "documents", from: "role_contract", to: "author" }
         ]
       },
       "author_home"
     );
 
     expect(markdown).toMatchInlineSnapshot(`
-      "# Role Home: Author
+      "# Author
 
-      This role-home document states the contract for one runtime role.
+      You are the Author.
+
+      Your repo-owned role home is \`generated/roles/author/AGENTS.md\`.
 
       <a id="read-first"></a>
       ## Read First
 
+      Read these shared doctrine surfaces before taking a turn.
+
+      - No additional shared doctrine reads are declared yet.
+
+      <a id="role-contract"></a>
+      ## Role Contract
+
       Create the packet.
 
-      - Boundary: Do not skip the stop line.
-      - Boundary: Do not rewrite shared doctrine.
-      - Reads: none
+      - Do not skip the stop line.
+      - Do not rewrite shared doctrine.
       "
     `);
   });
@@ -106,14 +121,119 @@ describe("role-home and shared renderers", () => {
 
       Draft the first packet.
 
-      - Role: author
-      - Reads: none
+      - Current owner: Author
+      - Read before acting: none
       - Required inputs: none
       - Support inputs: none
       - Interim artifacts: none
-      - Required outputs: packet_v1
+      - Outputs the next owner may trust: PACKET_V1.md
       - Stop line: Stop once the first draft exists.
-      - Next gate: gate_1
+      - Hand off to gate: Gate 1
+      "
+    `);
+  });
+
+  it("renders a project-home root document with a doctrine map", () => {
+    const markdown = renderDocument(
+      {
+        id: "render_project_home",
+        name: "Render Project Home",
+        roles: [{ id: "project_lead", name: "Project Lead", purpose: "Route the work." }],
+        workflowSteps: [
+          {
+            id: "route_work",
+            roleId: "project_lead",
+            purpose: "Route the work to the right owner.",
+            requiredInputIds: [],
+            requiredOutputIds: ["packet_v1"],
+            stopLine: "Stop once the next owner is obvious.",
+            nextStepId: "route_followthrough"
+          },
+          {
+            id: "route_followthrough",
+            roleId: "project_lead",
+            purpose: "Handle followthrough.",
+            requiredInputIds: ["packet_v1"],
+            requiredOutputIds: ["packet_v2"],
+            stopLine: "Stop once followthrough is complete."
+          }
+        ],
+        artifacts: [
+          { id: "packet_v1", name: "PACKET_V1.md", artifactClass: "required" },
+          { id: "packet_v2", name: "PACKET_V2.md", artifactClass: "required" }
+        ],
+        surfaces: [
+          {
+            id: "project_home_root",
+            surfaceClass: "project_home_root",
+            runtimePath: "paperclip_home/project_homes/lessons/README.md"
+          },
+          {
+            id: "shared_readme",
+            surfaceClass: "shared_entrypoint",
+            runtimePath: "paperclip_home/project_homes/lessons/shared/README.md"
+          },
+          {
+            id: "workflow_surface",
+            surfaceClass: "workflow_owner",
+            runtimePath: "paperclip_home/project_homes/lessons/shared/AUTHORITATIVE_LESSONS_WORKFLOW.md"
+          },
+          {
+            id: "lead_home",
+            surfaceClass: "role_home",
+            runtimePath: "paperclip_home/agents/project_lead/AGENTS.md"
+          }
+        ],
+        surfaceSections: [
+          { id: "project_home_map", surfaceId: "project_home_root", stableSlug: "project-home-map", title: "Project Home Map" },
+          { id: "shared_read_order", surfaceId: "shared_readme", stableSlug: "read-order", title: "Read Order" },
+          { id: "owner_map", surfaceId: "workflow_surface", stableSlug: "owner-map", title: "Owner Map" },
+          { id: "lead_read_first", surfaceId: "lead_home", stableSlug: "read-first", title: "Read First" },
+          { id: "lead_role_contract", surfaceId: "lead_home", stableSlug: "role-contract", title: "Role Contract" }
+        ],
+        generatedTargets: [
+          { id: "root_target", path: "paperclip_home/project_homes/lessons/README.md", sourceIds: ["route_work"], sectionId: "project_home_map" },
+          { id: "shared_target", path: "paperclip_home/project_homes/lessons/shared/README.md", sourceIds: ["route_work"], sectionId: "shared_read_order" },
+          {
+            id: "workflow_target",
+            path: "paperclip_home/project_homes/lessons/shared/AUTHORITATIVE_LESSONS_WORKFLOW.md",
+            sourceIds: ["route_work"],
+            sectionId: "owner_map"
+          },
+          { id: "home_read_target", path: "paperclip_home/agents/project_lead/AGENTS.md", sourceIds: ["project_lead"], sectionId: "lead_read_first" },
+          {
+            id: "home_contract_target",
+            path: "paperclip_home/agents/project_lead/AGENTS.md",
+            sourceIds: ["project_lead"],
+            sectionId: "lead_role_contract"
+          }
+        ],
+        links: [
+          { id: "root_documents_step", kind: "documents", from: "project_home_map", to: "route_work" },
+          { id: "shared_documents_step", kind: "documents", from: "shared_read_order", to: "route_work" },
+          { id: "workflow_surface_documents_step", kind: "documents", from: "workflow_surface", to: "route_work" },
+          { id: "workflow_section_documents_step", kind: "documents", from: "owner_map", to: "route_work" },
+          { id: "home_documents_role", kind: "documents", from: "lead_home", to: "project_lead" },
+          { id: "home_read_documents_role", kind: "documents", from: "lead_read_first", to: "project_lead" },
+          { id: "home_contract_documents_role", kind: "documents", from: "lead_role_contract", to: "project_lead" }
+        ]
+      },
+      "project_home_root"
+    );
+
+    expect(markdown).toMatchInlineSnapshot(`
+      "# Lessons Project Home
+
+      This is the repo home for Lessons shared doctrine and role-local runtime guidance.
+
+      <a id="project-home-map"></a>
+      ## Project Home Map
+
+      Use this project home as the runtime doctrine map for this project.
+
+      1. Start with \`paperclip_home/project_homes/lessons/shared/README.md\` for the shared doctrine entrypoint.
+      2. Use \`paperclip_home/project_homes/lessons/shared/AUTHORITATIVE_LESSONS_WORKFLOW.md\` as the authoritative workflow owner for routing and handoff decisions.
+      3. Use \`paperclip_home/agents/<role>/AGENTS.md\` for role-local guidance.
       "
     `);
   });

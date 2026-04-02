@@ -4,8 +4,10 @@ import {
   blockquote,
   codeBlock,
   doc,
+  listItem,
   paragraph,
   section,
+  table,
   unorderedList
 } from "../../src/doc/index.js";
 
@@ -14,9 +16,11 @@ describe("doc ast", () => {
     const ast = doc("Demo Document", [
       section("read-first", "Read First", [
         paragraph("Start here."),
-        unorderedList(["One thing", "Another thing"]),
+        unorderedList(["One thing", listItem("Another thing", [listItem("Nested thing")])]),
+        table(["Owner", "Reads"], [["Project Lead", "README.md"]]),
         blockquote([paragraph("Grounding note.")]),
-        codeBlock("ts", "export const demo = true;")
+        codeBlock("ts", "export const demo = true;"),
+        section("workflow-items", "Workflow Items", [paragraph("This subsection narrows the owner map.")], 3)
       ])
     ]);
 
@@ -36,12 +40,31 @@ describe("doc ast", () => {
                     "text": "One thing",
                   },
                   {
+                    "children": [
+                      {
+                        "kind": "list_item",
+                        "text": "Nested thing",
+                      },
+                    ],
                     "kind": "list_item",
                     "text": "Another thing",
                   },
                 ],
                 "kind": "list",
                 "ordered": false,
+              },
+              {
+                "headers": [
+                  "Owner",
+                  "Reads",
+                ],
+                "kind": "table",
+                "rows": [
+                  [
+                    "Project Lead",
+                    "README.md",
+                  ],
+                ],
               },
               {
                 "children": [
@@ -56,6 +79,18 @@ describe("doc ast", () => {
                 "code": "export const demo = true;",
                 "kind": "code_block",
                 "language": "ts",
+              },
+              {
+                "children": [
+                  {
+                    "kind": "paragraph",
+                    "text": "This subsection narrows the owner map.",
+                  },
+                ],
+                "kind": "section",
+                "level": 3,
+                "stableSlug": "workflow-items",
+                "title": "Workflow Items",
               },
             ],
             "kind": "section",

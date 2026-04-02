@@ -1,6 +1,14 @@
 import { describe, expect, it } from "vitest";
 
-import { buildGraph, getCheckTargets, getReadSections, getReadersOfSection } from "../../src/graph/index.js";
+import {
+  buildGraph,
+  getCheckTargets,
+  getReadSections,
+  getReadSurfaces,
+  getReadTargets,
+  getReadersOfSection,
+  getReadersOfSurface
+} from "../../src/graph/index.js";
 import { normalizeSetup } from "../../src/source/index.js";
 import demoMinimalSeed from "../fixtures/source/demo-minimal.js";
 
@@ -179,5 +187,61 @@ describe("graph indexes", () => {
     expect(getReadSections(graph, "role_1").map((section) => section.id)).toEqual(["section_1"]);
     expect(getReadersOfSection(graph, "section_2").map((node) => node.id)).toEqual(["step_1"]);
     expect(getCheckTargets(graph, "gate_1").map((node) => node.id)).toEqual(["packet_1", "section_2"]);
+  });
+
+  it("indexes whole-document reads and preserves authored read order", () => {
+    const graph = requireGraph({
+      id: "index_document_reads",
+      name: "Index Document Reads",
+      roles: [{ id: "role_1", name: "Role 1", purpose: "Read the runtime doctrine honestly." }],
+      surfaces: [
+        { id: "surface_1", surfaceClass: "shared_entrypoint", runtimePath: "paperclip_home/project_homes/lessons/shared/README.md" }
+      ],
+      surfaceSections: [
+        { id: "section_1", surfaceId: "surface_1", stableSlug: "read-order", title: "Read Order" }
+      ],
+      links: [
+        {
+          id: "role_reads_surface",
+          kind: "reads",
+          from: "role_1",
+          to: "surface_1",
+          condition: "When you need the shared owner map.",
+          context: "Read the whole shared entrypoint before packet-specific docs."
+        },
+        { id: "role_reads_section", kind: "reads", from: "role_1", to: "section_1" }
+      ]
+    });
+
+    expect(graph.indexes.readTargetIdsByReaderId.role_1).toEqual(["surface_1", "section_1"]);
+    expect(graph.indexes.readSurfaceIdsByReaderId.role_1).toEqual(["surface_1"]);
+    expect(graph.indexes.readSectionIdsByReaderId.role_1).toEqual(["section_1"]);
+    expect(graph.indexes.readerIdsByReadTargetId.surface_1).toEqual(["role_1"]);
+    expect(graph.indexes.readerIdsBySurfaceId.surface_1).toEqual(["role_1"]);
+
+    expect(getReadTargets(graph, "role_1").map((node) => node.id)).toEqual(["surface_1", "section_1"]);
+    expect(getReadSurfaces(graph, "role_1").map((node) => node.id)).toEqual(["surface_1"]);
+    expect(getReadersOfSurface(graph, "surface_1").map((node) => node.id)).toEqual(["role_1"]);
+  });
+
+  it("indexes nested surface-section hierarchy while preserving authored order", () => {
+    const graph = requireGraph({
+      id: "index_nested_sections",
+      name: "Index Nested Sections",
+      surfaces: [{ id: "surface_1", surfaceClass: "shared_entrypoint", runtimePath: "paperclip_home/project_homes/lessons/shared/README.md" }],
+      surfaceSections: [
+        { id: "terms", surfaceId: "surface_1", stableSlug: "terms", title: "Terms" },
+        { id: "workflow_items", surfaceId: "surface_1", stableSlug: "workflow-items", title: "Workflow Items", parentSectionId: "terms" },
+        { id: "poker_items", surfaceId: "surface_1", stableSlug: "poker-items", title: "PokerSkill Lessons Items", parentSectionId: "terms" },
+        { id: "lesson_root", surfaceId: "surface_1", stableSlug: "lesson-root", title: "Lesson Root", parentSectionId: "poker_items" }
+      ]
+    });
+
+    expect(graph.indexes.surfaceSectionIdsBySurfaceId.surface_1).toEqual(["terms", "workflow_items", "poker_items", "lesson_root"]);
+    expect(graph.indexes.rootSectionIdsBySurfaceId.surface_1).toEqual(["terms"]);
+    expect(graph.indexes.childSectionIdsBySectionId.terms).toEqual(["workflow_items", "poker_items"]);
+    expect(graph.indexes.childSectionIdsBySectionId.poker_items).toEqual(["lesson_root"]);
+    expect(graph.indexes.parentSectionIdBySectionId.workflow_items).toBe("terms");
+    expect(graph.indexes.parentSectionIdBySectionId.lesson_root).toBe("poker_items");
   });
 });

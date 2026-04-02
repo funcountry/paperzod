@@ -75,56 +75,62 @@ const lessonsFullSeed = defineSetup({
     { id: "quality_bar_standard_artifact", name: "Quality Bar Standard", artifactClass: "reference" }
   ],
   surfaces: [
-    { id: "dossier_role_home", surfaceClass: "role_home", runtimePath: "project_homes/lessons/roles/section_dossier_engineer/AGENTS.md" },
-    { id: "lesson_architect_home", surfaceClass: "role_home", runtimePath: "project_homes/lessons/roles/lessons_lesson_architect/AGENTS.md" },
-    { id: "lessons_readme", surfaceClass: "shared_entrypoint", runtimePath: "project_homes/lessons/shared/README.md" },
+    {
+      id: "lessons_project_home_root",
+      surfaceClass: "project_home_root",
+      runtimePath: "paperclip_home/project_homes/lessons/README.md"
+    },
+    { id: "dossier_role_home", surfaceClass: "role_home", runtimePath: "paperclip_home/agents/section_dossier_engineer/AGENTS.md" },
+    { id: "lesson_architect_home", surfaceClass: "role_home", runtimePath: "paperclip_home/agents/lessons_lesson_architect/AGENTS.md" },
+    { id: "lessons_readme", surfaceClass: "shared_entrypoint", runtimePath: "paperclip_home/project_homes/lessons/shared/README.md" },
     {
       id: "authoritative_workflow",
       surfaceClass: "workflow_owner",
-      runtimePath: "project_homes/lessons/shared/AUTHORITATIVE_LESSONS_WORKFLOW.md"
+      runtimePath: "paperclip_home/project_homes/lessons/shared/AUTHORITATIVE_LESSONS_WORKFLOW.md"
     },
     {
       id: "section_dossier_workflow",
       surfaceClass: "packet_workflow",
-      runtimePath: "project_homes/lessons/shared/proof_packets/SECTION_DOSSIER_ENGINEER_WORKFLOW.md"
+      runtimePath: "paperclip_home/project_homes/lessons/shared/proof_packets/SECTION_DOSSIER_ENGINEER_WORKFLOW.md"
     },
     {
       id: "lesson_architect_workflow",
       surfaceClass: "packet_workflow",
-      runtimePath: "project_homes/lessons/shared/proof_packets/LESSONS_LESSON_ARCHITECT_WORKFLOW.md"
+      runtimePath: "paperclip_home/project_homes/lessons/shared/proof_packets/LESSONS_LESSON_ARCHITECT_WORKFLOW.md"
     },
     {
       id: "packet_shapes_standard",
       surfaceClass: "standard",
-      runtimePath: "project_homes/lessons/shared/lessons_content_standards/LESSONS_PACKET_SHAPES.md"
+      runtimePath: "paperclip_home/project_homes/lessons/shared/lessons_content_standards/LESSONS_PACKET_SHAPES.md"
     },
     {
       id: "quality_bar_standard",
       surfaceClass: "standard",
-      runtimePath: "project_homes/lessons/shared/lessons_content_standards/LESSONS_QUALITY_BAR.md"
+      runtimePath: "paperclip_home/project_homes/lessons/shared/lessons_content_standards/LESSONS_QUALITY_BAR.md"
     },
     {
       id: "acceptance_critic_gate_surface",
       surfaceClass: "gate",
-      runtimePath: "project_homes/lessons/shared/lessons_content_standards/LESSONS_ACCEPTANCE_CRITIC_CRITERIA.md"
+      runtimePath: "paperclip_home/project_homes/lessons/shared/lessons_content_standards/LESSONS_ACCEPTANCE_CRITIC_CRITERIA.md"
     },
     {
       id: "poker_kb_surface",
       surfaceClass: "technical_reference",
-      runtimePath: "project_homes/lessons/shared/technical_references/POKER_KB.md"
+      runtimePath: "paperclip_home/project_homes/lessons/shared/technical_references/POKER_KB.md"
     },
     {
       id: "github_protocol_surface",
       surfaceClass: "how_to",
-      runtimePath: "project_homes/lessons/shared/how_to_guides/LESSONS_GITHUB_ACCESS_PROTOCOL.md"
+      runtimePath: "paperclip_home/project_homes/lessons/shared/how_to_guides/LESSONS_GITHUB_ACCESS_PROTOCOL.md"
     },
     {
       id: "mobile_bootstrap_surface",
       surfaceClass: "coordination",
-      runtimePath: "project_homes/lessons/shared/agent_coordination/LESSONS_PSMOBILE_BOOTSTRAP.md"
+      runtimePath: "paperclip_home/project_homes/lessons/shared/agent_coordination/LESSONS_PSMOBILE_BOOTSTRAP.md"
     }
   ],
   surfaceSections: [
+    { id: "project_home_map", surfaceId: "lessons_project_home_root", stableSlug: "project-home-map", title: "Project Home Map" },
     { id: "dossier_read_first", surfaceId: "dossier_role_home", stableSlug: "read-first", title: "Read First" },
     { id: "dossier_role_contract", surfaceId: "dossier_role_home", stableSlug: "role-contract", title: "Role Contract" },
     { id: "lesson_architect_read_first", surfaceId: "lesson_architect_home", stableSlug: "read-first", title: "Read First" },
@@ -179,120 +185,127 @@ const lessonsFullSeed = defineSetup({
       id: "poker_kb_reference",
       referenceClass: "runtime_reference",
       name: "Poker KB",
-      sourcePath: "project_homes/lessons/shared/technical_references/POKER_KB.md"
+      sourcePath: "paperclip_home/project_homes/lessons/shared/technical_references/POKER_KB.md"
     },
     {
       id: "github_access_reference",
       referenceClass: "support_reference",
       name: "Lessons GitHub Access Protocol",
-      sourcePath: "project_homes/lessons/shared/how_to_guides/LESSONS_GITHUB_ACCESS_PROTOCOL.md"
+      sourcePath: "paperclip_home/project_homes/lessons/shared/how_to_guides/LESSONS_GITHUB_ACCESS_PROTOCOL.md"
     },
     {
       id: "mobile_bootstrap_reference",
       referenceClass: "support_reference",
       name: "Lessons PSMobile Bootstrap",
-      sourcePath: "project_homes/lessons/shared/agent_coordination/LESSONS_PSMOBILE_BOOTSTRAP.md"
+      sourcePath: "paperclip_home/project_homes/lessons/shared/agent_coordination/LESSONS_PSMOBILE_BOOTSTRAP.md"
     }
   ],
   generatedTargets: [
     {
+      id: "lessons_project_home_root_target",
+      path: "paperclip_home/project_homes/lessons/README.md",
+      sourceIds: ["section_dossier_step"],
+      sectionId: "project_home_map"
+    },
+    {
       id: "dossier_role_home_read_first_target",
-      path: "project_homes/lessons/roles/section_dossier_engineer/AGENTS.md",
+      path: "paperclip_home/agents/section_dossier_engineer/AGENTS.md",
       sourceIds: ["section_dossier_engineer"],
       sectionId: "dossier_read_first"
     },
     {
       id: "dossier_role_home_role_contract_target",
-      path: "project_homes/lessons/roles/section_dossier_engineer/AGENTS.md",
+      path: "paperclip_home/agents/section_dossier_engineer/AGENTS.md",
       sourceIds: ["section_dossier_engineer"],
       sectionId: "dossier_role_contract"
     },
     {
       id: "lesson_architect_home_read_first_target",
-      path: "project_homes/lessons/roles/lessons_lesson_architect/AGENTS.md",
+      path: "paperclip_home/agents/lessons_lesson_architect/AGENTS.md",
       sourceIds: ["lessons_lesson_architect"],
       sectionId: "lesson_architect_read_first"
     },
     {
       id: "lesson_architect_home_role_contract_target",
-      path: "project_homes/lessons/roles/lessons_lesson_architect/AGENTS.md",
+      path: "paperclip_home/agents/lessons_lesson_architect/AGENTS.md",
       sourceIds: ["lessons_lesson_architect"],
       sectionId: "lesson_architect_role_contract"
     },
     {
       id: "lessons_readme_target",
-      path: "project_homes/lessons/shared/README.md",
+      path: "paperclip_home/project_homes/lessons/shared/README.md",
       sourceIds: ["section_dossier_step"],
       sectionId: "shared_read_order"
     },
     {
       id: "authoritative_workflow_owner_map_target",
-      path: "project_homes/lessons/shared/AUTHORITATIVE_LESSONS_WORKFLOW.md",
+      path: "paperclip_home/project_homes/lessons/shared/AUTHORITATIVE_LESSONS_WORKFLOW.md",
       sourceIds: ["lesson_architect_step"],
       sectionId: "workflow_owner_map"
     },
     {
       id: "authoritative_workflow_comment_shape_target",
-      path: "project_homes/lessons/shared/AUTHORITATIVE_LESSONS_WORKFLOW.md",
+      path: "paperclip_home/project_homes/lessons/shared/AUTHORITATIVE_LESSONS_WORKFLOW.md",
       sourceIds: ["comment_shape_contract"],
       sectionId: "workflow_comment_shape"
     },
     {
       id: "authoritative_workflow_specialist_turn_shape_target",
-      path: "project_homes/lessons/shared/AUTHORITATIVE_LESSONS_WORKFLOW.md",
+      path: "paperclip_home/project_homes/lessons/shared/AUTHORITATIVE_LESSONS_WORKFLOW.md",
       sourceIds: ["specialist_turn_shape_contract"],
       sectionId: "workflow_specialist_turn_shape"
     },
     {
       id: "section_dossier_workflow_target",
-      path: "project_homes/lessons/shared/proof_packets/SECTION_DOSSIER_ENGINEER_WORKFLOW.md",
+      path: "paperclip_home/project_homes/lessons/shared/proof_packets/SECTION_DOSSIER_ENGINEER_WORKFLOW.md",
       sourceIds: ["section_dossier_step"],
       sectionId: "section_dossier_lane_contract"
     },
     {
       id: "lesson_architect_workflow_target",
-      path: "project_homes/lessons/shared/proof_packets/LESSONS_LESSON_ARCHITECT_WORKFLOW.md",
+      path: "paperclip_home/project_homes/lessons/shared/proof_packets/LESSONS_LESSON_ARCHITECT_WORKFLOW.md",
       sourceIds: ["lesson_architect_step"],
       sectionId: "lesson_architect_lane_contract"
     },
     {
       id: "packet_shapes_standard_target",
-      path: "project_homes/lessons/shared/lessons_content_standards/LESSONS_PACKET_SHAPES.md",
+      path: "paperclip_home/project_homes/lessons/shared/lessons_content_standards/LESSONS_PACKET_SHAPES.md",
       sourceIds: ["packet_shape_standard_artifact"],
       sectionId: "packet_shape_section"
     },
     {
       id: "quality_bar_standard_target",
-      path: "project_homes/lessons/shared/lessons_content_standards/LESSONS_QUALITY_BAR.md",
+      path: "paperclip_home/project_homes/lessons/shared/lessons_content_standards/LESSONS_QUALITY_BAR.md",
       sourceIds: ["quality_bar_standard_artifact"],
       sectionId: "quality_bar_section"
     },
     {
       id: "acceptance_critic_gate_target",
-      path: "project_homes/lessons/shared/lessons_content_standards/LESSONS_ACCEPTANCE_CRITIC_CRITERIA.md",
+      path: "paperclip_home/project_homes/lessons/shared/lessons_content_standards/LESSONS_ACCEPTANCE_CRITIC_CRITERIA.md",
       sourceIds: ["lessons_acceptance_critic_gate"],
       sectionId: "gate_what_critic_judges"
     },
     {
       id: "poker_kb_surface_target",
-      path: "project_homes/lessons/shared/technical_references/POKER_KB.md",
+      path: "paperclip_home/project_homes/lessons/shared/technical_references/POKER_KB.md",
       sourceIds: ["poker_kb_reference"],
       sectionId: "poker_kb_section"
     },
     {
       id: "github_protocol_surface_target",
-      path: "project_homes/lessons/shared/how_to_guides/LESSONS_GITHUB_ACCESS_PROTOCOL.md",
+      path: "paperclip_home/project_homes/lessons/shared/how_to_guides/LESSONS_GITHUB_ACCESS_PROTOCOL.md",
       sourceIds: ["github_access_reference"],
       sectionId: "github_protocol_section"
     },
     {
       id: "mobile_bootstrap_surface_target",
-      path: "project_homes/lessons/shared/agent_coordination/LESSONS_PSMOBILE_BOOTSTRAP.md",
+      path: "paperclip_home/project_homes/lessons/shared/agent_coordination/LESSONS_PSMOBILE_BOOTSTRAP.md",
       sourceIds: ["mobile_bootstrap_reference"],
       sectionId: "mobile_bootstrap_section"
     }
   ],
   links: [
+    { id: "project_home_root_documents_step", kind: "documents", from: "project_home_map", to: "section_dossier_step" },
     { id: "dossier_home_documents_role", kind: "documents", from: "dossier_role_home", to: "section_dossier_engineer" },
     { id: "dossier_read_first_documents_role", kind: "documents", from: "dossier_read_first", to: "section_dossier_engineer" },
     { id: "dossier_role_contract_documents_role", kind: "documents", from: "dossier_role_contract", to: "section_dossier_engineer" },

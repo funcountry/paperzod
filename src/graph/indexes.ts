@@ -1,11 +1,18 @@
 import type { DoctrineGraph, DoctrineGraphIndexes } from "../core/graph.js";
 import type { DoctrineNodeDef, LinkDef, SetupDef } from "../core/index.js";
 
-function addToIndex(index: Record<string, string[]>, key: string, value: string): void {
+function addToIndex(
+  index: Record<string, string[]>,
+  key: string,
+  value: string,
+  options?: { preserveOrder?: boolean | undefined }
+): void {
   const values = index[key] ?? [];
   if (!values.includes(value)) {
     values.push(value);
-    values.sort();
+    if (!options?.preserveOrder) {
+      values.sort();
+    }
   }
   index[key] = values;
 }
@@ -16,6 +23,14 @@ function buildNodeById(nodes: readonly DoctrineNodeDef[]): Record<string, Doctri
 
 function isArtifactNode(node: DoctrineNodeDef | undefined): node is Extract<DoctrineNodeDef, { kind: "artifact" }> {
   return node?.kind === "artifact";
+}
+
+function isSurfaceNode(node: DoctrineNodeDef | undefined): node is Extract<DoctrineNodeDef, { kind: "surface" }> {
+  return node?.kind === "surface";
+}
+
+function isSurfaceSectionNode(node: DoctrineNodeDef | undefined): node is Extract<DoctrineNodeDef, { kind: "surface_section" }> {
+  return node?.kind === "surface_section";
 }
 
 export function buildGraphIndexes(setup: SetupDef, links: readonly LinkDef[]): DoctrineGraphIndexes {
@@ -37,8 +52,12 @@ export function buildGraphIndexes(setup: SetupDef, links: readonly LinkDef[]): D
     workflowStepIdsByRoleId: {},
     ownerIdsByNodeId: {},
     ownedNodeIdsByOwnerId: {},
+    readTargetIdsByReaderId: {},
+    readerIdsByReadTargetId: {},
     readSectionIdsByReaderId: {},
     readerIdsBySectionId: {},
+    readSurfaceIdsByReaderId: {},
+    readerIdsBySurfaceId: {},
     producerIdsByArtifactId: {},
     consumerIdsByArtifactId: {},
     supporterIdsByArtifactId: {},
@@ -48,7 +67,10 @@ export function buildGraphIndexes(setup: SetupDef, links: readonly LinkDef[]): D
     routeTargetIdsByNodeId: {},
     routeSourceIdsByNodeId: {},
     surfaceSectionIdsBySurfaceId: {},
+    rootSectionIdsBySurfaceId: {},
+    childSectionIdsBySectionId: {},
     surfaceIdBySectionId: {},
+    parentSectionIdBySectionId: {},
     documentedByNodeId: {},
     groundingReferenceIdsByNodeId: {},
     referenceIdsByNodeId: {},
@@ -100,8 +122,14 @@ export function buildGraphIndexes(setup: SetupDef, links: readonly LinkDef[]): D
   }
 
   for (const section of setup.surfaceSections) {
-    addToIndex(indexes.surfaceSectionIdsBySurfaceId, section.surfaceId, section.id);
+    addToIndex(indexes.surfaceSectionIdsBySurfaceId, section.surfaceId, section.id, { preserveOrder: true });
     indexes.surfaceIdBySectionId[section.id] = section.surfaceId;
+    if (section.parentSectionId) {
+      addToIndex(indexes.childSectionIdsBySectionId, section.parentSectionId, section.id, { preserveOrder: true });
+      indexes.parentSectionIdBySectionId[section.id] = section.parentSectionId;
+    } else {
+      addToIndex(indexes.rootSectionIdsBySurfaceId, section.surfaceId, section.id, { preserveOrder: true });
+    }
   }
 
   for (const target of setup.generatedTargets) {
@@ -118,8 +146,16 @@ export function buildGraphIndexes(setup: SetupDef, links: readonly LinkDef[]): D
         addToIndex(indexes.ownedNodeIdsByOwnerId, link.from, link.to);
         break;
       case "reads":
-        addToIndex(indexes.readSectionIdsByReaderId, link.from, link.to);
-        addToIndex(indexes.readerIdsBySectionId, link.to, link.from);
+        addToIndex(indexes.readTargetIdsByReaderId, link.from, link.to, { preserveOrder: true });
+        addToIndex(indexes.readerIdsByReadTargetId, link.to, link.from, { preserveOrder: true });
+        if (isSurfaceSectionNode(nodeById[link.to])) {
+          addToIndex(indexes.readSectionIdsByReaderId, link.from, link.to, { preserveOrder: true });
+          addToIndex(indexes.readerIdsBySectionId, link.to, link.from, { preserveOrder: true });
+        }
+        if (isSurfaceNode(nodeById[link.to])) {
+          addToIndex(indexes.readSurfaceIdsByReaderId, link.from, link.to, { preserveOrder: true });
+          addToIndex(indexes.readerIdsBySurfaceId, link.to, link.from, { preserveOrder: true });
+        }
         break;
       case "produces":
         if (isArtifactNode(nodeById[link.to])) {
@@ -176,10 +212,14 @@ export function summarizeGraphIndexes(graph: DoctrineGraph): Record<string, unkn
     nodeCount: graph.nodes.length,
     linkCount: graph.links.length,
     roleIdByWorkflowStepId: graph.indexes.roleIdByWorkflowStepId,
+    readTargetIdsByReaderId: graph.indexes.readTargetIdsByReaderId,
     readSectionIdsByReaderId: graph.indexes.readSectionIdsByReaderId,
+    readSurfaceIdsByReaderId: graph.indexes.readSurfaceIdsByReaderId,
     producerIdsByArtifactId: graph.indexes.producerIdsByArtifactId,
     checkerIdsByNodeId: graph.indexes.checkerIdsByNodeId,
     routeTargetIdsByNodeId: graph.indexes.routeTargetIdsByNodeId,
-    surfaceSectionIdsBySurfaceId: graph.indexes.surfaceSectionIdsBySurfaceId
+    surfaceSectionIdsBySurfaceId: graph.indexes.surfaceSectionIdsBySurfaceId,
+    rootSectionIdsBySurfaceId: graph.indexes.rootSectionIdsBySurfaceId,
+    childSectionIdsBySectionId: graph.indexes.childSectionIdsBySectionId
   };
 }

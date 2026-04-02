@@ -32,36 +32,93 @@ describe("extended surface renderers", () => {
     const rendered = renderAll({
       id: "render_extended",
       name: "Render Extended",
-      reviewGates: [{ id: "gate_1", name: "Gate 1", purpose: "Check the packet.", checkIds: ["artifact_1"] }],
-      artifacts: [{ id: "artifact_1", name: "Artifact 1", artifactClass: "required", runtimePath: "generated/ARTIFACT.md" }],
+      reviewGates: [{ id: "gate_1", name: "Lessons Acceptance Critic", purpose: "Check the packet.", checkIds: ["artifact_1"] }],
+      artifacts: [{ id: "artifact_1", name: "Packet Shape Standard", artifactClass: "reference" }],
       references: [
         {
           id: "ref_1",
           referenceClass: "runtime_reference",
           name: "Poker KB",
-          sourcePath: "technical_references/POKER_KB.md"
+          sourcePath: "paperclip_home/project_homes/lessons/shared/technical_references/POKER_KB.md"
+        },
+        {
+          id: "ref_2",
+          referenceClass: "support_reference",
+          name: "Lessons GitHub Access Protocol",
+          sourcePath: "paperclip_home/project_homes/lessons/shared/how_to_guides/LESSONS_GITHUB_ACCESS_PROTOCOL.md"
+        },
+        {
+          id: "ref_3",
+          referenceClass: "support_reference",
+          name: "Lessons PSMobile Bootstrap",
+          sourcePath: "paperclip_home/project_homes/lessons/shared/agent_coordination/LESSONS_PSMOBILE_BOOTSTRAP.md"
         }
       ],
       surfaces: [
-        { id: "standard_surface", surfaceClass: "standard", runtimePath: "generated/STANDARD.md" },
-        { id: "gate_surface", surfaceClass: "gate", runtimePath: "generated/GATE.md" },
-        { id: "reference_surface", surfaceClass: "technical_reference", runtimePath: "generated/REFERENCE.md" },
-        { id: "how_to_surface", surfaceClass: "how_to", runtimePath: "generated/HOW_TO.md" },
-        { id: "coordination_surface", surfaceClass: "coordination", runtimePath: "generated/COORDINATION.md" }
+        {
+          id: "standard_surface",
+          surfaceClass: "standard",
+          runtimePath: "paperclip_home/project_homes/lessons/shared/lessons_content_standards/LESSONS_PACKET_SHAPES.md"
+        },
+        {
+          id: "gate_surface",
+          surfaceClass: "gate",
+          runtimePath: "paperclip_home/project_homes/lessons/shared/lessons_content_standards/LESSONS_ACCEPTANCE_CRITIC_CRITERIA.md"
+        },
+        {
+          id: "reference_surface",
+          surfaceClass: "technical_reference",
+          runtimePath: "paperclip_home/project_homes/lessons/shared/technical_references/POKER_KB.md"
+        },
+        {
+          id: "how_to_surface",
+          surfaceClass: "how_to",
+          runtimePath: "paperclip_home/project_homes/lessons/shared/how_to_guides/LESSONS_GITHUB_ACCESS_PROTOCOL.md"
+        },
+        {
+          id: "coordination_surface",
+          surfaceClass: "coordination",
+          runtimePath: "paperclip_home/project_homes/lessons/shared/agent_coordination/LESSONS_PSMOBILE_BOOTSTRAP.md"
+        }
       ],
       surfaceSections: [
-        { id: "standard_section", surfaceId: "standard_surface", stableSlug: "rule", title: "Rule" },
-        { id: "gate_section", surfaceId: "gate_surface", stableSlug: "criteria", title: "Criteria" },
-        { id: "reference_section", surfaceId: "reference_surface", stableSlug: "source", title: "Source" },
-        { id: "how_to_section", surfaceId: "how_to_surface", stableSlug: "steps", title: "Steps" },
-        { id: "coordination_section", surfaceId: "coordination_surface", stableSlug: "handoff", title: "Handoff" }
+        { id: "standard_section", surfaceId: "standard_surface", stableSlug: "packet-shape", title: "Packet Shape" },
+        { id: "gate_section", surfaceId: "gate_surface", stableSlug: "what-the-critic-judges", title: "What the critic judges" },
+        { id: "reference_section", surfaceId: "reference_surface", stableSlug: "poker-kb", title: "Poker KB" },
+        { id: "how_to_section", surfaceId: "how_to_surface", stableSlug: "github-access", title: "GitHub Access" },
+        { id: "coordination_section", surfaceId: "coordination_surface", stableSlug: "bootstrap", title: "Bootstrap" }
       ],
       generatedTargets: [
-        { id: "target_standard", path: "generated/STANDARD.md", sourceIds: ["artifact_1"], sectionId: "standard_section" },
-        { id: "target_gate", path: "generated/GATE.md", sourceIds: ["gate_1"], sectionId: "gate_section" },
-        { id: "target_reference", path: "generated/REFERENCE.md", sourceIds: ["ref_1"], sectionId: "reference_section" },
-        { id: "target_how_to", path: "generated/HOW_TO.md", sourceIds: ["artifact_1"], sectionId: "how_to_section" },
-        { id: "target_coordination", path: "generated/COORDINATION.md", sourceIds: ["artifact_1"], sectionId: "coordination_section" }
+        {
+          id: "target_standard",
+          path: "paperclip_home/project_homes/lessons/shared/lessons_content_standards/LESSONS_PACKET_SHAPES.md",
+          sourceIds: ["artifact_1"],
+          sectionId: "standard_section"
+        },
+        {
+          id: "target_gate",
+          path: "paperclip_home/project_homes/lessons/shared/lessons_content_standards/LESSONS_ACCEPTANCE_CRITIC_CRITERIA.md",
+          sourceIds: ["gate_1"],
+          sectionId: "gate_section"
+        },
+        {
+          id: "target_reference",
+          path: "paperclip_home/project_homes/lessons/shared/technical_references/POKER_KB.md",
+          sourceIds: ["ref_1"],
+          sectionId: "reference_section"
+        },
+        {
+          id: "target_how_to",
+          path: "paperclip_home/project_homes/lessons/shared/how_to_guides/LESSONS_GITHUB_ACCESS_PROTOCOL.md",
+          sourceIds: ["ref_2"],
+          sectionId: "how_to_section"
+        },
+        {
+          id: "target_coordination",
+          path: "paperclip_home/project_homes/lessons/shared/agent_coordination/LESSONS_PSMOBILE_BOOTSTRAP.md",
+          sourceIds: ["ref_3"],
+          sectionId: "coordination_section"
+        }
       ],
       links: [
         { id: "documents_standard", kind: "documents", from: "standard_section", to: "artifact_1" },
@@ -69,75 +126,81 @@ describe("extended surface renderers", () => {
         { id: "documents_gate_section", kind: "documents", from: "gate_section", to: "gate_1" },
         { id: "documents_reference", kind: "documents", from: "reference_surface", to: "ref_1" },
         { id: "documents_reference_section", kind: "documents", from: "reference_section", to: "ref_1" },
-        { id: "documents_how_to", kind: "documents", from: "how_to_section", to: "artifact_1" },
-        { id: "documents_coordination", kind: "documents", from: "coordination_section", to: "artifact_1" }
+        { id: "documents_how_to", kind: "documents", from: "how_to_section", to: "ref_2" },
+        { id: "documents_coordination", kind: "documents", from: "coordination_section", to: "ref_3" }
       ]
     });
 
+    for (const markdown of Object.values(rendered)) {
+      expect(markdown).not.toContain("Artifact class:");
+      expect(markdown).not.toContain("Reference class:");
+      expect(markdown).not.toContain("Conceptual only:");
+      expect(markdown).not.toContain("Compatibility only:");
+    }
+
     expect(rendered).toMatchInlineSnapshot(`
       {
-        "coordination_surface": "# Coordination
+        "coordination_surface": "# Lessons PSMobile Bootstrap
 
-      This coordination document records shared execution expectations.
+      This file owns attached-checkout startup and runtime handling.
 
-      <a id="handoff"></a>
-      ## Handoff
+      <a id="bootstrap"></a>
+      ## Bootstrap
 
-      Artifact class: required.
+      Use this guide when the current task depends on \`Lessons PSMobile Bootstrap\`.
 
-      - Runtime path: generated/ARTIFACT.md
-      - Conceptual only: no
-      - Compatibility only: no
+      - Coordination source: \`paperclip_home/project_homes/lessons/shared/agent_coordination/LESSONS_PSMOBILE_BOOTSTRAP.md\`.
       ",
-        "gate_surface": "# Gate: Gate 1
+        "gate_surface": "# Lessons Acceptance Critic Criteria
 
-      This gate document records review and acceptance checks.
+      This file owns what Lessons Acceptance Critic checks before work moves on.
 
-      <a id="criteria"></a>
-      ## Criteria
+      Use it with the governing workflow and quality-bar surfaces for this gate.
+
+      <a id="what-the-critic-judges"></a>
+      ## What the critic judges
 
       Check the packet.
 
-      - Checks: artifact_1
-      - Reads: none
+      - Checks that must pass: Packet Shape Standard
+      - Read before acting: none
       ",
-        "how_to_surface": "# How To
+        "how_to_surface": "# Lessons GitHub Access Protocol
 
-      This how-to document explains a repeatable operational procedure.
+      This file is the shared GitHub access guide for the Lessons project.
 
-      <a id="steps"></a>
-      ## Steps
+      <a id="github-access"></a>
+      ## GitHub Access
 
-      Artifact class: required.
+      Use this guide when the current task depends on \`Lessons GitHub Access Protocol\`.
 
-      - Runtime path: generated/ARTIFACT.md
-      - Conceptual only: no
-      - Compatibility only: no
+      - Procedure source: \`paperclip_home/project_homes/lessons/shared/how_to_guides/LESSONS_GITHUB_ACCESS_PROTOCOL.md\`.
       ",
-        "reference_surface": "# Technical Reference: Poker KB
+        "reference_surface": "# Poker KB
 
-      This technical reference captures support material that shapes implementation.
+      This file owns the Lessons-local PokerKB runner path, URL routing, query discipline, and example commands.
 
-      <a id="source"></a>
-      ## Source
+      Use it when the current task needs repo-owned PokerKB runner or query discipline guidance.
 
-      Reference class: runtime_reference.
+      <a id="poker-kb"></a>
+      ## Poker KB
 
-      - Source path: technical_references/POKER_KB.md
-      - URL: none
+      Use this section when the current task needs the local PokerKB runner or query-discipline guidance.
+
+      - Reference source: \`paperclip_home/project_homes/lessons/shared/technical_references/POKER_KB.md\`.
       ",
-        "standard_surface": "# Standard
+        "standard_surface": "# Lessons Packet Shapes
 
-      This standard document records reusable doctrine rules.
+      This file owns the packet families used to start Lessons work.
 
-      <a id="rule"></a>
-      ## Rule
+      Use it to answer one question: what packet shape should I create for this job?
 
-      Artifact class: required.
+      <a id="packet-shape"></a>
+      ## Packet Shape
 
-      - Runtime path: generated/ARTIFACT.md
-      - Conceptual only: no
-      - Compatibility only: no
+      Use this section when the current job needs the canonical packet-shape rule.
+
+      - Current standard source: \`Packet Shape Standard\`.
       ",
       }
     `);

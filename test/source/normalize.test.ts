@@ -247,4 +247,234 @@ describe("setup normalization", () => {
 
     expect(normalizeSetup(builderSetup)).toEqual(normalizeSetup(plainSetup));
   });
+
+  it("preserves authored surface preambles and section bodies", () => {
+    const result = normalizeSetup({
+      id: "authored_content",
+      name: "Authored Content",
+      surfaces: [
+        {
+          id: "surface_1",
+          surfaceClass: "project_home_root",
+          runtimePath: "paperclip_home/project_homes/lessons/README.md",
+          preamble: [
+            { kind: "paragraph", text: "This project home maps the runtime doctrine surface." },
+            {
+              kind: "rule_list",
+              items: [
+                "Start at the shared README.",
+                { text: "Do not treat tools docs as runtime owners.", children: ["Do not route runtime law through tools/README.md."] }
+              ]
+            },
+            {
+              kind: "definition_list",
+              items: [
+                {
+                  term: "packet",
+                  definitions: ["The current handoff bundle.", "Only trust what the current owner proved."]
+                }
+              ]
+            },
+            {
+              kind: "table",
+              headers: ["Owner", "Primary doc"],
+              rows: [["Lessons Project Lead", "AUTHORITATIVE_LESSONS_WORKFLOW.md"]]
+            },
+            {
+              kind: "example",
+              title: "Example compile command",
+              blocks: [{ kind: "code_block", code: "paperzod compile setups/lessons/setup.ts", language: "sh" }]
+            },
+            {
+              kind: "good_bad_examples",
+              good: [
+                {
+                  title: "Good routing move",
+                  blocks: [{ kind: "paragraph", text: "Open the shared owner before packet-specific doctrine." }]
+                }
+              ],
+              bad: [
+                {
+                  title: "Bad routing move",
+                  blocks: [{ kind: "paragraph", text: "Jump straight into critic doctrine by habit." }]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      surfaceSections: [
+        {
+          id: "section_1",
+          surfaceId: "surface_1",
+          stableSlug: "project-home-map",
+          title: "Project Home Map",
+          body: [
+            { kind: "paragraph", text: "Read the shared entrypoint before lane-specific docs." },
+            {
+              kind: "ordered_steps",
+              items: ["Open README.", { text: "Open AUTHORITATIVE workflow.", children: ["Then open only the named owner."] }]
+            },
+            { kind: "code_block", code: "paperzod compile setups/lessons/setup.ts", language: "sh" }
+          ]
+        }
+      ],
+      roles: [{ id: "role_1", name: "Role 1", purpose: "Read the project doctrine honestly." }],
+      links: [
+        {
+          id: "role_reads_project_home",
+          kind: "reads",
+          from: "role_1",
+          to: "surface_1",
+          condition: "When you need the shared owner map.",
+          context: "Read the whole project-home root before deeper shared docs."
+        }
+      ]
+    });
+
+    expect(result.success).toBe(true);
+    if (!result.success) {
+      return;
+    }
+
+    expect(result.data.surfaces).toEqual([
+      {
+        kind: "surface",
+        id: "surface_1",
+        setupId: "authored_content",
+        surfaceClass: "project_home_root",
+        runtimePath: "paperclip_home/project_homes/lessons/README.md",
+        preamble: [
+          { kind: "paragraph", text: "This project home maps the runtime doctrine surface." },
+          {
+            kind: "rule_list",
+            items: [
+              "Start at the shared README.",
+              { text: "Do not treat tools docs as runtime owners.", children: ["Do not route runtime law through tools/README.md."] }
+            ]
+          },
+          {
+            kind: "definition_list",
+            items: [
+              {
+                term: "packet",
+                definitions: ["The current handoff bundle.", "Only trust what the current owner proved."]
+              }
+            ]
+          },
+          {
+            kind: "table",
+            headers: ["Owner", "Primary doc"],
+            rows: [["Lessons Project Lead", "AUTHORITATIVE_LESSONS_WORKFLOW.md"]]
+          },
+          {
+            kind: "example",
+            title: "Example compile command",
+            blocks: [{ kind: "code_block", code: "paperzod compile setups/lessons/setup.ts", language: "sh" }]
+          },
+          {
+            kind: "good_bad_examples",
+            good: [
+              {
+                title: "Good routing move",
+                blocks: [{ kind: "paragraph", text: "Open the shared owner before packet-specific doctrine." }]
+              }
+            ],
+            bad: [
+              {
+                title: "Bad routing move",
+                blocks: [{ kind: "paragraph", text: "Jump straight into critic doctrine by habit." }]
+              }
+            ]
+          }
+        ]
+      }
+    ]);
+    expect(result.data.surfaceSections).toEqual([
+      {
+        kind: "surface_section",
+        id: "section_1",
+        setupId: "authored_content",
+        surfaceId: "surface_1",
+        stableSlug: "project-home-map",
+        title: "Project Home Map",
+        body: [
+          { kind: "paragraph", text: "Read the shared entrypoint before lane-specific docs." },
+          {
+            kind: "ordered_steps",
+            items: ["Open README.", { text: "Open AUTHORITATIVE workflow.", children: ["Then open only the named owner."] }]
+          },
+          { kind: "code_block", code: "paperzod compile setups/lessons/setup.ts", language: "sh" }
+        ]
+      }
+    ]);
+    expect(result.data.links).toEqual([
+      {
+        id: "role_reads_project_home",
+        setupId: "authored_content",
+        kind: "reads",
+        from: "role_1",
+        to: "surface_1",
+        condition: "When you need the shared owner map.",
+        context: "Read the whole project-home root before deeper shared docs."
+      }
+    ]);
+  });
+
+  it("preserves authored subsection hierarchy on nested surface sections", () => {
+    const result = normalizeSetup({
+      id: "hierarchical_sections",
+      name: "Hierarchical Sections",
+      surfaces: [{ id: "surface_1", surfaceClass: "shared_entrypoint", runtimePath: "paperclip_home/project_homes/lessons/shared/README.md" }],
+      surfaceSections: [
+        { id: "terms", surfaceId: "surface_1", stableSlug: "terms", title: "Terms" },
+        { id: "workflow_items", surfaceId: "surface_1", stableSlug: "workflow-items", title: "Workflow Items", parentSectionId: "terms" },
+        { id: "poker_items", surfaceId: "surface_1", stableSlug: "poker-items", title: "PokerSkill Lessons Items", parentSectionId: "terms" },
+        { id: "lesson_root", surfaceId: "surface_1", stableSlug: "lesson-root", title: "Lesson Root", parentSectionId: "poker_items" }
+      ]
+    });
+
+    expect(result.success).toBe(true);
+    if (!result.success) {
+      return;
+    }
+
+    expect(result.data.surfaceSections).toEqual([
+      {
+        kind: "surface_section",
+        id: "terms",
+        setupId: "hierarchical_sections",
+        surfaceId: "surface_1",
+        stableSlug: "terms",
+        title: "Terms"
+      },
+      {
+        kind: "surface_section",
+        id: "workflow_items",
+        setupId: "hierarchical_sections",
+        surfaceId: "surface_1",
+        stableSlug: "workflow-items",
+        title: "Workflow Items",
+        parentSectionId: "terms"
+      },
+      {
+        kind: "surface_section",
+        id: "poker_items",
+        setupId: "hierarchical_sections",
+        surfaceId: "surface_1",
+        stableSlug: "poker-items",
+        title: "PokerSkill Lessons Items",
+        parentSectionId: "terms"
+      },
+      {
+        kind: "surface_section",
+        id: "lesson_root",
+        setupId: "hierarchical_sections",
+        surfaceId: "surface_1",
+        stableSlug: "lesson-root",
+        title: "Lesson Root",
+        parentSectionId: "poker_items"
+      }
+    ]);
+  });
 });

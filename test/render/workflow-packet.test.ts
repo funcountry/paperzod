@@ -53,32 +53,50 @@ describe("workflow and packet renderers", () => {
           { id: "draft_notes", name: "Draft Notes", artifactClass: "support", conceptualOnly: true },
           { id: "packet_v1", name: "PACKET_V1.md", artifactClass: "required" }
         ],
-        surfaces: [{ id: "workflow_surface", surfaceClass: "workflow_owner", runtimePath: "generated/WORKFLOW.md" }],
-        surfaceSections: [{ id: "lane_order", surfaceId: "workflow_surface", stableSlug: "lane-order", title: "Lane Order" }],
-        generatedTargets: [{ id: "target_1", path: "generated/WORKFLOW.md", sourceIds: ["draft_packet"], sectionId: "lane_order" }],
+        surfaces: [
+          {
+            id: "workflow_surface",
+            surfaceClass: "workflow_owner",
+            runtimePath: "paperclip_home/project_homes/lessons/shared/AUTHORITATIVE_LESSONS_WORKFLOW.md"
+          }
+        ],
+        surfaceSections: [{ id: "lane_order", surfaceId: "workflow_surface", stableSlug: "owner-map", title: "Owner Map" }],
+        generatedTargets: [
+          {
+            id: "target_1",
+            path: "paperclip_home/project_homes/lessons/shared/AUTHORITATIVE_LESSONS_WORKFLOW.md",
+            sourceIds: ["draft_packet"],
+            sectionId: "lane_order"
+          }
+        ],
         links: [{ id: "documents_step", kind: "documents", from: "lane_order", to: "draft_packet" }]
       },
       "workflow_surface"
     );
 
     expect(markdown).toMatchInlineSnapshot(`
-      "# Workflow Owner
+      "# Lessons Workflow
 
-      This workflow owner document describes the operational turn order and stop lines.
+      This is the top-level workflow for Lessons.
 
-      <a id="lane-order"></a>
-      ## Lane Order
+      Use this file for lane order, same-issue handoff, and owner routing.
 
-      Draft the first packet.
+      <a id="owner-map"></a>
+      ## Owner Map
 
-      - Role: author
-      - Reads: none
+      Use this section to understand the represented workflow order for the current setup.
+
+      1. Author: Draft the first packet.
+
+      This section currently documents the Author lane.
+
+      - Read before acting: none
       - Required inputs: none
-      - Support inputs: notes
-      - Interim artifacts: draft_notes
-      - Required outputs: packet_v1
+      - Support inputs: Notes
+      - Interim artifacts: Draft Notes
+      - Outputs the next owner may trust: PACKET_V1.md
       - Stop line: Stop once the packet is ready for review.
-      - Next gate: gate_1
+      - Hand off to gate: Gate 1
       "
     `);
   });
@@ -88,7 +106,24 @@ describe("workflow and packet renderers", () => {
       {
         id: "render_packet",
         name: "Render Packet",
+        roles: [{ id: "author", name: "Author", purpose: "Draft the packet." }],
+        workflowSteps: [
+          {
+            id: "draft_packet",
+            roleId: "author",
+            purpose: "Draft the first packet.",
+            requiredInputIds: [],
+            supportInputIds: ["notes"],
+            interimArtifactIds: ["draft_notes"],
+            requiredOutputIds: ["packet_v1"],
+            stopLine: "Stop once the packet is ready for review.",
+            nextGateId: "gate_1"
+          }
+        ],
+        reviewGates: [{ id: "gate_1", name: "Gate 1", purpose: "Check the packet.", checkIds: ["packet_v1"] }],
         artifacts: [
+          { id: "notes", name: "Notes", artifactClass: "support" },
+          { id: "draft_notes", name: "Draft Notes", artifactClass: "support", conceptualOnly: true },
           { id: "packet_v1", name: "PACKET_V1.md", artifactClass: "required" },
           { id: "packet_runtime", name: "PACKET_RUNTIME.md", artifactClass: "legacy", runtimePath: "generated/PACKET.md", compatibilityOnly: true }
         ],
@@ -101,29 +136,42 @@ describe("workflow and packet renderers", () => {
           }
         ],
         surfaces: [{ id: "packet_surface", surfaceClass: "packet_workflow", runtimePath: "generated/PACKET_WORKFLOW.md" }],
-        surfaceSections: [{ id: "packet_shape", surfaceId: "packet_surface", stableSlug: "packet-shape", title: "Packet Shape" }],
-        generatedTargets: [{ id: "target_1", path: "generated/PACKET_WORKFLOW.md", sourceIds: ["packet_contract"], sectionId: "packet_shape" }],
+        surfaceSections: [
+          { id: "packet_shape", surfaceId: "packet_surface", stableSlug: "what-this-lane-must-do", title: "What This Lane Must Do" }
+        ],
+        generatedTargets: [
+          { id: "target_1", path: "generated/PACKET_WORKFLOW.md", sourceIds: ["packet_contract"], sectionId: "packet_shape" }
+        ],
         links: [
           { id: "documents_surface_contract", kind: "documents", from: "packet_surface", to: "packet_contract" },
-          { id: "documents_section_contract", kind: "documents", from: "packet_shape", to: "packet_contract" }
+          { id: "documents_section_step", kind: "documents", from: "packet_shape", to: "draft_packet" }
         ]
       },
       "packet_surface"
     );
 
     expect(markdown).toMatchInlineSnapshot(`
-      "# Packet Workflow: Packet Contract
+      "# Author Workflow
 
-      This packet workflow document describes the trusted packet contract.
+      This file defines the shared workflow for the Author lane.
 
-      <a id="packet-shape"></a>
-      ## Packet Shape
+      It does not define handoff mechanics, the shared packet file rules, or critic verdicts.
 
-      Packet contract for Packet Contract.
+      <a id="what-this-lane-must-do"></a>
+      ## What This Lane Must Do
 
-      - Reads: none
-      - Conceptual artifacts: packet_v1
-      - Runtime artifacts: packet_runtime
+      Use this section as the lane contract for the \`Packet Contract\` packet.
+
+      Draft the first packet.
+
+      - Current owner: Author
+      - Read before acting: none
+      - Required inputs: none
+      - Support inputs: Notes
+      - Interim artifacts: Draft Notes
+      - Outputs the next owner may trust: PACKET_V1.md
+      - Stop line: Stop once the packet is ready for review.
+      - Hand off to gate: Gate 1
       "
     `);
   });

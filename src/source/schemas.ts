@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import type { AuthoredDefinitionListItem, AuthoredListEntry } from "../core/defs.js";
 import type { Diagnostic } from "../core/diagnostics.js";
 import { createDiagnostic } from "../core/diagnostics.js";
 import type {
@@ -19,6 +20,77 @@ import type {
 const idSchema = z.string().min(1);
 const nonEmptyStringSchema = z.string().min(1);
 const sectionSlugSchema = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
+const listEntrySchema: z.ZodType<AuthoredListEntry> = z.lazy(() =>
+  z.union([
+    nonEmptyStringSchema,
+    z.object({
+      text: nonEmptyStringSchema,
+      children: z.array(listEntrySchema).min(1).optional()
+    })
+  ])
+);
+const definitionListItemSchema = z.object({
+  term: nonEmptyStringSchema,
+  definitions: z.array(listEntrySchema).min(1)
+}) satisfies z.ZodType<AuthoredDefinitionListItem>;
+const tableBlockSchema = z
+  .object({
+    kind: z.literal("table"),
+    headers: z.array(nonEmptyStringSchema).min(1),
+    rows: z.array(z.array(nonEmptyStringSchema).min(1)).min(1)
+  })
+  .refine((value) => value.rows.every((row) => row.length === value.headers.length), {
+    message: "Each table row must match the header column count."
+  });
+const simpleContentBlockSchema = z.union([
+  z.object({
+    kind: z.literal("paragraph"),
+    text: nonEmptyStringSchema
+  }),
+  z.object({
+    kind: z.literal("unordered_list"),
+    items: z.array(listEntrySchema).min(1)
+  }),
+  z.object({
+    kind: z.literal("ordered_list"),
+    items: z.array(listEntrySchema).min(1)
+  }),
+  z.object({
+    kind: z.literal("ordered_steps"),
+    items: z.array(listEntrySchema).min(1)
+  }),
+  z.object({
+    kind: z.literal("rule_list"),
+    items: z.array(listEntrySchema).min(1)
+  }),
+  z.object({
+    kind: z.literal("definition_list"),
+    items: z.array(definitionListItemSchema).min(1)
+  }),
+  tableBlockSchema,
+  z.object({
+    kind: z.literal("code_block"),
+    code: nonEmptyStringSchema,
+    language: nonEmptyStringSchema.optional()
+  })
+]);
+const exampleCaseSchema = z.object({
+  title: nonEmptyStringSchema.optional(),
+  blocks: z.array(simpleContentBlockSchema).min(1)
+});
+const contentBlockSchema = z.union([
+  simpleContentBlockSchema,
+  z.object({
+    kind: z.literal("example"),
+    title: nonEmptyStringSchema.optional(),
+    blocks: z.array(simpleContentBlockSchema).min(1)
+  }),
+  z.object({
+    kind: z.literal("good_bad_examples"),
+    good: z.array(exampleCaseSchema).min(1),
+    bad: z.array(exampleCaseSchema).min(1)
+  })
+]);
 
 export const roleSchema = z.object({
   id: idSchema,
@@ -71,6 +143,7 @@ export const surfaceSchema = z.object({
   id: idSchema,
   surfaceClass: z.enum([
     "role_home",
+    "project_home_root",
     "shared_entrypoint",
     "workflow_owner",
     "packet_workflow",
@@ -80,14 +153,19 @@ export const surfaceSchema = z.object({
     "how_to",
     "coordination"
   ]),
-  runtimePath: nonEmptyStringSchema
+  runtimePath: nonEmptyStringSchema,
+  preamble: z.array(contentBlockSchema).optional()
 }) satisfies z.ZodType<SurfaceInput>;
 
 export const surfaceSectionSchema = z.object({
   id: idSchema,
   surfaceId: idSchema,
   stableSlug: sectionSlugSchema,
-  title: nonEmptyStringSchema
+  title: nonEmptyStringSchema,
+  parentSectionId: idSchema.optional(),
+  body: z.array(contentBlockSchema).optional()
+}).refine((value) => value.parentSectionId !== value.id, {
+  message: "A surface section may not parent itself."
 }) satisfies z.ZodType<SurfaceSectionInput>;
 
 export const referenceSchema = z.object({
@@ -111,25 +189,40 @@ export const generatedTargetSchema = z.object({
   sectionId: idSchema.optional()
 }) satisfies z.ZodType<GeneratedTargetInput>;
 
-export const linkSchema = z.object({
-  id: idSchema,
-  kind: z.enum([
-    "owns",
-    "reads",
-    "produces",
-    "consumes",
-    "supports",
-    "checks",
-    "routes_to",
-    "documents",
-    "grounds",
-    "references",
-    "maps_to_runtime",
-    "generated_from"
-  ]),
-  from: idSchema,
-  to: idSchema
-}) satisfies z.ZodType<LinkInput>;
+function basicLinkSchema<const TKind extends Exclude<LinkInput["kind"], "reads">>(kind: TKind) {
+  return z
+    .object({
+      id: idSchema,
+      kind: z.literal(kind),
+      from: idSchema,
+      to: idSchema
+    })
+    .strict();
+}
+
+export const linkSchema = z.union([
+  z
+    .object({
+      id: idSchema,
+      kind: z.literal("reads"),
+      from: idSchema,
+      to: idSchema,
+      condition: nonEmptyStringSchema.optional(),
+      context: nonEmptyStringSchema.optional()
+    })
+    .strict(),
+  basicLinkSchema("owns"),
+  basicLinkSchema("produces"),
+  basicLinkSchema("consumes"),
+  basicLinkSchema("supports"),
+  basicLinkSchema("checks"),
+  basicLinkSchema("routes_to"),
+  basicLinkSchema("documents"),
+  basicLinkSchema("grounds"),
+  basicLinkSchema("references"),
+  basicLinkSchema("maps_to_runtime"),
+  basicLinkSchema("generated_from")
+]) satisfies z.ZodType<LinkInput>;
 
 export const setupSchema = z.object({
   id: idSchema,

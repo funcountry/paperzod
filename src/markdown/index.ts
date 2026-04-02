@@ -18,6 +18,7 @@ function renderDocumentAst(graph: DoctrineGraph, plan: CompilePlan, document: Pl
   switch (document.surfaceClass) {
     case "role_home":
       return renderRoleHomeDocument(graph, plan, document);
+    case "project_home_root":
     case "shared_entrypoint":
       return renderSharedEntrypointDocument(graph, plan, document);
     case "workflow_owner":

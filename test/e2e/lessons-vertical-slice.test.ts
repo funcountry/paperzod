@@ -74,11 +74,11 @@ describe("lessons_vertical_slice e2e", () => {
         "manifest": {
           "adapterName": "paperclip_markdown",
           "documentPaths": {
-            "acceptance_critic_gate_surface": "/repo/paperclip_agents/project_homes/lessons/shared/lessons_content_standards/LESSONS_ACCEPTANCE_CRITIC_CRITERIA.md",
-            "dossier_role_home": "/repo/paperclip_agents/project_homes/lessons/roles/section_dossier_engineer/AGENTS.md",
-            "lessons_readme": "/repo/paperclip_agents/project_homes/lessons/shared/README.md",
-            "packet_shapes_standard": "/repo/paperclip_agents/project_homes/lessons/shared/lessons_content_standards/LESSONS_PACKET_SHAPES.md",
-            "section_dossier_workflow": "/repo/paperclip_agents/project_homes/lessons/shared/proof_packets/SECTION_DOSSIER_ENGINEER_WORKFLOW.md",
+            "acceptance_critic_gate_surface": "/repo/paperclip_agents/paperclip_home/project_homes/lessons/shared/lessons_content_standards/LESSONS_ACCEPTANCE_CRITIC_CRITERIA.md",
+            "dossier_role_home": "/repo/paperclip_agents/paperclip_home/agents/section_dossier_engineer/AGENTS.md",
+            "lessons_readme": "/repo/paperclip_agents/paperclip_home/project_homes/lessons/shared/README.md",
+            "packet_shapes_standard": "/repo/paperclip_agents/paperclip_home/project_homes/lessons/shared/lessons_content_standards/LESSONS_PACKET_SHAPES.md",
+            "section_dossier_workflow": "/repo/paperclip_agents/paperclip_home/project_homes/lessons/shared/proof_packets/SECTION_DOSSIER_ENGINEER_WORKFLOW.md",
           },
           "outputRoot": "paperclip_agents",
           "repoRoot": "/repo",
@@ -86,128 +86,123 @@ describe("lessons_vertical_slice e2e", () => {
         "rendered": [
           {
             "id": "dossier_role_home",
-            "markdown": "# Role Home: Section Dossier Engineer
+            "markdown": "# Section Dossier Engineer
 
-      This role-home document states the contract for one runtime role.
+      You are the Section Dossier Engineer.
+
+      Your repo-owned role home is \`paperclip_home/agents/section_dossier_engineer/AGENTS.md\`.
 
       <a id="read-first"></a>
       ## Read First
 
-      Own the section dossier lane and produce the section dossier packet.
+      Read these shared doctrine surfaces before taking a turn.
 
-      - Boundary: Do not reteach downstream lesson flow.
-      - Boundary: Do not rename locked section concepts in later lanes.
-      - Reads: standard_comment_shape
+      - Read \`Comment Shape\`.
 
       <a id="role-contract"></a>
       ## Role Contract
 
       Own the section dossier lane and produce the section dossier packet.
 
-      - Boundary: Do not reteach downstream lesson flow.
-      - Boundary: Do not rename locked section concepts in later lanes.
-      - Reads: standard_comment_shape
+      - Do not reteach downstream lesson flow.
+      - Do not rename locked section concepts in later lanes.
       ",
-            "path": "project_homes/lessons/roles/section_dossier_engineer/AGENTS.md",
-          },
-          {
-            "id": "acceptance_critic_gate_surface",
-            "markdown": "# Gate: Lessons Acceptance Critic
-
-      This gate document records review and acceptance checks.
-
-      <a id="what-the-critic-judges"></a>
-      ## What the critic judges
-
-      Judge whether the dossier lane proved the section burden and handed off a trustworthy packet.
-
-      - Checks: section_dossier_packet, workflow_lane_contract
-      - Reads: none
-      ",
-            "path": "project_homes/lessons/shared/lessons_content_standards/LESSONS_ACCEPTANCE_CRITIC_CRITERIA.md",
-          },
-          {
-            "id": "packet_shapes_standard",
-            "markdown": "# Standard
-
-      This standard document records reusable doctrine rules.
-
-      <a id="comment-shape"></a>
-      ## Comment Shape
-
-      Artifact class: reference.
-
-      - Runtime path: none
-      - Conceptual only: no
-      - Compatibility only: no
-
-      <a id="specialist-turn-shape"></a>
-      ## Specialist Turn Shape
-
-      Artifact class: reference.
-
-      - Runtime path: none
-      - Conceptual only: no
-      - Compatibility only: no
-      ",
-            "path": "project_homes/lessons/shared/lessons_content_standards/LESSONS_PACKET_SHAPES.md",
-          },
-          {
-            "id": "section_dossier_workflow",
-            "markdown": "# Packet Workflow: Section Dossier
-
-      This packet workflow document describes the trusted packet contract.
-
-      <a id="what-this-lane-must-do"></a>
-      ## What This Lane Must Do
-
-      Define what the section teaches, what it does not teach, and the evidence behind those calls.
-
-      - Role: section_dossier_engineer
-      - Reads: standard_specialist_turn_shape
-      - Required inputs: none
-      - Support inputs: lessons_simple_clear_ref
-      - Interim artifacts: none
-      - Required outputs: section_dossier_packet
-      - Stop line: Stop once the section dossier packet is coherent enough for the critic to judge.
-      - Next gate: lessons_acceptance_critic_gate
-      ",
-            "path": "project_homes/lessons/shared/proof_packets/SECTION_DOSSIER_ENGINEER_WORKFLOW.md",
+            "path": "paperclip_home/agents/section_dossier_engineer/AGENTS.md",
           },
           {
             "id": "lessons_readme",
-            "markdown": "# Shared Entrypoint
+            "markdown": "# Lessons Shared Doctrine
 
-      This shared entrypoint introduces the setup-wide doctrine surface.
+      This folder is the live shared doctrine home for the Lessons project.
+
+      Start here, then open the one surface that owns your current question.
 
       <a id="read-order"></a>
       ## Read Order
 
       Define what the section teaches, what it does not teach, and the evidence behind those calls.
 
-      - Role: section_dossier_engineer
-      - Reads: standard_specialist_turn_shape
+      - Current owner: Section Dossier Engineer
+      - Read before acting: Specialist Turn Shape
       - Required inputs: none
-      - Support inputs: lessons_simple_clear_ref
+      - Support inputs: Lessons Workflow Simple Clear
       - Interim artifacts: none
-      - Required outputs: section_dossier_packet
+      - Outputs the next owner may trust: SECTION_DOSSIER.md
       - Stop line: Stop once the section dossier packet is coherent enough for the critic to judge.
-      - Next gate: lessons_acceptance_critic_gate
+      - Hand off to gate: Lessons Acceptance Critic
       ",
-            "path": "project_homes/lessons/shared/README.md",
+            "path": "paperclip_home/project_homes/lessons/shared/README.md",
+          },
+          {
+            "id": "section_dossier_workflow",
+            "markdown": "# Section Dossier Engineer Workflow
+
+      This file defines the shared workflow for the Section Dossier Engineer lane.
+
+      It does not define handoff mechanics, the shared packet file rules, or critic verdicts.
+
+      <a id="what-this-lane-must-do"></a>
+      ## What This Lane Must Do
+
+      Use this section as the lane contract for the \`Section Dossier\` packet.
+
+      Define what the section teaches, what it does not teach, and the evidence behind those calls.
+
+      - Current owner: Section Dossier Engineer
+      - Read before acting: Specialist Turn Shape
+      - Required inputs: none
+      - Support inputs: Lessons Workflow Simple Clear
+      - Interim artifacts: none
+      - Outputs the next owner may trust: SECTION_DOSSIER.md
+      - Stop line: Stop once the section dossier packet is coherent enough for the critic to judge.
+      - Hand off to gate: Lessons Acceptance Critic
+      ",
+            "path": "paperclip_home/project_homes/lessons/shared/proof_packets/SECTION_DOSSIER_ENGINEER_WORKFLOW.md",
+          },
+          {
+            "id": "packet_shapes_standard",
+            "markdown": "# Lessons Packet Shapes
+
+      This file owns the packet families used to start Lessons work.
+
+      Use it to answer one question: what packet shape should I create for this job?
+
+      <a id="comment-shape"></a>
+      ## Comment Shape
+
+      Use this section as the shared standard for \`Comment Shape Standard\`.
+
+      - Current standard source: \`Comment Shape Standard\`.
+
+      <a id="specialist-turn-shape"></a>
+      ## Specialist Turn Shape
+
+      Use this section as the shared standard for \`Specialist Turn Shape Standard\`.
+
+      - Current standard source: \`Specialist Turn Shape Standard\`.
+      ",
+            "path": "paperclip_home/project_homes/lessons/shared/lessons_content_standards/LESSONS_PACKET_SHAPES.md",
+          },
+          {
+            "id": "acceptance_critic_gate_surface",
+            "markdown": "# Lessons Acceptance Critic Criteria
+
+      This file owns what Lessons Acceptance Critic checks before work moves on.
+
+      Use it with the governing workflow and quality-bar surfaces for this gate.
+
+      <a id="what-the-critic-judges"></a>
+      ## What the critic judges
+
+      Judge whether the dossier lane proved the section burden and handed off a trustworthy packet.
+
+      - Checks that must pass: SECTION_DOSSIER.md, What This Lane Must Do
+      - Read before acting: none
+      ",
+            "path": "paperclip_home/project_homes/lessons/shared/lessons_content_standards/LESSONS_ACCEPTANCE_CRITIC_CRITERIA.md",
           },
         ],
         "sections": [
-          {
-            "documentId": "acceptance_critic_gate_surface",
-            "id": "gate_what_critic_judges",
-            "sourceIds": [
-              "gate_what_critic_judges",
-              "lessons_acceptance_critic_gate",
-            ],
-            "stableSlug": "what-the-critic-judges",
-            "title": "What the critic judges",
-          },
           {
             "documentId": "dossier_role_home",
             "id": "role_read_first",
@@ -239,6 +234,16 @@ describe("lessons_vertical_slice e2e", () => {
             "title": "Read Order",
           },
           {
+            "documentId": "section_dossier_workflow",
+            "id": "workflow_lane_contract",
+            "sourceIds": [
+              "section_dossier_step",
+              "workflow_lane_contract",
+            ],
+            "stableSlug": "what-this-lane-must-do",
+            "title": "What This Lane Must Do",
+          },
+          {
             "documentId": "packet_shapes_standard",
             "id": "standard_comment_shape",
             "sourceIds": [
@@ -259,14 +264,14 @@ describe("lessons_vertical_slice e2e", () => {
             "title": "Specialist Turn Shape",
           },
           {
-            "documentId": "section_dossier_workflow",
-            "id": "workflow_lane_contract",
+            "documentId": "acceptance_critic_gate_surface",
+            "id": "gate_what_critic_judges",
             "sourceIds": [
-              "section_dossier_step",
-              "workflow_lane_contract",
+              "gate_what_critic_judges",
+              "lessons_acceptance_critic_gate",
             ],
-            "stableSlug": "what-this-lane-must-do",
-            "title": "What This Lane Must Do",
+            "stableSlug": "what-the-critic-judges",
+            "title": "What the critic judges",
           },
         ],
       }
