@@ -1,0 +1,202 @@
+{
+  "version": 1,
+  "scope": {
+    "generated": "paperclip_home/agents/** and paperclip_home/project_homes/lessons/{README.md,shared/**}",
+    "excluded": [
+      "paperclip_home/project_homes/lessons/tools/**",
+      "paperclip_home/project_homes/lessons/plans/**"
+    ]
+  },
+  "documents": [
+    {
+      "order": 1,
+      "relativePath": "paperclip_home/agents/lessons_project_lead/AGENTS.md",
+      "surfaceClass": "role_home"
+    },
+    {
+      "order": 2,
+      "relativePath": "paperclip_home/agents/section_dossier_engineer/AGENTS.md",
+      "surfaceClass": "role_home"
+    },
+    {
+      "order": 3,
+      "relativePath": "paperclip_home/agents/section_concepts_terms_curator/AGENTS.md",
+      "surfaceClass": "role_home"
+    },
+    {
+      "order": 4,
+      "relativePath": "paperclip_home/agents/lessons_section_architect/AGENTS.md",
+      "surfaceClass": "role_home"
+    },
+    {
+      "order": 5,
+      "relativePath": "paperclip_home/agents/lessons_playable_strategist/AGENTS.md",
+      "surfaceClass": "role_home"
+    },
+    {
+      "order": 6,
+      "relativePath": "paperclip_home/agents/lessons_lesson_architect/AGENTS.md",
+      "surfaceClass": "role_home"
+    },
+    {
+      "order": 7,
+      "relativePath": "paperclip_home/agents/lessons_situation_synthesizer/AGENTS.md",
+      "surfaceClass": "role_home"
+    },
+    {
+      "order": 8,
+      "relativePath": "paperclip_home/agents/lessons_playable_materializer/AGENTS.md",
+      "surfaceClass": "role_home"
+    },
+    {
+      "order": 9,
+      "relativePath": "paperclip_home/agents/lessons_copywriter/AGENTS.md",
+      "surfaceClass": "role_home"
+    },
+    {
+      "order": 10,
+      "relativePath": "paperclip_home/agents/lessons_acceptance_critic/AGENTS.md",
+      "surfaceClass": "role_home"
+    },
+    {
+      "order": 11,
+      "relativePath": "paperclip_home/project_homes/lessons/README.md",
+      "surfaceClass": "project_home_root"
+    },
+    {
+      "order": 12,
+      "relativePath": "paperclip_home/project_homes/lessons/shared/README.md",
+      "surfaceClass": "shared_entrypoint"
+    },
+    {
+      "order": 13,
+      "relativePath": "paperclip_home/project_homes/lessons/shared/AUTHORITATIVE_LESSONS_WORKFLOW.md",
+      "surfaceClass": "workflow_owner"
+    },
+    {
+      "order": 14,
+      "relativePath": "paperclip_home/project_homes/lessons/shared/proof_packets/SECTION_DOSSIER_ENGINEER_WORKFLOW.md",
+      "surfaceClass": "packet_workflow"
+    },
+    {
+      "order": 15,
+      "relativePath": "paperclip_home/project_homes/lessons/shared/proof_packets/SECTION_CONCEPTS_TERMS_CURATOR_WORKFLOW.md",
+      "surfaceClass": "packet_workflow"
+    },
+    {
+      "order": 16,
+      "relativePath": "paperclip_home/project_homes/lessons/shared/proof_packets/LESSONS_SECTION_ARCHITECT_WORKFLOW.md",
+      "surfaceClass": "packet_workflow"
+    },
+    {
+      "order": 17,
+      "relativePath": "paperclip_home/project_homes/lessons/shared/proof_packets/LESSONS_PLAYABLE_STRATEGIST_WORKFLOW.md",
+      "surfaceClass": "packet_workflow"
+    },
+    {
+      "order": 18,
+      "relativePath": "paperclip_home/project_homes/lessons/shared/proof_packets/LESSONS_LESSON_ARCHITECT_WORKFLOW.md",
+      "surfaceClass": "packet_workflow"
+    },
+    {
+      "order": 19,
+      "relativePath": "paperclip_home/project_homes/lessons/shared/proof_packets/LESSONS_SITUATION_SYNTHESIZER_WORKFLOW.md",
+      "surfaceClass": "packet_workflow"
+    },
+    {
+      "order": 20,
+      "relativePath": "paperclip_home/project_homes/lessons/shared/proof_packets/LESSONS_PLAYABLE_MATERIALIZER_WORKFLOW.md",
+      "surfaceClass": "packet_workflow"
+    },
+    {
+      "order": 21,
+      "relativePath": "paperclip_home/project_homes/lessons/shared/proof_packets/LESSONS_COPYWRITER_WORKFLOW.md",
+      "surfaceClass": "packet_workflow"
+    },
+    {
+      "order": 22,
+      "relativePath": "paperclip_home/project_homes/lessons/shared/proof_packets/LESSONS_ACCEPTANCE_CRITIC_WORKFLOW.md",
+      "surfaceClass": "packet_workflow"
+    },
+    {
+      "order": 23,
+      "relativePath": "paperclip_home/project_homes/lessons/shared/proof_packets/LESSONS_PUBLISH_AND_FOLLOWTHROUGH_WORKFLOW.md",
+      "surfaceClass": "packet_workflow"
+    },
+    {
+      "order": 24,
+      "relativePath": "paperclip_home/project_homes/lessons/shared/proof_packets/LESSONS_EXISTING_LESSON_MAINTENANCE_WORKFLOW.md",
+      "surfaceClass": "packet_workflow"
+    },
+    {
+      "order": 25,
+      "relativePath": "paperclip_home/project_homes/lessons/shared/lessons_content_standards/LESSONS_PACKET_SHAPES.md",
+      "surfaceClass": "standard"
+    },
+    {
+      "order": 26,
+      "relativePath": "paperclip_home/project_homes/lessons/shared/lessons_content_standards/LESSONS_QUALITY_BAR.md",
+      "surfaceClass": "standard"
+    },
+    {
+      "order": 27,
+      "relativePath": "paperclip_home/project_homes/lessons/shared/lessons_content_standards/LESSONS_ACCEPTANCE_CRITIC_CRITERIA.md",
+      "surfaceClass": "gate"
+    },
+    {
+      "order": 28,
+      "relativePath": "paperclip_home/project_homes/lessons/shared/lessons_content_standards/LESSONS_POKER_GROUNDING_RULES.md",
+      "surfaceClass": "standard"
+    },
+    {
+      "order": 29,
+      "relativePath": "paperclip_home/project_homes/lessons/shared/lessons_content_standards/LESSON_COPY_STANDARDS.md",
+      "surfaceClass": "standard"
+    },
+    {
+      "order": 30,
+      "relativePath": "paperclip_home/project_homes/lessons/shared/lessons_content_standards/LESSON_RIGHT_MOVE_RULES.md",
+      "surfaceClass": "standard"
+    },
+    {
+      "order": 31,
+      "relativePath": "paperclip_home/project_homes/lessons/shared/technical_references/POKER_KB.md",
+      "surfaceClass": "technical_reference"
+    },
+    {
+      "order": 32,
+      "relativePath": "paperclip_home/project_homes/lessons/shared/technical_references/AGENT_RUNTIME_REFERENCE_MAP.md",
+      "surfaceClass": "technical_reference"
+    },
+    {
+      "order": 33,
+      "relativePath": "paperclip_home/project_homes/lessons/shared/technical_references/LESSONS_DOCTRINE_OWNERSHIP_MAP.md",
+      "surfaceClass": "technical_reference"
+    },
+    {
+      "order": 34,
+      "relativePath": "paperclip_home/project_homes/lessons/shared/technical_references/LESSONS_TOOL_REFERENCE.md",
+      "surfaceClass": "technical_reference"
+    },
+    {
+      "order": 35,
+      "relativePath": "paperclip_home/project_homes/lessons/shared/technical_references/LESSON_STEP_ROUTE_GUIDE.md",
+      "surfaceClass": "technical_reference"
+    },
+    {
+      "order": 36,
+      "relativePath": "paperclip_home/project_homes/lessons/shared/how_to_guides/LESSONS_GITHUB_ACCESS_PROTOCOL.md",
+      "surfaceClass": "how_to"
+    },
+    {
+      "order": 37,
+      "relativePath": "paperclip_home/project_homes/lessons/shared/how_to_guides/LESSONS_STAGING_QR_PROTOCOL.md",
+      "surfaceClass": "how_to"
+    },
+    {
+      "order": 38,
+      "relativePath": "paperclip_home/project_homes/lessons/shared/agent_coordination/LESSONS_PSMOBILE_BOOTSTRAP.md",
+      "surfaceClass": "coordination"
+    }
+  ]
+}

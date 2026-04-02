@@ -1,0 +1,52 @@
+# AGENTS.md
+
+## First Run
+
+- `npm install`
+- `npm run typecheck`
+- `npm run test:types`
+- `npm run build`
+- Use `npx vitest run <path>` for the smallest honest test pass on the area you changed.
+- Run `npm test` before claiming broad verification. If unrelated failures already exist, say that plainly and do not hide them with snapshot churn.
+
+## Definition Of Done
+
+- Run the smallest honest verification set for the files you changed.
+- If you changed TypeScript in the compiler, graph, planner, target, or renderer layers, run `npm run typecheck`, `npm run build`, and the relevant `npx vitest run ...` suites.
+- If you changed render output, fixtures, snapshots, or goldens, run the matching render or e2e tests and read the output diff before updating snapshots.
+- If you changed docs only, tests are optional. Say what you did and did not run.
+
+## Red Lines
+
+- Do not edit `vendor/zod/**` unless the task is explicitly about the vendored reference checkout.
+- Do not special-purpose public docs, APIs, or examples to Lessons. Treat Lessons fixtures and goldens as one proving case for a generic compiler.
+- Do not update snapshots or `test/goldens/lessons-live/**` just to force green tests. Read the rendered change first and explain why the output contract changed.
+- Treat `docs/ref/**` as grounding input and reference material, not generated output.
+- Do not claim the repo is green unless you actually ran the relevant commands.
+
+## Blocked State
+
+- Stop and ask when the right behavior depends on a product decision that is not settled in the repo yet.
+- If a change introduces or reshapes a public doctrine surface, read the docs map first and align code, tests, and docs in the same change.
+- If the task is authoring or tightening repo instruction files, use `$agents-md-authoring`.
+
+## Writing
+
+- Write for a human reader first.
+- Use plain English.
+- Lead with the concrete thing: what changed, what to run, what happens next.
+- Avoid house jargon, compressed labels, and schema-sounding prose.
+
+## Docs Map
+
+- `docs/ref/GENERIC_DOCTRINE_SYSTEM_PLAIN_EXAMPLE.md`: the smallest plain-English explanation of the product shape.
+- `docs/impl2.md`: one high-fidelity proving plan, not the product boundary.
+- `docs/requirements.md`: product contract and boundaries.
+- `docs/schema.md`: source language and node model.
+- `docs/architecture.md`: compiler layers and pipeline shape.
+- `docs/testing.md`: proof standard and release gate.
+
+## Test Truth Surfaces
+
+- `test/fixtures/source/**`: authored proving fixtures.
+- `test/goldens/lessons-live/**`: one frozen parity corpus for a proving case.
