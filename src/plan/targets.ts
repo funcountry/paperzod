@@ -2,6 +2,7 @@ import path from "node:path/posix";
 
 import { createDiagnostic, sortDiagnostics } from "../core/diagnostics.js";
 import type { CompilePlan, Diagnostic, PlannedDocument, SurfaceClass } from "../core/index.js";
+import type { OwnedOutputScopeInput } from "../source/module.js";
 
 export interface TargetAdapter {
   name: string;
@@ -16,7 +17,10 @@ export interface TargetManifest {
   repoRoot: string;
   outputRoot: string;
   documentPaths: Record<string, string>;
+  ownedScopes: ResolvedOwnedOutputScope[];
 }
+
+export type ResolvedOwnedOutputScope = { kind: "root"; absolutePath: string } | { kind: "file"; absolutePath: string };
 
 export type TargetManifestResult =
   | { success: true; data: TargetManifest }
@@ -101,10 +105,51 @@ export function createPaperclipMarkdownTarget(options: Omit<TargetAdapterOptions
   });
 }
 
-export function resolveTargetManifest(plan: CompilePlan, adapter: TargetAdapter): TargetManifestResult {
+function isOwnedOutputScopeInput(value: unknown): value is OwnedOutputScopeInput {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "kind" in value &&
+    (value.kind === "root" || value.kind === "file") &&
+    "path" in value &&
+    typeof value.path === "string"
+  );
+}
+
+function resolveOwnedScope(adapter: TargetAdapter, scope: OwnedOutputScopeInput): ResolvedOwnedOutputScope {
+  return {
+    kind: scope.kind,
+    absolutePath: path.resolve(adapter.repoRoot, adapter.outputRoot, scope.path)
+  };
+}
+
+function scopesOverlap(left: ResolvedOwnedOutputScope, right: ResolvedOwnedOutputScope): boolean {
+  if (left.kind === "file" && right.kind === "file") {
+    return left.absolutePath === right.absolutePath;
+  }
+
+  if (left.kind === "root" && right.kind === "root") {
+    return (
+      left.absolutePath === right.absolutePath ||
+      left.absolutePath.startsWith(`${right.absolutePath}/`) ||
+      right.absolutePath.startsWith(`${left.absolutePath}/`)
+    );
+  }
+
+  const root = left.kind === "root" ? left : right;
+  const file = left.kind === "file" ? left : right;
+  return file.absolutePath === root.absolutePath || file.absolutePath.startsWith(`${root.absolutePath}/`);
+}
+
+export function resolveTargetManifest(
+  plan: CompilePlan,
+  adapter: TargetAdapter,
+  ownedOutputScopes: readonly OwnedOutputScopeInput[] = []
+): TargetManifestResult {
   const diagnostics: Diagnostic[] = [];
   const documentPaths: Record<string, string> = {};
   const documentIdByResolvedPath: Record<string, string> = {};
+  const resolvedOwnedScopes: ResolvedOwnedOutputScope[] = [];
 
   for (const document of plan.documents) {
     if (!isWithinOutputRoot(adapter.repoRoot, adapter.outputRoot, document.path)) {
@@ -138,6 +183,56 @@ export function resolveTargetManifest(plan: CompilePlan, adapter: TargetAdapter)
     documentPaths[document.id] = resolvedPath;
   }
 
+  ownedOutputScopes.forEach((scope, index) => {
+    if (!isOwnedOutputScopeInput(scope)) {
+      diagnostics.push(
+        createTargetDiagnostic({
+          code: "plan.target_owned_scope_invalid",
+          message: `Owned output scope at index ${index} must include kind "root" or "file" and a relative path string.`
+        })
+      );
+      return;
+    }
+
+    if (!isWithinOutputRoot(adapter.repoRoot, adapter.outputRoot, scope.path)) {
+      diagnostics.push(
+        createTargetDiagnostic({
+          code: "plan.target_owned_scope_out_of_scope",
+          message: `Owned output scope "${scope.path}" resolves outside the configured output root.`
+        })
+      );
+      return;
+    }
+
+    resolvedOwnedScopes.push(resolveOwnedScope(adapter, scope));
+  });
+
+  const sortedOwnedScopes = [...resolvedOwnedScopes].sort((left, right) =>
+    `${left.kind}\u0000${left.absolutePath}`.localeCompare(`${right.kind}\u0000${right.absolutePath}`)
+  );
+
+  for (let index = 0; index < sortedOwnedScopes.length; index += 1) {
+    const current = sortedOwnedScopes[index];
+    if (!current) {
+      continue;
+    }
+
+    for (let compareIndex = index + 1; compareIndex < sortedOwnedScopes.length; compareIndex += 1) {
+      const other = sortedOwnedScopes[compareIndex];
+      if (!other || !scopesOverlap(current, other)) {
+        continue;
+      }
+
+      diagnostics.push(
+        createTargetDiagnostic({
+          code: "plan.target_owned_scope_overlap",
+          message: `Owned output scopes "${current.absolutePath}" and "${other.absolutePath}" overlap.`,
+          relatedIds: [current.absolutePath, other.absolutePath]
+        })
+      );
+    }
+  }
+
   const sortedDiagnostics = sortDiagnostics(diagnostics);
   if (sortedDiagnostics.length > 0) {
     return { success: false, diagnostics: sortedDiagnostics };
@@ -149,7 +244,8 @@ export function resolveTargetManifest(plan: CompilePlan, adapter: TargetAdapter)
       adapterName: adapter.name,
       repoRoot: adapter.repoRoot,
       outputRoot: adapter.outputRoot,
-      documentPaths
+      documentPaths,
+      ownedScopes: sortedOwnedScopes
     }
   };
 }

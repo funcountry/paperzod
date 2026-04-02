@@ -10,7 +10,7 @@ function formatUsage(): string {
   return [
     "Usage:",
     "  paperzod validate <setup-path>",
-    "  paperzod compile <setup-path> [--repo-root <path>] [--output-root <path>] [--target generic|paperclip] [--write]",
+    "  paperzod compile <setup-path> [--repo-root <path>] [--output-root <path>] [--target generic|paperclip] [--write] [--prune]",
     "  paperzod doctor <setup-path>"
   ].join("\n");
 }
@@ -46,6 +46,20 @@ export function analyzeSetupInput(input: unknown): AnalyzeResult {
   return renderSetup(input);
 }
 
+export function extractSetupId(input: unknown): string {
+  if (typeof input === "object" && input !== null) {
+    if ("id" in input && typeof input.id === "string") {
+      return input.id;
+    }
+
+    if ("setup" in input && typeof input.setup === "object" && input.setup !== null && "id" in input.setup && typeof input.setup.id === "string") {
+      return input.setup.id;
+    }
+  }
+
+  return "unknown_setup";
+}
+
 export function createAdapterFromArgs(args: string[]): TargetAdapter {
   const repoRoot = readFlag(args, "--repo-root") ?? process.cwd();
   const outputRoot = readFlag(args, "--output-root") ?? ".";
@@ -75,6 +89,9 @@ export function formatDiagnostic(diagnostic: Diagnostic): string {
   const lines = [`[${diagnostic.phase}] ${diagnostic.code}`, diagnostic.message];
   if (diagnostic.nodeId) {
     lines.push(`Node: ${diagnostic.nodeId}`);
+  }
+  if (diagnostic.path && diagnostic.path.length > 0) {
+    lines.push(`Paths: ${diagnostic.path.join(", ")}`);
   }
   if (diagnostic.relatedIds && diagnostic.relatedIds.length > 0) {
     lines.push(`Related: ${diagnostic.relatedIds.join(", ")}`);

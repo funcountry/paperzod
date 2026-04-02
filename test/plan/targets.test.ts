@@ -74,4 +74,79 @@ describe("target adapter abstraction", () => {
 
     expect(result.diagnostics.map((diagnostic) => diagnostic.code)).toEqual(["plan.target_path_out_of_scope"]);
   });
+
+  it("resolves declared owned output scopes under the configured output root", () => {
+    const plan = requirePlan(demoMinimalSeed);
+    const result = resolveTargetManifest(
+      plan,
+      createTargetAdapter({
+        name: "test",
+        repoRoot: "/repo",
+        outputRoot: "paperclip_home/project_homes/demo"
+      }),
+      [
+        { kind: "root", path: "managed/shared" },
+        { kind: "file", path: "generated/roles/author/AGENTS.md" }
+      ]
+    );
+
+    expect(result.success).toBe(true);
+    if (!result.success) {
+      return;
+    }
+
+    expect(result.data.ownedScopes).toEqual([
+      {
+        kind: "file",
+        absolutePath: "/repo/paperclip_home/project_homes/demo/generated/roles/author/AGENTS.md"
+      },
+      {
+        kind: "root",
+        absolutePath: "/repo/paperclip_home/project_homes/demo/managed/shared"
+      }
+    ]);
+  });
+
+  it("rejects owned output scopes that escape the configured output root", () => {
+    const plan = requirePlan(demoMinimalSeed);
+    const result = resolveTargetManifest(
+      plan,
+      createTargetAdapter({
+        name: "test",
+        repoRoot: "/repo",
+        outputRoot: "paperclip_home/project_homes/demo"
+      }),
+      [{ kind: "root", path: "../outside" }]
+    );
+
+    expect(result.success).toBe(false);
+    if (result.success) {
+      return;
+    }
+
+    expect(result.diagnostics.map((diagnostic) => diagnostic.code)).toEqual(["plan.target_owned_scope_out_of_scope"]);
+  });
+
+  it("rejects overlapping owned output scopes", () => {
+    const plan = requirePlan(demoMinimalSeed);
+    const result = resolveTargetManifest(
+      plan,
+      createTargetAdapter({
+        name: "test",
+        repoRoot: "/repo",
+        outputRoot: "paperclip_home/project_homes/demo"
+      }),
+      [
+        { kind: "root", path: "generated" },
+        { kind: "file", path: "generated/roles/author/AGENTS.md" }
+      ]
+    );
+
+    expect(result.success).toBe(false);
+    if (result.success) {
+      return;
+    }
+
+    expect(result.diagnostics.map((diagnostic) => diagnostic.code)).toEqual(["plan.target_owned_scope_overlap"]);
+  });
 });

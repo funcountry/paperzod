@@ -16,11 +16,12 @@ import type { TargetAdapter, TargetManifest } from "./plan/index.js";
 import { buildGraph } from "./graph/index.js";
 import { renderDocuments, type RenderedDocument } from "./markdown/index.js";
 import { buildCompilePlan, resolveTargetManifest } from "./plan/index.js";
-import { normalizeSetup } from "./source/index.js";
+import { normalizeSetup, resolveSetupModuleInput, type ResolvedSetupModuleInput } from "./source/index.js";
 
 export type PipelineResult<T> = { success: true; data: T } | { success: false; diagnostics: Diagnostic[] };
 
 export interface RenderSetupResult {
+  sourceModule: ResolvedSetupModuleInput;
   setup: SetupDef;
   graph: DoctrineGraph;
   plan: CompilePlan;
@@ -39,11 +40,21 @@ export interface CompileAndEmitSetupResult extends CompileSetupResult {
 }
 
 export function validateSetup(input: unknown) {
-  return normalizeSetup(input);
+  const resolved = resolveSetupModuleInput(input);
+  if (!resolved.success) {
+    return resolved;
+  }
+
+  return normalizeSetup(resolved.data.setup);
 }
 
 export function renderSetup(input: unknown): PipelineResult<RenderSetupResult> {
-  const normalized = normalizeSetup(input);
+  const resolved = resolveSetupModuleInput(input);
+  if (!resolved.success) {
+    return resolved;
+  }
+
+  const normalized = normalizeSetup(resolved.data.setup);
   if (!normalized.success) {
     return normalized;
   }
@@ -53,7 +64,7 @@ export function renderSetup(input: unknown): PipelineResult<RenderSetupResult> {
     return graph;
   }
 
-  const diagnostics = runChecks(graph.data);
+  const diagnostics = runChecks(graph.data, resolved.data.checks);
   if (diagnostics.length > 0) {
     return { success: false, diagnostics };
   }
@@ -68,6 +79,7 @@ export function renderSetup(input: unknown): PipelineResult<RenderSetupResult> {
   return {
     success: true,
     data: {
+      sourceModule: resolved.data,
       setup: normalized.data,
       graph: graph.data,
       plan: plan.data,
@@ -85,7 +97,7 @@ export function compileSetup(input: unknown, adapter: TargetAdapter): PipelineRe
     return rendered;
   }
 
-  const manifest = resolveTargetManifest(rendered.data.plan, adapter);
+  const manifest = resolveTargetManifest(rendered.data.plan, adapter, rendered.data.sourceModule.outputOwnership);
   if (!manifest.success) {
     return manifest;
   }
@@ -110,12 +122,15 @@ export async function compileAndEmitSetup(
   }
 
   const emit = await emitDocuments(compiled.data.documents, compiled.data.manifest, options);
+  if (!emit.success) {
+    return emit;
+  }
 
   return {
     success: true,
     data: {
       ...compiled.data,
-      emit
+      emit: emit.data
     }
   };
 }

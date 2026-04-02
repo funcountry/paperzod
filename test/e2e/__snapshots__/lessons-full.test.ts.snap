@@ -48,6 +48,20 @@ exports[`lessons_full e2e > compiles the full Lessons proving fixture with stabl
       "section_dossier_workflow": "/repo/paperclip_agents/paperclip_home/project_homes/lessons/shared/proof_packets/SECTION_DOSSIER_ENGINEER_WORKFLOW.md",
     },
     "outputRoot": "paperclip_agents",
+    "ownedScopes": [
+      {
+        "absolutePath": "/repo/paperclip_agents/paperclip_home/agents/lessons_lesson_architect/AGENTS.md",
+        "kind": "file",
+      },
+      {
+        "absolutePath": "/repo/paperclip_agents/paperclip_home/agents/section_dossier_engineer/AGENTS.md",
+        "kind": "file",
+      },
+      {
+        "absolutePath": "/repo/paperclip_agents/paperclip_home/project_homes/lessons",
+        "kind": "root",
+      },
+    ],
     "repoRoot": "/repo",
   },
   "rendered": {

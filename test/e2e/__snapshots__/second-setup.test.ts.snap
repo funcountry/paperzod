@@ -12,6 +12,16 @@ exports[`second_setup e2e > compiles the same pipeline for a non-Lessons setup 1
       "release_workflow_surface": "/repo/paperclip_agents/paperclip_home/project_homes/core_dev/shared/workflows/AUTHORITATIVE_CORE_DEV_WORKFLOW.md",
     },
     "outputRoot": "paperclip_agents",
+    "ownedScopes": [
+      {
+        "absolutePath": "/repo/paperclip_agents/paperclip_home/agents/coordinator/AGENTS.md",
+        "kind": "file",
+      },
+      {
+        "absolutePath": "/repo/paperclip_agents/paperclip_home/project_homes/core_dev",
+        "kind": "root",
+      },
+    ],
     "repoRoot": "/repo",
   },
   "rendered": {

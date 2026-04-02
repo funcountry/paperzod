@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { compileSetup, createPaperclipMarkdownTarget } from "../../src/index.js";
+import { loadFragments } from "../../src/source/index.js";
 
 function compile(input: unknown) {
   return compileSetup(
@@ -14,6 +15,10 @@ function compile(input: unknown) {
 
 describe("authored doctrine content flow", () => {
   it("renders authored preambles, authored section bodies, and conditional read guidance end to end", () => {
+    const fragments = loadFragments(new URL("../fixtures/fragments/authored-content/", import.meta.url), {
+      ownerMap: "owner_map.md"
+    });
+
     const result = compile({
       id: "authored_content_flow",
       name: "Authored Content Flow",
@@ -41,11 +46,7 @@ describe("authored doctrine content flow", () => {
                 }
               ]
             },
-            {
-              kind: "table",
-              headers: ["Owner", "Primary doc"],
-              rows: [["Lessons Project Lead", "AUTHORITATIVE_LESSONS_WORKFLOW.md"]]
-            }
+            ...fragments.ownerMap
           ]
         },
         {

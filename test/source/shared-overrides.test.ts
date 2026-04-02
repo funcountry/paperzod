@@ -17,7 +17,7 @@ describe("shared overrides normalization", () => {
 
     expect(alpha.data.roles[0]?.purpose).toBe("Reusable role.");
     expect(beta.data.roles[0]?.purpose).toBe("Reusable role with beta-local wording.");
-    expect(beta.data.packetContracts[0]?.runtimeArtifactIds).toEqual(["beta_packet_runtime"]);
+    expect(beta.data.packetContracts[0]?.runtimeArtifactIds).toEqual(["packet_runtime"]);
     expect(beta.data.artifacts[1]?.compatibilityOnly).toBe(true);
     expect(beta.data.artifacts[1]?.runtimePath).toBe("generated/beta/PACKET.md");
   });

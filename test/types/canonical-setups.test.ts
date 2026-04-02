@@ -1,14 +1,16 @@
 import { expectTypeOf, test } from "vitest";
 
-import type { SetupInput, SetupPart } from "../../src/source/index.js";
+import type { SetupInput, SetupModuleDef, SetupPart } from "../../src/source/index.js";
 import { surfaceDocumentParts as coreDevSurfaceDocumentParts } from "../../setups/core_dev/surfaces.ts";
 import { surfaceDocumentParts as lessonsSurfaceDocumentParts } from "../../setups/lessons/surfaces.ts";
 import coreDevSetup from "../../setups/core_dev/index.ts";
 import lessonsSetup from "../../setups/lessons/index.ts";
 
-test("canonical setup modules stay plain SetupInput values", () => {
-  expectTypeOf(lessonsSetup).toMatchTypeOf<SetupInput>();
-  expectTypeOf(coreDevSetup).toMatchTypeOf<SetupInput>();
+test("canonical setup modules keep plain semantic setup truth inside the source envelope", () => {
+  expectTypeOf(lessonsSetup).toMatchTypeOf<SetupModuleDef>();
+  expectTypeOf(coreDevSetup).toMatchTypeOf<SetupModuleDef>();
+  expectTypeOf(lessonsSetup.setup).toMatchTypeOf<SetupInput>();
+  expectTypeOf(coreDevSetup.setup).toMatchTypeOf<SetupInput>();
 });
 
 test("canonical setup packages expose modular helper-backed surface parts", () => {

@@ -72,12 +72,14 @@ changing the product boundary.
 
 ## What A Setup Author Does
 
-The authoring flow has four parts:
+The authoring flow has five parts:
 
 1. Define the base setup facts as plain `SetupInput`.
 2. Add reusable document-shape parts with helper-backed templates.
 3. Load authored markdown fragments for the prose humans should own directly.
-4. Compose those parts back into one plain setup and compile it.
+4. Compose those parts back into one plain setup.
+5. Optionally wrap that setup in `defineSetupModule(...)` when you need
+   setup-local checks or declared output ownership.
 
 That means a setup author does not hand-maintain ten slightly different
 `AGENTS.md` files.
@@ -261,25 +263,66 @@ used by the canonical proving setups:
 
 - `composeSetup(baseSetup, ...parts)` merges helper-produced setup parts back
   into one plain `SetupInput`.
+- `defineSetupModule({ setup, checks, outputOwnership })` wraps a plain setup
+  when you need setup-local rules or compiler-owned prune boundaries.
 - Document-shape helpers now ship for:
   `role_home`, `project_home_root`, `shared_entrypoint`, `workflow_owner`,
   `packet_workflow`, `standard`, `gate`, `technical_reference`, `how_to`, and
   `coordination`.
+- `projectDocumentSections(...)` lowers one shared section catalog into many
+  ordinary document parts without widening the semantic model.
+- `applyKeyedOverrides(...)` gives setup authors an explicit replace-by-id
+  helper while keeping `composeSetup(...)` append-only.
 - `loadFragments(new URL("./fragments/.../", import.meta.url), spec)` loads
   repo-local markdown fragments from an explicit base directory.
 - The fragment loader currently supports paragraphs, nested ordered or
-  unordered lists, and fenced code blocks.
-- Headings, tables, blockquotes, frontmatter, HTML, images, and task lists
-  fail loudly today and should stay TypeScript-authored until the contract
-  expands.
-- `composeSetup(...)` stays append-only. If one setup needs a local override,
-  write that override in ordinary TypeScript instead of expecting a framework
-  patch or deep-merge system.
-- Extra setup-level executable checks are not a shipped hook yet. The
-  framework currently runs only its core generic checks.
+  unordered lists, fenced code blocks, and narrow pipe tables that lower to
+  authored `table` blocks.
+- Headings, blockquotes, frontmatter, HTML, images, and task lists still fail
+  loudly and stay TypeScript-authored.
+- `doctor`, `validate`, and `compile` all run the same merged check set when a
+  setup module declares local rules.
+- Dry-run compile can preview deletes inside declared ownership scopes. Write
+  mode requires `--prune` before those deletes are applied.
 - The canonical proving setups under `setups/lessons/**` and
-  `setups/core_dev/**` are modular local packages assembled by `index.ts`, but
-  they still export plain `SetupInput`.
+  `setups/core_dev/**` are modular local packages assembled by `index.ts` and
+  now use `defineSetupModule(...)` to declare owned output scopes.
+
+## Optional Framework Additions
+
+When a setup needs more than plain append-only composition, the framework
+surface stays explicit:
+
+```ts
+export default defineSetupModule({
+  setup: applyKeyedOverrides(
+    composeSetup(
+      baseSetup,
+      ...projectDocumentSections(roleHomeTemplate, {
+        sections: {
+          readFirst: { sourceIds: ["shared_workflow"] },
+        },
+        destinations: [
+          {
+            surfaceId: "writer_home",
+            runtimePath: "generated/writer/AGENTS.md",
+            roleId: "writer",
+          },
+        ],
+      }),
+    ),
+    {
+      roles: [
+        {
+          id: "writer",
+          replace: (current) => ({ ...current, purpose: "Write the draft with local workflow constraints." }),
+        },
+      ],
+    },
+  ),
+  outputOwnership: [{ kind: "root", path: "paperclip_home/project_homes/editorial" }],
+});
+```
 
 ## What You Compile
 
@@ -288,6 +331,7 @@ For a generic setup:
 ```sh
 paperzod doctor setups/editorial/index.ts
 paperzod compile setups/editorial/index.ts --repo-root . --output-root generated --write
+paperzod compile setups/editorial/index.ts --repo-root . --output-root generated --write --prune
 ```
 
 For a Paperclip runtime tree:

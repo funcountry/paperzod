@@ -1,5 +1,6 @@
 import { writeFile } from "node:fs/promises";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 
 import { beforeAll, describe, expect, it } from "vitest";
 
@@ -44,6 +45,45 @@ describe("cli doctor", () => {
       expect(result.stdout).toContain("[check] check.workflow.missing_role");
       expect(result.stdout).toContain("Fix surface: source role and workflow declarations");
       expect(result.stdout).toContain("Node: step_1");
+    });
+  });
+
+  it("runs setup-local checks through the same doctor pipeline", async () => {
+    await withTempDir(async (dir) => {
+      const fixturePath = path.join(dir, "doctor-setup-module.mjs");
+      const importSpecifier = pathToFileURL(path.join(repoRoot, "dist/index.js")).href;
+      await writeFile(
+        fixturePath,
+        [
+          `import { defineSetupModule } from ${JSON.stringify(importSpecifier)};`,
+          "",
+          "export default defineSetupModule({",
+          "  setup: {",
+          '    id: "doctor_module_case",',
+          '    name: "Doctor Module Case"',
+          "  },",
+          "  checks: [",
+          "    {",
+          '      id: "doctor_local_rule",',
+          "      run: () => [{",
+          '        code: "check.local.doctor_rule",',
+          '        severity: "error",',
+          '        phase: "check",',
+          '        message: "Doctor local rule fired."',
+          "      }]",
+          "    }",
+          "  ]",
+          "});",
+          ""
+        ].join("\n"),
+        "utf8"
+      );
+
+      const result = await runNodeScript(["dist/cli/index.js", "doctor", fixturePath], repoRoot);
+      expect(result.code).toBe(1);
+      expect(result.stdout).toContain("Doctor report for doctor_module_case");
+      expect(result.stdout).toContain("[check] check.local.doctor_rule");
+      expect(result.stdout).toContain("Fix surface: the relevant source declarations");
     });
   });
 });

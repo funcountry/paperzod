@@ -1,6 +1,14 @@
 import { describe, expect, it } from "vitest";
 
-import { buildGraph, compileAndEmitSetup, compileSetup, createTargetAdapter, renderSetup, validateSetup } from "../../src/index.js";
+import {
+  buildGraph,
+  compileAndEmitSetup,
+  compileSetup,
+  createTargetAdapter,
+  defineSetupModule,
+  renderSetup,
+  validateSetup
+} from "../../src/index.js";
 import editorialExample from "../fixtures/source/editorial-example.js";
 import demoMinimalSeed from "../fixtures/source/demo-minimal.js";
 import { withTempDir } from "../helpers/fs.js";
@@ -151,5 +159,36 @@ describe("public library api", () => {
     expect(compiled.data.rendered.documents.find((document) => document.id === "editorial_workflow")?.markdown).toContain(
       "Move one issue from draft to publish in a fixed order."
     );
+  });
+
+  it("accepts setup modules and runs local rules through the public api", () => {
+    const rendered = renderSetup(
+      defineSetupModule({
+        setup: {
+          id: "api_setup_module",
+          name: "API Setup Module"
+        },
+        checks: [
+          {
+            id: "api_local_rule",
+            run: () => [
+              {
+                code: "check.local.api_rule",
+                severity: "error",
+                phase: "check",
+                message: "API local rule fired."
+              }
+            ]
+          }
+        ]
+      })
+    );
+
+    expect(rendered.success).toBe(false);
+    if (rendered.success) {
+      return;
+    }
+
+    expect(rendered.diagnostics.map((diagnostic) => diagnostic.code)).toEqual(["check.local.api_rule"]);
   });
 });

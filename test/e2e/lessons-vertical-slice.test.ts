@@ -81,6 +81,7 @@ describe("lessons_vertical_slice e2e", () => {
             "section_dossier_workflow": "/repo/paperclip_agents/paperclip_home/project_homes/lessons/shared/proof_packets/SECTION_DOSSIER_ENGINEER_WORKFLOW.md",
           },
           "outputRoot": "paperclip_agents",
+          "ownedScopes": [],
           "repoRoot": "/repo",
         },
         "rendered": [

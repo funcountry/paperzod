@@ -15,6 +15,15 @@ function compileLessonsFull() {
   );
 }
 
+function requireEmitSuccess(result: Awaited<ReturnType<typeof emitDocuments>>) {
+  expect(result.success).toBe(true);
+  if (!result.success) {
+    throw new Error(result.diagnostics.map((diagnostic) => diagnostic.code).join(", "));
+  }
+
+  return result.data;
+}
+
 describe("stability and diff locality", () => {
   it("produces byte-identical output on repeated compile", () => {
     const first = compileLessonsFull();
@@ -76,8 +85,8 @@ describe("stability and diff locality", () => {
         return;
       }
 
-      const firstEmit = await emitDocuments(compiled.data.documents, compiled.data.manifest, { write: true });
-      const secondEmit = await emitDocuments(compiled.data.documents, compiled.data.manifest, { write: true });
+      const firstEmit = requireEmitSuccess(await emitDocuments(compiled.data.documents, compiled.data.manifest, { write: true }));
+      const secondEmit = requireEmitSuccess(await emitDocuments(compiled.data.documents, compiled.data.manifest, { write: true }));
 
       expect(firstEmit.files.some((file) => file.status === "create")).toBe(true);
       expect(secondEmit.files.every((file) => file.status === "unchanged")).toBe(true);
@@ -114,8 +123,8 @@ describe("stability and diff locality", () => {
         return;
       }
 
-      await emitDocuments(original.data.documents, original.data.manifest, { write: true });
-      const diff = await emitDocuments(changed.data.documents, changed.data.manifest, { write: false });
+      requireEmitSuccess(await emitDocuments(original.data.documents, original.data.manifest, { write: true }));
+      const diff = requireEmitSuccess(await emitDocuments(changed.data.documents, changed.data.manifest, { write: false }));
 
       expect(diff.files.map((file) => [file.documentId, file.status])).toEqual([
         ["author_home", "update"],

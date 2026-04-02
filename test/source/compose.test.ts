@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { composeSetup, type SetupInput, type SetupPart } from "../../src/source/index.js";
+import { applyKeyedOverrides, composeSetup, type SetupInput, type SetupPart } from "../../src/source/index.js";
 
 describe("composeSetup", () => {
   it("merges setup parts into one plain SetupInput without mutating the base", () => {
@@ -77,5 +77,71 @@ describe("composeSetup", () => {
       { id: "shared_readme", surfaceClass: "shared_entrypoint", runtimePath: "generated/README.md" },
       { id: "workflow_doc", surfaceClass: "workflow_owner", runtimePath: "generated/WORKFLOW.md" }
     ]);
+  });
+
+  it("applies explicit keyed overrides without mutating the base setup", () => {
+    const baseSetup: SetupInput = {
+      id: "shared",
+      name: "Shared",
+      roles: [{ id: "writer", name: "Writer", purpose: "Write the draft." }],
+      surfaces: [{ id: "writer_home", surfaceClass: "role_home", runtimePath: "generated/writer/AGENTS.md" }]
+    };
+
+    const overridden = applyKeyedOverrides(baseSetup, {
+      roles: [
+        {
+          id: "writer",
+          replace: (current) => ({ ...current, purpose: "Write the draft with local constraints." })
+        }
+      ],
+      surfaces: [
+        {
+          id: "writer_home",
+          replace: (current) => ({ ...current, runtimePath: "generated/local/writer/AGENTS.md" })
+        }
+      ]
+    });
+
+    expect(overridden).toEqual({
+      id: "shared",
+      name: "Shared",
+      roles: [{ id: "writer", name: "Writer", purpose: "Write the draft with local constraints." }],
+      surfaces: [{ id: "writer_home", surfaceClass: "role_home", runtimePath: "generated/local/writer/AGENTS.md" }]
+    });
+    expect(baseSetup).toEqual({
+      id: "shared",
+      name: "Shared",
+      roles: [{ id: "writer", name: "Writer", purpose: "Write the draft." }],
+      surfaces: [{ id: "writer_home", surfaceClass: "role_home", runtimePath: "generated/writer/AGENTS.md" }]
+    });
+  });
+
+  it("fails loudly on missing, duplicate, or id-changing overrides", () => {
+    const baseSetup: SetupInput = {
+      id: "shared",
+      name: "Shared",
+      roles: [{ id: "writer", name: "Writer", purpose: "Write the draft." }]
+    };
+
+    expect(() =>
+      applyKeyedOverrides(baseSetup, {
+        roles: [{ id: "critic", replace: { id: "critic", name: "Critic", purpose: "Review the draft." } }]
+      })
+    ).toThrow('Override collection "roles" references missing id "critic".');
+
+    expect(() =>
+      applyKeyedOverrides(baseSetup, {
+        roles: [
+          { id: "writer", replace: { id: "writer", name: "Writer", purpose: "One." } },
+          { id: "writer", replace: { id: "writer", name: "Writer", purpose: "Two." } }
+        ]
+      })
+    ).toThrow('Override collection "roles" reuses override ids: writer.');
+
+    expect(() =>
+      applyKeyedOverrides(baseSetup, {
+        roles: [{ id: "writer", replace: { id: "critic", name: "Writer", purpose: "Wrong id." } }]
+      })
+    ).toThrow('Override collection "roles" may not change stable id "writer".');
   });
 });

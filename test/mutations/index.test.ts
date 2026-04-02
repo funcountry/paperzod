@@ -5,6 +5,29 @@ import lessonsSetup from "../../setups/lessons/index.ts";
 import lessonsVerticalSliceSeed from "../fixtures/source/lessons-vertical-slice.js";
 import coreDevSetup from "../../setups/core_dev/index.ts";
 
+const lessonsSource = lessonsSetup.setup;
+const coreDevSource = coreDevSetup.setup;
+
+function withLessonsSetup(patch: Partial<typeof lessonsSource>) {
+  return {
+    ...lessonsSetup,
+    setup: {
+      ...lessonsSource,
+      ...patch
+    }
+  };
+}
+
+function withCoreDevSetup(patch: Partial<typeof coreDevSource>) {
+  return {
+    ...coreDevSetup,
+    setup: {
+      ...coreDevSource,
+      ...patch
+    }
+  };
+}
+
 function compile(input: unknown) {
   return compileSetup(
     input,
@@ -17,14 +40,13 @@ function compile(input: unknown) {
 
 describe("mutation suite", () => {
   it("catches packet rename drift", () => {
-    const result = compile({
-      ...lessonsSetup,
-      packetContracts: lessonsSetup.packetContracts.map((contract) =>
+    const result = compile(withLessonsSetup({
+      packetContracts: lessonsSource.packetContracts.map((contract) =>
         contract.id === "section_dossier_contract"
           ? { ...contract, conceptualArtifactIds: ["section_dossier_packet_renamed"] }
           : contract
       )
-    });
+    }));
 
     expect(result.success).toBe(false);
     if (!result.success) {
@@ -55,12 +77,11 @@ describe("mutation suite", () => {
   });
 
   it("catches role-contract drift", () => {
-    const result = compile({
-      ...coreDevSetup,
-      workflowSteps: coreDevSetup.workflowSteps.map((step) =>
+    const result = compile(withCoreDevSetup({
+      workflowSteps: coreDevSource.workflowSteps.map((step) =>
         step.id === "release_readiness_step" ? { ...step, roleId: "missing_role" } : step
       )
-    });
+    }));
 
     expect(result.success).toBe(false);
     if (!result.success) {
@@ -69,12 +90,11 @@ describe("mutation suite", () => {
   });
 
   it("catches gate-check drift", () => {
-    const result = compile({
-      ...lessonsSetup,
-      reviewGates: lessonsSetup.reviewGates.map((gate) =>
+    const result = compile(withLessonsSetup({
+      reviewGates: lessonsSource.reviewGates.map((gate) =>
         gate.id === "lessons_acceptance_critic_gate" ? { ...gate, checkIds: ["missing_packet"] } : gate
       )
-    });
+    }));
 
     expect(result.success).toBe(false);
     if (!result.success) {
@@ -83,12 +103,11 @@ describe("mutation suite", () => {
   });
 
   it("catches downstream consumer-or-gate drift", () => {
-    const result = compile({
-      ...coreDevSetup,
-      reviewGates: coreDevSetup.reviewGates.map((gate) =>
+    const result = compile(withCoreDevSetup({
+      reviewGates: coreDevSource.reviewGates.map((gate) =>
         gate.id === "release_readiness_gate" ? { ...gate, checkIds: ["release_protocol_standard"] } : gate
       )
-    });
+    }));
 
     expect(result.success).toBe(false);
     if (!result.success) {
@@ -99,12 +118,11 @@ describe("mutation suite", () => {
   });
 
   it("catches compatibility-mapping drift", () => {
-    const result = compile({
-      ...lessonsSetup,
-      packetContracts: lessonsSetup.packetContracts.map((contract) =>
+    const result = compile(withLessonsSetup({
+      packetContracts: lessonsSource.packetContracts.map((contract) =>
         contract.id === "lesson_plan_contract" ? { ...contract, runtimeArtifactIds: ["section_dossier_packet"] } : contract
       )
-    });
+    }));
 
     expect(result.success).toBe(false);
     if (!result.success) {
@@ -113,12 +131,11 @@ describe("mutation suite", () => {
   });
 
   it("catches exact-section reads drift", () => {
-    const result = compile({
-      ...lessonsSetup,
-      links: lessonsSetup.links.map((link) =>
+    const result = compile(withLessonsSetup({
+      links: lessonsSource.links.map((link) =>
         link.id === "lesson_step_reads_quality_bar" ? { ...link, to: "missing_quality_bar_section" } : link
       )
-    });
+    }));
 
     expect(result.success).toBe(false);
     if (!result.success) {
@@ -174,15 +191,14 @@ describe("mutation suite", () => {
   });
 
   it("catches typed artifact-flow link drift", () => {
-    const result = compile({
-      ...coreDevSetup,
+    const result = compile(withCoreDevSetup({
       links: [
-        ...coreDevSetup.links,
+        ...coreDevSource.links,
         { id: "bad_produces_target", kind: "produces", from: "release_readiness_step", to: "release_how_to_surface" },
         { id: "bad_consumes_source", kind: "consumes", from: "shared_role", to: "release_readiness_contract" },
         { id: "bad_supports_target", kind: "supports", from: "release_readiness_step", to: "shared_release_order" }
       ]
-    });
+    }));
 
     expect(result.success).toBe(false);
     if (!result.success) {
@@ -197,15 +213,14 @@ describe("mutation suite", () => {
   });
 
   it("catches typed ownership and reference-link drift", () => {
-    const result = compile({
-      ...lessonsSetup,
+    const result = compile(withLessonsSetup({
       links: [
-        ...lessonsSetup.links,
+        ...lessonsSource.links,
         { id: "bad_owns_source", kind: "owns", from: "packet_shape_standard_artifact", to: "packet_shape_section" },
         { id: "bad_grounds_source", kind: "grounds", from: "section_dossier_packet", to: "lessons_simple_clear_ref" },
         { id: "bad_references_source", kind: "references", from: "section_dossier_packet", to: "poker_kb_reference" }
       ]
-    });
+    }));
 
     expect(result.success).toBe(false);
     if (!result.success) {
@@ -220,10 +235,9 @@ describe("mutation suite", () => {
   });
 
   it("catches link-level maps_to_runtime drift", () => {
-    const valid = {
-      ...lessonsSetup,
+    const valid = withLessonsSetup({
       links: [
-        ...lessonsSetup.links,
+        ...lessonsSource.links,
         {
           id: "lesson_plan_contract_maps_to_runtime_workflow",
           kind: "maps_to_runtime",
@@ -231,14 +245,17 @@ describe("mutation suite", () => {
           to: "lesson_architect_workflow"
         }
       ]
-    };
+    });
     expect(compile(valid).success).toBe(true);
 
     const drift = compile({
       ...valid,
-      links: valid.links.map((link) =>
-        link.id === "lesson_plan_contract_maps_to_runtime_workflow" ? { ...link, to: "comment_shape_contract" } : link
-      )
+      setup: {
+        ...valid.setup,
+        links: valid.setup.links.map((link) =>
+          link.id === "lesson_plan_contract_maps_to_runtime_workflow" ? { ...link, to: "comment_shape_contract" } : link
+        )
+      }
     });
 
     expect(drift.success).toBe(false);

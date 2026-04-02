@@ -3,6 +3,18 @@ import { describe, expect, it } from "vitest";
 import { compileSetup, createPaperclipMarkdownTarget } from "../../src/index.js";
 import lessonsSetup from "../../setups/lessons/index.ts";
 
+const lessonsSource = lessonsSetup.setup;
+
+function withLessonsSetup(patch: Partial<typeof lessonsSource>) {
+  return {
+    ...lessonsSetup,
+    setup: {
+      ...lessonsSource,
+      ...patch
+    }
+  };
+}
+
 function compile(input: unknown) {
   return compileSetup(
     input,
@@ -69,34 +81,31 @@ describe("lessons_full e2e", () => {
   });
 
   it("fails loudly on standards, gate, and runtime-mapping drift", () => {
-    const standardsDrift = compile({
-      ...lessonsSetup,
-      links: lessonsSetup.links.map((link) =>
+    const standardsDrift = compile(withLessonsSetup({
+      links: lessonsSource.links.map((link) =>
         link.kind === "documents" && link.from === "packet_shape_section" ? { ...link, to: "missing_standard_artifact" } : link
       )
-    });
+    }));
     expect(standardsDrift.success).toBe(false);
     if (!standardsDrift.success) {
       expect(standardsDrift.diagnostics.map((diagnostic) => diagnostic.code)).toContain("graph.unknown_link_target");
     }
 
-    const gateDrift = compile({
-      ...lessonsSetup,
-      reviewGates: lessonsSetup.reviewGates.map((gate) =>
+    const gateDrift = compile(withLessonsSetup({
+      reviewGates: lessonsSource.reviewGates.map((gate) =>
         gate.id === "lessons_acceptance_critic_gate" ? { ...gate, checkIds: ["missing_packet"] } : gate
       )
-    });
+    }));
     expect(gateDrift.success).toBe(false);
     if (!gateDrift.success) {
       expect(gateDrift.diagnostics.map((diagnostic) => diagnostic.code)).toContain("check.review_gate.invalid_check_target");
     }
 
-    const mappingDrift = compile({
-      ...lessonsSetup,
-      packetContracts: lessonsSetup.packetContracts.map((contract) =>
+    const mappingDrift = compile(withLessonsSetup({
+      packetContracts: lessonsSource.packetContracts.map((contract) =>
         contract.id === "lesson_plan_contract" ? { ...contract, runtimeArtifactIds: ["section_dossier_packet"] } : contract
       )
-    });
+    }));
     expect(mappingDrift.success).toBe(false);
     if (!mappingDrift.success) {
       expect(mappingDrift.diagnostics.map((diagnostic) => diagnostic.code)).toContain("check.packet.invalid_runtime_artifact");

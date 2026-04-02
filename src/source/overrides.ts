@@ -1,0 +1,108 @@
+import type { SetupInput } from "./builders.js";
+import { composeSetup } from "./compose.js";
+
+const setupCollectionKeys = [
+  "roles",
+  "workflowSteps",
+  "reviewGates",
+  "packetContracts",
+  "artifacts",
+  "surfaces",
+  "surfaceSections",
+  "references",
+  "generatedTargets",
+  "links"
+] as const satisfies readonly (keyof Omit<SetupInput, "id" | "name" | "description">)[];
+
+type SetupCollectionKey = (typeof setupCollectionKeys)[number];
+type CollectionItem<TKey extends SetupCollectionKey> = NonNullable<SetupInput[TKey]>[number];
+type ReplacementValue<T extends { id: string }> = T | ((current: T) => T);
+
+export interface KeyedOverride<T extends { id: string }> {
+  id: T["id"];
+  replace: ReplacementValue<T>;
+}
+
+export type SetupOverrides = Partial<{
+  [TKey in SetupCollectionKey]: readonly KeyedOverride<CollectionItem<TKey>>[] | undefined;
+}>;
+
+function duplicateIds(values: readonly string[]): string[] {
+  const seen = new Set<string>();
+  const duplicates = new Set<string>();
+
+  for (const value of values) {
+    if (seen.has(value)) {
+      duplicates.add(value);
+      continue;
+    }
+
+    seen.add(value);
+  }
+
+  return [...duplicates].sort();
+}
+
+function applyCollectionOverrides<TKey extends SetupCollectionKey>(
+  setup: SetupInput,
+  key: TKey,
+  overrides: readonly KeyedOverride<CollectionItem<TKey>>[]
+): void {
+  const collection = setup[key] as CollectionItem<TKey>[] | undefined;
+  if (!collection || collection.length === 0) {
+    throw new Error(`Override collection "${key}" is empty, so keyed replacement is not available.`);
+  }
+
+  const ambiguousIds = duplicateIds(collection.map((item) => item.id));
+  if (ambiguousIds.length > 0) {
+    throw new Error(`Override collection "${key}" contains duplicate ids: ${ambiguousIds.join(", ")}.`);
+  }
+
+  const duplicateOverrideIds = duplicateIds(overrides.map((override) => override.id));
+  if (duplicateOverrideIds.length > 0) {
+    throw new Error(`Override collection "${key}" reuses override ids: ${duplicateOverrideIds.join(", ")}.`);
+  }
+
+  for (const override of overrides) {
+    const index = collection.findIndex((item) => item.id === override.id);
+    if (index === -1) {
+      throw new Error(`Override collection "${key}" references missing id "${override.id}".`);
+    }
+
+    const current = collection[index];
+    if (!current) {
+      throw new Error(`Override collection "${key}" could not resolve id "${override.id}".`);
+    }
+
+    const next =
+      typeof override.replace === "function"
+        ? override.replace(structuredClone(current) as CollectionItem<TKey>)
+        : override.replace;
+
+    if (next.id !== override.id) {
+      throw new Error(`Override collection "${key}" may not change stable id "${override.id}".`);
+    }
+
+    collection[index] = next;
+  }
+}
+
+function applyOverridesForKey<TKey extends SetupCollectionKey>(setup: SetupInput, overrides: SetupOverrides, key: TKey): void {
+  const collectionOverrides = overrides[key];
+  if (!collectionOverrides || collectionOverrides.length === 0) {
+    return;
+  }
+
+  applyCollectionOverrides(setup, key, collectionOverrides);
+}
+
+export function applyKeyedOverrides(baseSetup: SetupInput, overrides: SetupOverrides): SetupInput {
+  // Stable ids are the only legal selector surface for override behavior.
+  const result = composeSetup(baseSetup);
+
+  for (const key of setupCollectionKeys) {
+    applyOverridesForKey(result, overrides, key);
+  }
+
+  return result;
+}

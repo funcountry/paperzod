@@ -13,22 +13,26 @@ If the schema language cannot express that example cleanly, it is not ready.
 Current status:
 
 - the current prototype implements this schema family closely
-- canonical repo-local setups now ship as plain `SetupInput` modules under
-  `setups/**`
+- canonical repo-local setups now ship as source modules under `setups/**`
 - the shipped helper layer now includes `composeSetup(...)`, reusable
   document-shape helpers for every surface family used by the canonical
-  proving setups, and explicit-base `loadFragments(...)`
+  proving setups, `defineSetupModule(...)`, `projectDocumentSections(...)`,
+  `applyKeyedOverrides(...)`, and explicit-base `loadFragments(...)`
 - the helper layer lowers back into plain `SetupInput`; it does not widen the
   normalized node model
 - the canonical repo-local proving setups are now modular local packages under
   `setups/lessons/**` and `setups/core_dev/**`, each assembled by `index.ts`
-  into one plain `SetupInput`
-- fragment loading is intentionally narrow in the first cut: paragraphs,
-  nested ordered or unordered lists, and fenced code blocks only
-- `composeSetup(...)` is intentionally append-only; setup-local overrides stay
-  ordinary TypeScript for now
-- setup-level executable checks remain explicitly deferred; the shipped
-  framework runs only its core generic checks
+  into one source module that still carries one plain semantic setup
+- fragment loading is intentionally narrow in the shipped cut: paragraphs,
+  nested ordered or unordered lists, fenced code blocks, and pipe tables that
+  lower to authored `table` blocks
+- `composeSetup(...)` is intentionally append-only; explicit stable-id
+  replacement now lives in `applyKeyedOverrides(...)`
+- setup-level executable checks may now be declared through the additive
+  source-envelope contract, and still run through the single generic check
+  registry
+- source modules may declare owned output scopes for compiler-managed prune
+  behavior
 - stable section targets are emitted through deliberate raw HTML anchors in
   the runtime markdown
 
@@ -37,7 +41,8 @@ Current status:
 The public source contract now has two layers:
 
 1. The stable low-level contract is still plain `SetupInput`.
-2. The shipped helper layer is a thin authoring convenience on top:
+2. The shipped source-envelope and helper layer is an additive convenience on top:
+   - `defineSetupModule({ setup, checks, outputOwnership })`
    - `composeSetup(baseSetup, ...parts)`
    - `defineRoleHomeTemplate(...)`
    - `defineProjectHomeRootTemplate(...)`
@@ -49,12 +54,16 @@ The public source contract now has two layers:
    - `defineTechnicalReferenceTemplate(...)`
    - `defineHowToTemplate(...)`
    - `defineCoordinationTemplate(...)`
+   - `projectDocumentSections(...)`
+   - `applyKeyedOverrides(...)`
    - `loadFragments(new URL("./fragments/.../", import.meta.url), spec)`
 
 Those helpers lower into the existing `surface`, `surface_section`,
 `generated_target`, and `documents` link model before normalization.
 They do not add `templates`, `workflows`, or `standards` arrays to
 `SetupInput`, and they do not create new normalized node kinds.
+The source envelope configures the compiler around plain setup truth; it is
+not a second semantic model.
 
 ## Design rule
 

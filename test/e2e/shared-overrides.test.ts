@@ -40,16 +40,17 @@ describe("shared_overrides e2e", () => {
           "manifest": {
             "adapterName": "test",
             "documentPaths": {
-              "alpha_gate_surface": "/repo/out/generated/alpha/gates/shared_gate.md",
-              "alpha_home": "/repo/out/generated/alpha/roles/shared_role/AGENTS.md",
-              "alpha_packet_surface": "/repo/out/generated/alpha/packets/contract.md",
+              "gate_surface": "/repo/out/generated/alpha/gates/shared_gate.md",
+              "home": "/repo/out/generated/alpha/roles/shared_role/AGENTS.md",
+              "packet_surface": "/repo/out/generated/alpha/packets/contract.md",
             },
             "outputRoot": "out",
+            "ownedScopes": [],
             "repoRoot": "/repo",
           },
           "rendered": [
             {
-              "id": "alpha_home",
+              "id": "home",
               "markdown": "# Shared Role
 
       You are the Shared Role.
@@ -66,7 +67,7 @@ describe("shared_overrides e2e", () => {
       ",
             },
             {
-              "id": "alpha_gate_surface",
+              "id": "gate_surface",
               "markdown": "# Shared Gate
 
       This file owns what Shared Gate checks before work moves on.
@@ -83,7 +84,7 @@ describe("shared_overrides e2e", () => {
       ",
             },
             {
-              "id": "alpha_packet_surface",
+              "id": "packet_surface",
               "markdown": "# Alpha Contract Workflow
 
       This packet workflow document describes the trusted packet contract.
@@ -104,16 +105,17 @@ describe("shared_overrides e2e", () => {
           "manifest": {
             "adapterName": "test",
             "documentPaths": {
-              "beta_gate_surface": "/repo/out/generated/beta/gates/shared_gate.md",
-              "beta_home": "/repo/out/generated/beta/roles/shared_role/AGENTS.md",
-              "beta_packet_surface": "/repo/out/generated/beta/packets/contract.md",
+              "gate_surface": "/repo/out/generated/beta/gates/shared_gate.md",
+              "home": "/repo/out/generated/beta/roles/shared_role/AGENTS.md",
+              "packet_surface": "/repo/out/generated/beta/packets/contract.md",
             },
             "outputRoot": "out",
+            "ownedScopes": [],
             "repoRoot": "/repo",
           },
           "rendered": [
             {
-              "id": "beta_home",
+              "id": "home",
               "markdown": "# Shared Role
 
       You are the Shared Role.
@@ -130,7 +132,7 @@ describe("shared_overrides e2e", () => {
       ",
             },
             {
-              "id": "beta_gate_surface",
+              "id": "gate_surface",
               "markdown": "# Shared Gate
 
       This file owns what Shared Gate checks before work moves on.
@@ -147,7 +149,7 @@ describe("shared_overrides e2e", () => {
       ",
             },
             {
-              "id": "beta_packet_surface",
+              "id": "packet_surface",
               "markdown": "# Beta Contract Workflow
 
       This packet workflow document describes the trusted packet contract.
@@ -178,9 +180,9 @@ describe("shared_overrides e2e", () => {
       return;
     }
 
-    const alphaHome = alpha.data.documents.find((document) => document.id === "alpha_home")?.markdown;
-    const betaHome = beta.data.documents.find((document) => document.id === "beta_home")?.markdown;
-    const betaPacket = beta.data.documents.find((document) => document.id === "beta_packet_surface")?.markdown;
+    const alphaHome = alpha.data.documents.find((document) => document.id === "home")?.markdown;
+    const betaHome = beta.data.documents.find((document) => document.id === "home")?.markdown;
+    const betaPacket = beta.data.documents.find((document) => document.id === "packet_surface")?.markdown;
 
     expect(alphaHome).toContain("Reusable role.");
     expect(betaHome).toContain("Reusable role with beta-local wording.");

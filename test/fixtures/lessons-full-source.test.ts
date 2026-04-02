@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { normalizeSetup } from "../../src/index.js";
+import { validateSetup } from "../../src/index.js";
 import lessonsSetup from "../../setups/lessons/index.ts";
 
 describe("lessons_full source model", () => {
   it("represents the full Lessons requirement shape without hacks", () => {
-    const result = normalizeSetup(lessonsSetup);
+    const result = validateSetup(lessonsSetup);
     expect(result.success).toBe(true);
     if (!result.success) {
       return;

@@ -1,4 +1,4 @@
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 
@@ -56,6 +56,23 @@ function helperTsFixtureModuleSource(importSpecifier: string): string {
   ].join("\n");
 }
 
+function ownedCompileFixtureModuleSource(importSpecifier: string): string {
+  return [
+    `import { defineSetupModule } from ${JSON.stringify(importSpecifier)};`,
+    "",
+    "export default defineSetupModule({",
+    "  setup: {",
+    '    id: "cli_owned_output",',
+    '    name: "CLI Owned Output",',
+    '    surfaces: [{ id: "surface_1", surfaceClass: "workflow_owner", runtimePath: "generated/WORKFLOW.md" }],',
+    '    generatedTargets: [{ id: "target_1", path: "generated/WORKFLOW.md", sourceIds: ["surface_1"] }]',
+    "  },",
+    '  outputOwnership: [{ kind: "root", path: "generated" }]',
+    "});",
+    ""
+  ].join("\n");
+}
+
 beforeAll(async () => {
   const build = await runProcess(npmCommand(), ["run", "build"], repoRoot);
   expect(build.code).toBe(0);
@@ -73,7 +90,7 @@ describe("cli validate and compile", () => {
           "const markdown = await import('paperzod/markdown');",
           "const testing = await import('paperzod/testing');",
           "console.log(JSON.stringify({",
-          "  root: ['validateSetup','compileSetup','composeSetup','loadFragments','defineRoleHomeTemplate','defineGateTemplate'].every((key) => typeof root[key] === 'function'),",
+          "  root: ['validateSetup','compileSetup','composeSetup','loadFragments','defineRoleHomeTemplate','defineGateTemplate','defineSetupModule'].every((key) => typeof root[key] === 'function'),",
           "  core: typeof core.createDiagnostic === 'function',",
           "  markdown: typeof markdown.renderDocuments === 'function',",
           "  testing: typeof testing.stableJson === 'function'",
@@ -174,6 +191,50 @@ describe("cli validate and compile", () => {
     });
   });
 
+  it("runs setup-local checks through validate and compile", async () => {
+    await withTempDir(async (dir) => {
+      const fixturePath = path.join(dir, "local-check-setup.mjs");
+      const importSpecifier = pathToFileURL(path.join(repoRoot, "dist/index.js")).href;
+      await writeFile(
+        fixturePath,
+        [
+          `import { defineSetupModule } from ${JSON.stringify(importSpecifier)};`,
+          "",
+          "export default defineSetupModule({",
+          "  setup: {",
+          '    id: "cli_local_check",',
+          '    name: "CLI Local Check"',
+          "  },",
+          "  checks: [",
+          "    {",
+          '      id: "cli_local_rule",',
+          "      run: () => [{",
+          '        code: "check.local.cli_rule",',
+          '        severity: "error",',
+          '        phase: "check",',
+          '        message: "CLI local rule fired."',
+          "      }]",
+          "    }",
+          "  ]",
+          "});",
+          ""
+        ].join("\n"),
+        "utf8"
+      );
+
+      const validateResult = await runNodeScript(["dist/cli/index.js", "validate", fixturePath], repoRoot);
+      expect(validateResult.code).toBe(1);
+      expect(validateResult.stderr).toContain("check.local.cli_rule");
+
+      const compileResult = await runNodeScript(
+        ["dist/cli/index.js", "compile", fixturePath, "--repo-root", dir, "--output-root", "out"],
+        repoRoot
+      );
+      expect(compileResult.code).toBe(1);
+      expect(compileResult.stderr).toContain("check.local.cli_rule");
+    });
+  });
+
   it("compiles in dry-run mode and reports file actions", async () => {
     await withTempDir(async (dir) => {
       const fixturePath = path.join(dir, "compile-setup.mjs");
@@ -197,6 +258,45 @@ describe("cli validate and compile", () => {
       expect(result.stdout).toContain("COMPILED cli_compile");
       expect(result.stdout).toContain("dry-run");
       expect(result.stdout).toContain("create");
+    });
+  });
+
+  it("previews deletes in dry-run and requires --prune before write mode applies them", async () => {
+    await withTempDir(async (dir) => {
+      const fixturePath = path.join(dir, "owned-compile-setup.mjs");
+      const importSpecifier = pathToFileURL(path.join(repoRoot, "dist/index.js")).href;
+      const stalePath = path.join(dir, "out", "generated", "STALE.md");
+      const generatedPath = path.join(dir, "out", "generated", "WORKFLOW.md");
+      await writeFile(fixturePath, ownedCompileFixtureModuleSource(importSpecifier), "utf8");
+      await mkdir(path.dirname(stalePath), { recursive: true });
+      await writeFile(stalePath, "# stale\n", "utf8");
+
+      const dryRun = await runNodeScript(
+        ["dist/cli/index.js", "compile", fixturePath, "--repo-root", dir, "--output-root", "out"],
+        repoRoot
+      );
+      expect(dryRun.code).toBe(0);
+      expect(dryRun.stdout).toContain(`create surface_1 ${generatedPath}`);
+      expect(dryRun.stdout).toContain(`delete ${stalePath}`);
+
+      const blockedWrite = await runNodeScript(
+        ["dist/cli/index.js", "compile", fixturePath, "--repo-root", dir, "--output-root", "out", "--write"],
+        repoRoot
+      );
+      expect(blockedWrite.code).toBe(1);
+      expect(blockedWrite.stderr).toContain("emit.prune_required");
+      await expect(readFile(generatedPath, "utf8")).rejects.toMatchObject({ code: "ENOENT" });
+      expect(await readFile(stalePath, "utf8")).toBe("# stale\n");
+
+      const prunedWrite = await runNodeScript(
+        ["dist/cli/index.js", "compile", fixturePath, "--repo-root", dir, "--output-root", "out", "--write", "--prune"],
+        repoRoot
+      );
+      expect(prunedWrite.code).toBe(0);
+      expect(prunedWrite.stdout).toContain(`create surface_1 ${generatedPath}`);
+      expect(prunedWrite.stdout).toContain(`delete ${stalePath}`);
+      expect((await readFile(generatedPath, "utf8")).length).toBeGreaterThan(0);
+      await expect(readFile(stalePath, "utf8")).rejects.toMatchObject({ code: "ENOENT" });
     });
   });
 

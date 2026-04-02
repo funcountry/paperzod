@@ -3,6 +3,7 @@ import { expectTypeOf, test } from "vitest";
 import type { AuthoredContentBlock } from "../../src/core/defs.js";
 import {
   composeSetup,
+  defineSetupModule,
   defineGateTemplate,
   defineRole,
   defineRoleHomeTemplate,
@@ -100,4 +101,24 @@ test("helper-based authoring stays type-safe and lowers to SetupInput", () => {
 
   expectTypeOf(setup).toMatchTypeOf<SetupInput>();
   expectTypeOf(fragments.goal).toEqualTypeOf<AuthoredContentBlock[]>();
+});
+
+test("setup module authoring stays type-safe", () => {
+  const module = defineSetupModule({
+    setup: defineSetup({
+      id: "typed_module_setup",
+      name: "Typed Module Setup",
+      roles: [defineRole({ id: "role_1", name: "Role 1", purpose: "Do the work." })]
+    }),
+    checks: [
+      {
+        id: "typed_local_rule",
+        run: () => []
+      }
+    ],
+    outputOwnership: [{ kind: "root", path: "generated/typed_module" }]
+  });
+
+  expectTypeOf(module.setup).toMatchTypeOf<SetupInput>();
+  expectTypeOf(module.outputOwnership).toMatchTypeOf<readonly { kind: "root"; path: string }[]>();
 });

@@ -39,6 +39,7 @@ describe("demo_minimal e2e", () => {
             "workflow_surface": "/repo/out/generated/WORKFLOW.md",
           },
           "outputRoot": "out",
+          "ownedScopes": [],
           "repoRoot": "/repo",
         },
         "plan": {

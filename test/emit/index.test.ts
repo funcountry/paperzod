@@ -1,4 +1,5 @@
-import { readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
+import path from "node:path";
 
 import { describe, expect, it } from "vitest";
 
@@ -18,6 +19,15 @@ function compileToRendered(input: unknown) {
     plan: rendered.data.plan,
     rendered: rendered.data.documents
   };
+}
+
+function requireEmitSuccess(result: Awaited<ReturnType<typeof emitDocuments>>) {
+  expect(result.success).toBe(true);
+  if (!result.success) {
+    throw new Error(result.diagnostics.map((diagnostic) => diagnostic.code).join(", "));
+  }
+
+  return result.data;
 }
 
 describe("emit layer", () => {
@@ -45,7 +55,7 @@ describe("emit layer", () => {
         return;
       }
 
-      const firstEmit = await emitDocuments(compiled.rendered, manifest.data, { write: true });
+      const firstEmit = requireEmitSuccess(await emitDocuments(compiled.rendered, manifest.data, { write: true }));
       expect(firstEmit.files.map((file) => file.status)).toEqual(["create"]);
 
       const workflowPath = manifest.data.documentPaths.surface_1;
@@ -56,11 +66,11 @@ describe("emit layer", () => {
 
       await writeFile(workflowPath, "# Manual edit\n", "utf8");
 
-      const dryRun = await emitDocuments(compiled.rendered, manifest.data, { write: false });
+      const dryRun = requireEmitSuccess(await emitDocuments(compiled.rendered, manifest.data, { write: false }));
       expect(dryRun.files[0]?.status).toBe("update");
       expect(dryRun.files[0]?.diff).toContain("Manual edit");
 
-      const overwrite = await emitDocuments(compiled.rendered, manifest.data, { write: true });
+      const overwrite = requireEmitSuccess(await emitDocuments(compiled.rendered, manifest.data, { write: true }));
       expect(overwrite.files[0]?.status).toBe("update");
       expect(await readFile(workflowPath, "utf8")).toBe(compiled.rendered[0]?.markdown);
     });
@@ -141,13 +151,75 @@ describe("emit layer", () => {
         return;
       }
 
-      await emitDocuments(initial.rendered, manifest.data, { write: true });
-      const diff = await emitDocuments(changed.rendered, manifest.data, { write: false });
+      requireEmitSuccess(await emitDocuments(initial.rendered, manifest.data, { write: true }));
+      const diff = requireEmitSuccess(await emitDocuments(changed.rendered, manifest.data, { write: false }));
 
       expect(diff.files.map((file) => [file.documentId, file.status])).toEqual([
         ["author_home", "update"],
         ["shared_readme", "unchanged"]
       ]);
+    });
+  });
+
+  it("previews stale owned files and only applies deletes with explicit prune", async () => {
+    await withTempDir(async (dir) => {
+      const compiled = compileToRendered({
+        id: "emit_owned_scope",
+        name: "Emit Owned Scope",
+        surfaces: [{ id: "surface_1", surfaceClass: "workflow_owner", runtimePath: "generated/WORKFLOW.md" }],
+        generatedTargets: [{ id: "target_1", path: "generated/WORKFLOW.md", sourceIds: ["surface_1"] }]
+      });
+
+      const manifest = resolveTargetManifest(
+        compiled.plan,
+        createTargetAdapter({ name: "test", repoRoot: dir, outputRoot: "." }),
+        [{ kind: "root", path: "generated" }]
+      );
+      expect(manifest.success).toBe(true);
+      if (!manifest.success) {
+        return;
+      }
+
+      const workflowPath = manifest.data.documentPaths.surface_1;
+      expect(workflowPath).toBeDefined();
+      if (!workflowPath) {
+        return;
+      }
+
+      requireEmitSuccess(await emitDocuments(compiled.rendered, manifest.data, { write: true }));
+
+      const stalePath = path.join(dir, "generated", "STALE.md");
+      await mkdir(path.dirname(stalePath), { recursive: true });
+      await writeFile(stalePath, "# stale\n", "utf8");
+      await writeFile(workflowPath, "# Manual edit\n", "utf8");
+
+      const dryRun = requireEmitSuccess(await emitDocuments(compiled.rendered, manifest.data, { write: false }));
+      expect(dryRun.files).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ documentId: "surface_1", status: "update", path: workflowPath }),
+          expect.objectContaining({ status: "delete", path: stalePath })
+        ])
+      );
+
+      const blockedWrite = await emitDocuments(compiled.rendered, manifest.data, { write: true });
+      expect(blockedWrite.success).toBe(false);
+      if (blockedWrite.success) {
+        return;
+      }
+
+      expect(blockedWrite.diagnostics.map((diagnostic) => diagnostic.code)).toEqual(["emit.prune_required"]);
+      expect(await readFile(workflowPath, "utf8")).toBe("# Manual edit\n");
+      expect(await readFile(stalePath, "utf8")).toBe("# stale\n");
+
+      const prunedWrite = requireEmitSuccess(await emitDocuments(compiled.rendered, manifest.data, { write: true, prune: true }));
+      expect(prunedWrite.files).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ documentId: "surface_1", status: "update", path: workflowPath }),
+          expect.objectContaining({ status: "delete", path: stalePath })
+        ])
+      );
+      expect(await readFile(workflowPath, "utf8")).toBe(compiled.rendered[0]?.markdown);
+      await expect(readFile(stalePath, "utf8")).rejects.toMatchObject({ code: "ENOENT" });
     });
   });
 });

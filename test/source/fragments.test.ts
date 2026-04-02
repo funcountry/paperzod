@@ -66,6 +66,26 @@ describe("loadFragments", () => {
     });
   });
 
+  it("loads pipe tables into authored table blocks", async () => {
+    await withTempDir(async (dir) => {
+      await writeFile(
+        path.join(dir, "owners.md"),
+        ["| Owner | Primary doc |", "| --- | --- |", "| Lessons Project Lead | AUTHORITATIVE_LESSONS_WORKFLOW.md |", ""].join("\n"),
+        "utf8"
+      );
+
+      const loaded = loadFragments(dir, { owners: "owners.md" });
+
+      expect(loaded.owners).toEqual([
+        {
+          kind: "table",
+          headers: ["Owner", "Primary doc"],
+          rows: [["Lessons Project Lead", "AUTHORITATIVE_LESSONS_WORKFLOW.md"]]
+        }
+      ]);
+    });
+  });
+
   it("rejects relative string bases", () => {
     expect(() => loadFragments("fragments", { overview: "overview.md" })).toThrowError(
       'Fragment base "fragments" must be an absolute path or file URL.'
@@ -78,6 +98,16 @@ describe("loadFragments", () => {
 
       expect(() => loadFragments(dir, { heading: "heading.md" })).toThrowError(
         new RegExp(`${escapeRegExp(path.join(dir, "heading.md"))}:1: Headings are not supported`)
+      );
+    });
+  });
+
+  it("fails loudly on malformed pipe tables with file context", async () => {
+    await withTempDir(async (dir) => {
+      await writeFile(path.join(dir, "bad_table.md"), ["| Owner | Primary doc |", "| --- | owner |", "| Lead | README.md |", ""].join("\n"), "utf8");
+
+      expect(() => loadFragments(dir, { table: "bad_table.md" })).toThrowError(
+        new RegExp(`${escapeRegExp(path.join(dir, "bad_table.md"))}:2: Malformed pipe table separator`)
       );
     });
   });

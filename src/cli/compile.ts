@@ -5,7 +5,8 @@ export async function runCompileCommand(setupPath: string, args: string[]): Prom
   const input = await loadSetupInput(setupPath);
   const adapter = createAdapterFromArgs(args);
   const write = hasFlag(args, "--write");
-  const compiled = await compileAndEmitSetup(input, adapter, { write });
+  const prune = hasFlag(args, "--prune");
+  const compiled = await compileAndEmitSetup(input, adapter, { write, prune });
 
   if (!compiled.success) {
     for (const diagnostic of compiled.diagnostics) {
@@ -18,7 +19,7 @@ export async function runCompileCommand(setupPath: string, args: string[]): Prom
   console.log(`COMPILED ${compiled.data.setup.setup.id}`);
   console.log(`mode=${write ? "write" : "dry-run"}`);
   for (const file of compiled.data.emit.files) {
-    console.log(`${file.status} ${file.documentId} ${file.path}`);
+    console.log(file.documentId ? `${file.status} ${file.documentId} ${file.path}` : `${file.status} ${file.path}`);
   }
 
   return 0;

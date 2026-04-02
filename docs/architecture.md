@@ -185,9 +185,14 @@ This is the ergonomic TypeScript layer a setup author writes.
 Current shipped helpers:
 
 - `defineSetup(...)`
+- `defineSetupModule(...)`
 - `defineRole(...)`
 - `defineWorkflowStep(...)`
 - `defineSurface(...)`
+- document-shape helpers for the shipped surface families
+- `projectDocumentSections(...)`
+- `applyKeyedOverrides(...)`
+- `loadFragments(...)`
 
 The remaining node families are currently authored as plain objects inside the
 setup declaration.
@@ -300,6 +305,9 @@ It should contain:
 
 - Zod schemas for source shapes
 - builder helpers for ergonomic setup authoring
+- source-envelope resolution for setup-local checks and owned output scopes
+- projection and override helpers that lower before normalization
+- narrow fragment loading for human-owned prose blocks
 - normalization from authoring inputs to `SetupDef`
 
 This is where Zod belongs most heavily.
@@ -500,15 +508,16 @@ The compile pipeline should be explicit and phase-separated.
 Current flow:
 
 1. load setup module
-2. normalize authored inputs to `SetupDef`
-3. validate all source shapes with Zod
-4. build `DoctrineGraph`
-5. run check registry against the graph
-6. build `CompilePlan`
-7. render planned documents into the internal doc AST
-8. stringify markdown
-9. emit files or produce a dry-run diff
-10. return diagnostics plus a compile summary
+2. resolve any source-envelope declarations such as local checks or owned output scopes
+3. normalize authored inputs to `SetupDef`
+4. validate all source shapes with Zod
+5. build `DoctrineGraph`
+6. run the single check registry against core plus setup-local rules
+7. build `CompilePlan`
+8. render planned documents into the internal doc AST
+9. resolve target paths plus any owned output scopes
+10. emit files or produce a dry-run diff, delete preview, or prune-required diagnostic
+11. return diagnostics plus a compile summary
 
 Only steps `1` and `9` should involve I/O.
 Everything else should be pure and snapshot-testable.
@@ -522,6 +531,7 @@ Current API:
 ```ts
 import {
   defineSetup,
+  defineSetupModule,
   validateSetup,
   renderSetup,
   compileSetup,
@@ -597,6 +607,10 @@ Current limitation:
 ## Setup model
 
 A setup module should be a pure data declaration plus tiny helpers.
+
+A setup module may still export plain `SetupInput`.
+When it needs compiler-owned prune boundaries or setup-local checks, it may
+instead export `defineSetupModule({ setup, checks, outputOwnership })`.
 
 A setup should declare:
 

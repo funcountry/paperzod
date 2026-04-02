@@ -12,6 +12,8 @@ Lessons reference case without flattening the real pod shape.
 Current status:
 
 - the canonical Lessons proving setup now lives in `setups/lessons/index.ts`
+- that entrypoint now exports `defineSetupModule(...)` so Lessons can declare
+  its owned shared doctrine tree plus the exact role-home files it owns
 - `test/fixtures/source/lessons-full.ts` is a thin test-facing re-export of
   that canonical setup
 - `test/fixtures/source/lessons-vertical-slice.ts` remains a narrower Lessons
@@ -75,6 +77,15 @@ paperzod/
 `index.ts` is still the only public assembly boundary. The local modules exist
 so the proving setup stays reviewable without inventing a wrapper format or a
 second semantic source.
+
+The current Lessons entrypoint also declares owned output scopes explicitly:
+
+- `paperclip_home/project_homes/lessons/**`
+- `paperclip_home/agents/section_dossier_engineer/AGENTS.md`
+- `paperclip_home/agents/lessons_lesson_architect/AGENTS.md`
+
+That keeps compiler-owned prune boundaries honest without turning Lessons
+paths into product semantics.
 
 ## Lessons setup model
 

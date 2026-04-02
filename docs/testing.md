@@ -20,12 +20,13 @@ Current status:
 - the automated release gate is currently green
 - current automated evidence:
   - `49` test files passed
-  - `166` tests passed
+  - `182` tests passed
   - root typecheck passed
   - type-only authoring tests passed
   - build passed
-  - the helper-backed editorial proving example passed through source, API,
-    e2e, and CLI proof
+  - framework-first authoring proof now covers setup modules, ownership/prune,
+    projection, keyed overrides, narrow table fragments, and canonical setup
+    adoption across unit, e2e, CLI, and full-suite proof
 - this document remains the normative release-gate spec for future changes
 
 ## First rule

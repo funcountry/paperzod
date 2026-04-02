@@ -6,10 +6,12 @@ import {
   defineHowToTemplate,
   definePacketWorkflowTemplate,
   defineProjectHomeRootTemplate,
+  defineRoleHomeTemplate,
   defineSharedEntrypointTemplate,
   defineStandardTemplate,
   defineTechnicalReferenceTemplate,
-  defineWorkflowOwnerTemplate
+  defineWorkflowOwnerTemplate,
+  projectDocumentSections
 } from "../../src/source/index.js";
 
 describe("document-shape helpers", () => {
@@ -284,5 +286,145 @@ describe("document-shape helpers", () => {
         sectionId: "quality_bar_section"
       }
     ]);
+  });
+
+  it("projects one shared section catalog into many destination documents", () => {
+    const roleHomeTemplate = defineRoleHomeTemplate({
+      id: "role_home",
+      sections: [
+        { key: "readFirst", title: "Read First" },
+        { key: "roleContract", title: "Role Contract" }
+      ] as const
+    });
+
+    const [writerHome, criticHome] = projectDocumentSections(roleHomeTemplate, {
+      sections: {
+        readFirst: {
+          body: [{ kind: "paragraph", text: "Read the shared workflow first." }],
+          sourceIds: ["shared_workflow"]
+        }
+      },
+      destinations: [
+        {
+          surfaceId: "writer_home",
+          runtimePath: "generated/writer/AGENTS.md",
+          roleId: "writer",
+          sections: {
+            readFirst: {
+              body: [{ kind: "paragraph", text: "Read the shared workflow first, then the current brief." }],
+              sourceIds: ["writer_brief"]
+            }
+          }
+        },
+        {
+          surfaceId: "critic_home",
+          runtimePath: "generated/critic/AGENTS.md",
+          roleId: "critic",
+          sections: {
+            roleContract: {
+              documentsTo: "review_gate"
+            }
+          }
+        }
+      ]
+    });
+
+    expect(writerHome).toEqual({
+      surfaces: [
+        {
+          id: "writer_home",
+          surfaceClass: "role_home",
+          runtimePath: "generated/writer/AGENTS.md"
+        }
+      ],
+      surfaceSections: [
+        {
+          id: "writer_home_read_first",
+          surfaceId: "writer_home",
+          stableSlug: "read-first",
+          title: "Read First",
+          body: [{ kind: "paragraph", text: "Read the shared workflow first, then the current brief." }]
+        },
+        {
+          id: "writer_home_role_contract",
+          surfaceId: "writer_home",
+          stableSlug: "role-contract",
+          title: "Role Contract"
+        }
+      ],
+      generatedTargets: [
+        {
+          id: "writer_home_read_first_target",
+          path: "generated/writer/AGENTS.md",
+          sourceIds: ["writer_home_read_first", "writer", "shared_workflow", "writer_brief"],
+          sectionId: "writer_home_read_first"
+        },
+        {
+          id: "writer_home_role_contract_target",
+          path: "generated/writer/AGENTS.md",
+          sourceIds: ["writer_home_role_contract", "writer"],
+          sectionId: "writer_home_role_contract"
+        }
+      ],
+      links: [
+        { id: "writer_home_documents_writer", kind: "documents", from: "writer_home", to: "writer" },
+        { id: "writer_home_read_first_documents_writer", kind: "documents", from: "writer_home_read_first", to: "writer" },
+        {
+          id: "writer_home_role_contract_documents_writer",
+          kind: "documents",
+          from: "writer_home_role_contract",
+          to: "writer"
+        }
+      ]
+    });
+
+    expect(criticHome).toEqual({
+      surfaces: [
+        {
+          id: "critic_home",
+          surfaceClass: "role_home",
+          runtimePath: "generated/critic/AGENTS.md"
+        }
+      ],
+      surfaceSections: [
+        {
+          id: "critic_home_read_first",
+          surfaceId: "critic_home",
+          stableSlug: "read-first",
+          title: "Read First",
+          body: [{ kind: "paragraph", text: "Read the shared workflow first." }]
+        },
+        {
+          id: "critic_home_role_contract",
+          surfaceId: "critic_home",
+          stableSlug: "role-contract",
+          title: "Role Contract"
+        }
+      ],
+      generatedTargets: [
+        {
+          id: "critic_home_read_first_target",
+          path: "generated/critic/AGENTS.md",
+          sourceIds: ["critic_home_read_first", "critic", "shared_workflow"],
+          sectionId: "critic_home_read_first"
+        },
+        {
+          id: "critic_home_role_contract_target",
+          path: "generated/critic/AGENTS.md",
+          sourceIds: ["critic_home_role_contract", "review_gate"],
+          sectionId: "critic_home_role_contract"
+        }
+      ],
+      links: [
+        { id: "critic_home_documents_critic", kind: "documents", from: "critic_home", to: "critic" },
+        { id: "critic_home_read_first_documents_critic", kind: "documents", from: "critic_home_read_first", to: "critic" },
+        {
+          id: "critic_home_role_contract_documents_review_gate",
+          kind: "documents",
+          from: "critic_home_role_contract",
+          to: "review_gate"
+        }
+      ]
+    });
   });
 });

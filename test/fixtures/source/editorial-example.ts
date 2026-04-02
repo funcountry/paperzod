@@ -1,5 +1,6 @@
 import {
   composeSetup,
+  projectDocumentSections,
   defineRoleHomeTemplate,
   defineSetup,
   defineStandardTemplate,
@@ -51,6 +52,82 @@ const workflowFragments = loadFragments(new URL("../fragments/editorial/workflow
   goal: "goal.md",
   handoffRules: "handoff_rules.md",
   sendBackRules: "send_back_rules.md"
+});
+
+const roleHomeDocuments = projectDocumentSections(roleHomeTemplate, {
+  sections: {
+    readFirst: {
+      sourceIds: ["editorial_workflow", "draft_quality_standard"]
+    }
+  },
+  destinations: [
+    {
+      surfaceId: "writer_home",
+      runtimePath: "generated/editorial/roles/writer/AGENTS.md",
+      roleId: "writer",
+      sections: {
+        readFirst: {
+          body: paragraph("Read the shared workflow, then the draft-quality standard, then the current brief.")
+        },
+        yourJob: {
+          body: paragraph("Write the draft for the current issue. Do not publish it yourself.")
+        },
+        inputs: {
+          body: bullets("Shared workflow", "Draft Quality Standard", "BRIEF.md")
+        },
+        outputs: {
+          body: bullets("DRAFT.md")
+        },
+        stopLine: {
+          body: paragraph("Stop when the draft is ready for critic review. Send the issue to Critic next.")
+        }
+      }
+    },
+    {
+      surfaceId: "critic_home",
+      runtimePath: "generated/editorial/roles/critic/AGENTS.md",
+      roleId: "critic",
+      sections: {
+        readFirst: {
+          body: paragraph("Read the shared workflow, the draft-quality standard, and the current draft before you review.")
+        },
+        yourJob: {
+          body: paragraph("Review the draft, decide whether it passes, and explain any send-back clearly.")
+        },
+        inputs: {
+          body: bullets("Shared workflow", "Draft Quality Standard", "DRAFT.md")
+        },
+        outputs: {
+          body: bullets("REVIEW_NOTES.md")
+        },
+        stopLine: {
+          body: paragraph("Stop when the draft either passes or goes back with clear notes.")
+        }
+      }
+    },
+    {
+      surfaceId: "publisher_home",
+      runtimePath: "generated/editorial/roles/publisher/AGENTS.md",
+      roleId: "publisher",
+      sections: {
+        readFirst: {
+          body: paragraph("Read the shared workflow, then confirm the draft and review notes are both present.")
+        },
+        yourJob: {
+          body: paragraph("Publish the issue only after critic review passes.")
+        },
+        inputs: {
+          body: bullets("Shared workflow", "DRAFT.md", "REVIEW_NOTES.md")
+        },
+        outputs: {
+          body: bullets("PUBLISHED_ISSUE.md")
+        },
+        stopLine: {
+          body: paragraph("Stop when the issue is published and the final packet is ready for handoff.")
+        }
+      }
+    }
+  ]
 });
 
 const editorialExample = composeSetup(
@@ -124,72 +201,7 @@ const editorialExample = composeSetup(
       { id: "publisher_reads_workflow", kind: "reads", from: "publisher", to: "editorial_workflow" }
     ]
   }),
-  roleHomeTemplate.document({
-    surfaceId: "writer_home",
-    runtimePath: "generated/editorial/roles/writer/AGENTS.md",
-    roleId: "writer",
-    sections: {
-      readFirst: {
-        body: paragraph("Read the shared workflow, then the draft-quality standard, then the current brief.")
-      },
-      yourJob: {
-        body: paragraph("Write the draft for the current issue. Do not publish it yourself.")
-      },
-      inputs: {
-        body: bullets("Shared workflow", "Draft Quality Standard", "BRIEF.md")
-      },
-      outputs: {
-        body: bullets("DRAFT.md")
-      },
-      stopLine: {
-        body: paragraph("Stop when the draft is ready for critic review. Send the issue to Critic next.")
-      }
-    }
-  }),
-  roleHomeTemplate.document({
-    surfaceId: "critic_home",
-    runtimePath: "generated/editorial/roles/critic/AGENTS.md",
-    roleId: "critic",
-    sections: {
-      readFirst: {
-        body: paragraph("Read the shared workflow, the draft-quality standard, and the current draft before you review.")
-      },
-      yourJob: {
-        body: paragraph("Review the draft, decide whether it passes, and explain any send-back clearly.")
-      },
-      inputs: {
-        body: bullets("Shared workflow", "Draft Quality Standard", "DRAFT.md")
-      },
-      outputs: {
-        body: bullets("REVIEW_NOTES.md")
-      },
-      stopLine: {
-        body: paragraph("Stop when the draft either passes or goes back with clear notes.")
-      }
-    }
-  }),
-  roleHomeTemplate.document({
-    surfaceId: "publisher_home",
-    runtimePath: "generated/editorial/roles/publisher/AGENTS.md",
-    roleId: "publisher",
-    sections: {
-      readFirst: {
-        body: paragraph("Read the shared workflow, then confirm the draft and review notes are both present.")
-      },
-      yourJob: {
-        body: paragraph("Publish the issue only after critic review passes.")
-      },
-      inputs: {
-        body: bullets("Shared workflow", "DRAFT.md", "REVIEW_NOTES.md")
-      },
-      outputs: {
-        body: bullets("PUBLISHED_ISSUE.md")
-      },
-      stopLine: {
-        body: paragraph("Stop when the issue is published and the final packet is ready for handoff.")
-      }
-    }
-  }),
+  ...roleHomeDocuments,
   workflowOwnerTemplate.document({
     surfaceId: "editorial_workflow",
     runtimePath: "generated/editorial/shared/AUTHORITATIVE_WORKFLOW.md",

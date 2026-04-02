@@ -27,7 +27,7 @@ interface ParsedListBlock {
 }
 
 const listMarkerPattern = /^(\s*)([-*+]|\d+\.)\s+(.*)$/;
-const tableSeparatorPattern = /^\s*:?-{3,}:?(?:\s*\|\s*:?-{3,}:?)+\s*$/;
+const pipeTableLinePattern = /^\s*\|.*\|\s*$/;
 
 function fragmentError(filePath: string, lineNumber: number, message: string): never {
   throw new Error(`${filePath}:${lineNumber}: ${message}`);
@@ -112,6 +112,38 @@ function parseListMarker(line: string, filePath: string, lineNumber: number): Li
   };
 }
 
+function isPipeTableLine(line: string): boolean {
+  return pipeTableLinePattern.test(line);
+}
+
+function parseTableCells(line: string, filePath: string, lineNumber: number): string[] {
+  if (!isPipeTableLine(line)) {
+    fragmentError(filePath, lineNumber, "Malformed pipe table row. Use leading and trailing | characters for each row.");
+  }
+
+  const trimmed = line.trim();
+  const inner = trimmed.slice(1, -1);
+  const cells = inner.split("|").map((cell) => cell.trim());
+  if (cells.length < 2) {
+    fragmentError(filePath, lineNumber, "Pipe tables must include at least two columns.");
+  }
+
+  return cells;
+}
+
+function parseTableSeparator(line: string, expectedColumns: number, filePath: string, lineNumber: number): void {
+  const cells = parseTableCells(line, filePath, lineNumber);
+  if (cells.length !== expectedColumns) {
+    fragmentError(filePath, lineNumber, "Pipe table separator columns must match the header column count.");
+  }
+
+  for (const cell of cells) {
+    if (!/^:?-{3,}:?$/.test(cell)) {
+      fragmentError(filePath, lineNumber, "Malformed pipe table separator. Use at least three dashes per column.");
+    }
+  }
+}
+
 function getUnsupportedReason(line: string, options: { firstBlock: boolean }): string | undefined {
   const trimmed = line.trim();
 
@@ -129,9 +161,6 @@ function getUnsupportedReason(line: string, options: { firstBlock: boolean }): s
   }
   if (/^\s*>/.test(line)) {
     return "Blockquotes are not supported in fragments.";
-  }
-  if (/^\s*\|.*\|\s*$/.test(line) || tableSeparatorPattern.test(line)) {
-    return "Tables are not supported in fragments.";
   }
   if (/^\s*<[/!A-Za-z][^>]*>/.test(line)) {
     return "HTML blocks are not supported in fragments.";
@@ -270,6 +299,52 @@ function parseListBlock(
   };
 }
 
+function parseTableBlock(lines: readonly string[], startIndex: number, filePath: string): ParsedBlock {
+  const headerLine = lines[startIndex] ?? "";
+  const separatorLine = lines[startIndex + 1];
+  if (separatorLine === undefined) {
+    fragmentError(filePath, startIndex + 1, "Pipe tables must include a separator row immediately after the header.");
+  }
+
+  // Tables are the widest fragment syntax we accept because they already lower one-to-one into authored table blocks.
+  const headers = parseTableCells(headerLine, filePath, startIndex + 1);
+  parseTableSeparator(separatorLine, headers.length, filePath, startIndex + 2);
+
+  const rows: string[][] = [];
+  let index = startIndex + 2;
+
+  while (index < lines.length) {
+    const line = lines[index];
+    if (line === undefined || isBlank(line)) {
+      break;
+    }
+    if (!isPipeTableLine(line)) {
+      break;
+    }
+
+    const row = parseTableCells(line, filePath, index + 1);
+    if (row.length !== headers.length) {
+      fragmentError(filePath, index + 1, "Pipe table rows must match the header column count.");
+    }
+
+    rows.push(row);
+    index += 1;
+  }
+
+  if (rows.length === 0) {
+    fragmentError(filePath, startIndex + 1, "Pipe tables must include at least one body row.");
+  }
+
+  return {
+    block: {
+      kind: "table",
+      headers,
+      rows
+    },
+    nextIndex: index
+  };
+}
+
 function parseParagraph(lines: readonly string[], startIndex: number, filePath: string, firstBlock: boolean): ParsedBlock {
   let index = startIndex;
   const paragraphLines: string[] = [];
@@ -279,7 +354,7 @@ function parseParagraph(lines: readonly string[], startIndex: number, filePath: 
     if (line === undefined || isBlank(line)) {
       break;
     }
-    if (/^\s*```/.test(line) || parseListMarker(line, filePath, index + 1)) {
+    if (/^\s*```/.test(line) || parseListMarker(line, filePath, index + 1) || isPipeTableLine(line)) {
       break;
     }
 
@@ -332,6 +407,13 @@ function parseFragmentMarkdown(content: string, filePath: string): AuthoredConte
       }
 
       const parsed = parseListBlock(lines, index, 0, undefined, filePath);
+      blocks.push(parsed.block);
+      index = parsed.nextIndex;
+      continue;
+    }
+
+    if (isPipeTableLine(line)) {
+      const parsed = parseTableBlock(lines, index, filePath);
       blocks.push(parsed.block);
       index = parsed.nextIndex;
       continue;
