@@ -15,7 +15,7 @@ The standard is:
 - we can trust that the product satisfies the Lessons proving case without
   becoming Lessons-specific
 
-Status as of 2026-04-02:
+Current status:
 
 - the automated release gate is currently green
 - current automated evidence:

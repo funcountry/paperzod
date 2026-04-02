@@ -41,11 +41,11 @@
 ## Docs Map
 
 - `docs/ref/GENERIC_DOCTRINE_SYSTEM_PLAIN_EXAMPLE.md`: the smallest plain-English explanation of the product shape.
-- `docs/impl2.md`: one high-fidelity proving plan, not the product boundary.
 - `docs/requirements.md`: product contract and boundaries.
 - `docs/schema.md`: source language and node model.
 - `docs/architecture.md`: compiler layers and pipeline shape.
 - `docs/testing.md`: proof standard and release gate.
+- `docs/example_lessons.md`: the high-fidelity Lessons proving example and source-shape explanation.
 
 ## Test Truth Surfaces
 

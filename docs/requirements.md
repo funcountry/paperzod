@@ -14,7 +14,7 @@ satisfy the Lessons reference material in
 [`docs/ref`](/Users/aelaguiz/workspace/paperzod/docs/ref) and the live Lessons
 shape in `../paperclip_agents`, while still remaining general-purpose.
 
-Status as of 2026-04-01:
+Current status:
 
 - the current repo implements and proves the core compiler path described here
   against canonical repo-local setups plus fixture-based proving cases

@@ -10,7 +10,7 @@ But it is now grounded by the concrete Lessons example in
 
 If the schema language cannot express that example cleanly, it is not ready.
 
-Status as of 2026-04-02:
+Current status:
 
 - the current prototype implements this schema family closely
 - canonical repo-local setups now ship as plain `SetupInput` modules under

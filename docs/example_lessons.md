@@ -9,7 +9,7 @@ This is an example, not the product requirements.
 The point is to prove that the standalone `paperzod` model can satisfy the
 Lessons reference case without flattening the real pod shape.
 
-Status as of 2026-04-01:
+Current status:
 
 - the canonical Lessons proving setup now lives in `setups/lessons/index.ts`
 - `test/fixtures/source/lessons-full.ts` is a thin test-facing re-export of
@@ -56,18 +56,25 @@ It also needs to preserve the fact that some of these are:
 
 ## Source package shape
 
-The first-cut canonical Lessons package in this repo now uses the simplest
-reviewable shape:
+The canonical Lessons package in this repo now uses the modular proving shape:
 
 ```text
 paperzod/
   setups/
     lessons/
+      artifacts.ts
       index.ts
+      links.ts
+      references.ts
+      roles.ts
+      surfaces.ts
+      targets.ts
+      workflow.ts
 ```
 
-That source package defines one setup graph with enough information to
-generate the runtime markdown surfaces for the Lessons pod.
+`index.ts` is still the only public assembly boundary. The local modules exist
+so the proving setup stays reviewable without inventing a wrapper format or a
+second semantic source.
 
 ## Lessons setup model
 

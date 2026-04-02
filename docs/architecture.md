@@ -11,7 +11,7 @@ diagnostics.
 This is not a markdown templating project.
 It is a source-model-first doctrine compiler.
 
-Status as of 2026-04-01:
+Current status:
 
 - the prototype architecture is implemented
 - the repo now has a working compiler pipeline, CLI, and proving fixtures
@@ -93,7 +93,6 @@ paperzod/
     schema.md
     architecture.md
     testing.md
-    implementation_plan.md
     example_lessons.md
     ref/
   src/

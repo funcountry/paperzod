@@ -410,8 +410,8 @@ One reasonable repo layout looks like this:
 npm install
 npm run typecheck
 npm run test:types
-npm test
 npm run build
+npm test
 ```
 
 When you are extending the system:
@@ -434,7 +434,7 @@ When you are extending the system:
   - compiler layers and pipeline shape
 - [docs/testing.md](/Users/aelaguiz/workspace/paperzod/docs/testing.md)
   - proving standard and release gate
-- [docs/impl2.md](/Users/aelaguiz/workspace/paperzod/docs/impl2.md)
-  - one high-fidelity proving plan, not the product boundary
+- [docs/example_lessons.md](/Users/aelaguiz/workspace/paperzod/docs/example_lessons.md)
+  - the high-fidelity Lessons proving example and canonical setup readback
 - [docs/ref](/Users/aelaguiz/workspace/paperzod/docs/ref)
   - grounding material and reference inputs
