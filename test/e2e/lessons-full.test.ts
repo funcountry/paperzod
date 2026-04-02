@@ -72,7 +72,7 @@ describe("lessons_full e2e", () => {
     const standardsDrift = compile({
       ...lessonsSetup,
       links: lessonsSetup.links.map((link) =>
-        link.id === "packet_shape_section_documents_artifact" ? { ...link, to: "missing_standard_artifact" } : link
+        link.kind === "documents" && link.from === "packet_shape_section" ? { ...link, to: "missing_standard_artifact" } : link
       )
     });
     expect(standardsDrift.success).toBe(false);

@@ -3,9 +3,11 @@ import { expectTypeOf, test } from "vitest";
 import type { AuthoredContentBlock } from "../../src/core/defs.js";
 import {
   composeSetup,
+  defineGateTemplate,
   defineRole,
   defineRoleHomeTemplate,
   defineSetup,
+  defineSharedEntrypointTemplate,
   defineSurface,
   defineWorkflowStep,
   loadFragments,
@@ -46,6 +48,14 @@ test("helper-based authoring stays type-safe and lowers to SetupInput", () => {
   const fragments = loadFragments(new URL("../fixtures/fragments/editorial/workflow/", import.meta.url), {
     goal: "goal.md"
   });
+  const sharedEntrypoint = defineSharedEntrypointTemplate({
+    id: "shared_entrypoint",
+    sections: [{ key: "readOrder", title: "Read Order" }] as const
+  });
+  const gate = defineGateTemplate({
+    id: "gate",
+    sections: [{ key: "criteria", title: "Criteria" }] as const
+  });
 
   const setup = composeSetup(
     defineSetup({
@@ -73,6 +83,18 @@ test("helper-based authoring stays type-safe and lowers to SetupInput", () => {
       sections: {
         readFirst: { body: fragments.goal }
       }
+    }),
+    sharedEntrypoint.document({
+      surfaceId: "shared_readme",
+      runtimePath: "generated/README.md",
+      sections: {
+        readOrder: { documentsTo: "step_1" }
+      }
+    }),
+    gate.document({
+      surfaceId: "review_gate_surface",
+      runtimePath: "generated/gates/REVIEW.md",
+      reviewGateId: "review_gate"
     })
   );
 

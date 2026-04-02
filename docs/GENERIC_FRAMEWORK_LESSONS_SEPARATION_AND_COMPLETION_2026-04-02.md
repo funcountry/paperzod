@@ -23,19 +23,27 @@ related:
 
 Outcome
 
-The generic-core cut and the missing authoring surface are now both shipped:
-reusable document-shape helpers, repo-local markdown fragment ingestion, and
-truthful docs about what is core versus setup-side sugar.
+The generic-core cut, the first helper-backed authoring layer, and the
+follow-on authoring cleanup phase are all shipped. The framework now exposes a
+broader and more explicit authoring surface without reopening the core model.
 
 Problem
 
-The repo was no longer Lessons-coupled in the core, but it was still
-split-brained at the product surface: the plain example and README described a
-helper layer that the code did not actually ship.
+The repo needed one last cleanup pass after the generic-core cut: broaden the
+helper family pack, prove modular canonical setup assembly, and make the
+remaining narrow boundaries explicit instead of leaving them as implied future
+choices.
 
 Approach
 
-Keep the generic core and canonical setup boundary that already shipped, then add a thin ergonomic authoring layer on top of the existing low-level model: reusable document-shape helpers and markdown fragment loading that lower into plain `SetupInput`, plus docs truth that clearly separates shipped framework helpers from setup-local composition.
+Keep the generic core and canonical setup boundary, then finish the remaining
+authoring-layer cleanup without inventing a second semantic system: broaden
+helper coverage across every surface family already used in the canonical
+proving setups, split those setups into specialized local files assembled by
+plain `index.ts` entrypoints, keep the fragment contract narrow, keep
+`composeSetup(...)` append-only, keep setup-level executable checks deferred,
+and keep raw HTML anchors as the deliberate stable-target mechanism. Every
+convenience still lowers into plain `SetupInput`.
 
 Plan
 
@@ -44,6 +52,7 @@ Plan
 3. Make plain TypeScript setup modules first-class authoring inputs, then move Lessons and `core_dev` into canonical setup packages instead of keeping them half inside `src/**` and half inside fixtures.
 4. Finish structural-first parity and the end-to-end verification story so the framework and the Lessons proving case are both fully covered.
 5. Finish the missing authoring-surface follow-through in three slices: authoring primitives, reusable document shapes, then product-doc truth plus final proof.
+6. Close one cleanup phase for authoring-layer completeness: broaden helper coverage for the remaining repeated surface families, modularize the canonical setups, make fragment/composition/check and section-target boundaries explicit, and close with focused proof plus truthful docs.
 
 Non-negotiables
 
@@ -54,6 +63,8 @@ Non-negotiables
 - The final test story must prove both genericity and full Lessons support end to end.
 - Public docs must not claim authoring helpers that do not exist.
 - Ergonomic authoring helpers must lower into plain `SetupInput`; they must not widen the core graph model or create a second semantic source.
+- This cleanup phase must not silently expand into modeling the full Lessons doctrine tree.
+- Canonical setup modularization must still assemble into one plain default-exported `SetupInput`, not a wrapper or plugin format.
 
 <!-- arch_skill:block:implementation_audit:start -->
 # Implementation Audit (authoritative)
@@ -62,13 +73,16 @@ Verdict (code): COMPLETE
 Manual QA: n/a (non-blocking)
 
 ## Code blockers (why code is not done)
-- None. The plain-example product-shape requirements are now code-verifiable.
+- None. The plain-example product-shape requirements and the Phase 9 cleanup
+  contracts are now code-verifiable.
 
 ## Reopened phases (false-complete fixes)
 - None.
 
 ## Missing items (code gaps; evidence-anchored; no tables)
-- None. Audit readback against `docs/ref/GENERIC_DOCTRINE_SYSTEM_PLAIN_EXAMPLE.md`:
+- None. Audit readback against
+  `docs/ref/GENERIC_DOCTRINE_SYSTEM_PLAIN_EXAMPLE.md` plus the Phase 9
+  contracts in Sections 0, 5, 6, and 7:
   - reusable document shapes are shipped through
     `src/source/templates.ts`
   - one setup can fill those shapes through plain `SetupInput` plus
@@ -76,6 +90,10 @@ Manual QA: n/a (non-blocking)
     `test/fixtures/source/editorial-example.ts`
   - pre-authored markdown fragments are shipped through
     `src/source/fragments.ts`
+  - canonical proving setups now assemble from modular local files under
+    `setups/lessons/**` and `setups/core_dev/**`
+  - stable section targets still emit through deliberate raw HTML anchors in
+    `src/doc/markdown.ts`
   - generated runtime markdown is proven through
     `test/e2e/editorial-example.test.ts`,
     `test/api/index.test.ts`, and
@@ -85,13 +103,23 @@ Manual QA: n/a (non-blocking)
 - Landed authoring primitives in `src/source/compose.ts` and
   `src/source/fragments.ts`, including the explicit fragment-base contract and
   fail-loud supported-markdown boundary.
-- Landed reusable document-shape helpers in `src/source/templates.ts` for the
-  first proving families: `role_home`, `workflow_owner`, and `standard`.
+- Landed reusable document-shape helpers in `src/source/templates.ts` for
+  every surface family used by the canonical proving setups:
+  `role_home`, `project_home_root`, `shared_entrypoint`,
+  `workflow_owner`, `packet_workflow`, `standard`, `gate`,
+  `technical_reference`, `how_to`, and `coordination`.
 - Added an executable helper-backed proving setup in
   `test/fixtures/source/editorial-example.ts` plus fragment fixtures under
   `test/fixtures/fragments/editorial/**`.
-- Rewrote `README.md` and `docs/schema.md` around the shipped helper API and
-  the explicit defer on setup-level executable checks.
+- Refactored `setups/lessons/**` and `setups/core_dev/**` into modular local
+  packages with `roles.ts`, `workflow.ts`, `artifacts.ts`, `references.ts`,
+  `surfaces.ts`, `targets.ts`, `links.ts`, and `index.ts`.
+- Kept canonical setup helper imports on the package self-reference path
+  instead of raw runtime imports from `src/**`, and aligned repo typecheck
+  plus test resolution around that contract.
+- Rewrote `README.md`, `docs/schema.md`, and `docs/testing.md` around the
+  shipped helper API, the explicit defer on setup-level executable checks, and
+  the deliberate raw HTML section-anchor contract.
 
 ## Verification summary
 - Focused helper-layer proof passed:
@@ -103,7 +131,7 @@ Manual QA: n/a (non-blocking)
   - `npm test`
 - Final repo-wide result:
   - `49` test files passed
-  - `162` tests passed
+  - `166` tests passed
 
 ## Non-blocking follow-ups (manual QA / screenshots / human verification)
 - `docs/ref/GENERIC_DOCTRINE_SYSTEM_PLAIN_EXAMPLE.md` is still intentionally
@@ -121,6 +149,7 @@ deep_dive_pass_1: done 2026-04-02
 external_research_grounding: done 2026-04-02
 deep_dive_pass_2: done 2026-04-02
 deep_dive_pass_3: done 2026-04-02
+deep_dive_pass_4: done 2026-04-02
 phase_plan: done 2026-04-02
 recommended_flow: deep dive -> external research grounding -> deep dive again -> phase plan -> implement
 note: This is a warn-first checklist only. It should not hard-block execution.
@@ -133,7 +162,7 @@ note: This is a warn-first checklist only. It should not hard-block execution.
 
 This change is successful when the `paperzod` core can express and compile the full Lessons doctrine requirement set through generic node types, links, planners, render primitives, and target adapters, while all Lessons-specific authored content, parity expectations, and setup-local rules live outside the core implementation.
 
-That claim is false if any required Lessons capability still needs hard-coded Lessons names, Lessons-only slugs, Lessons-only prose branches, Lessons-only path assumptions in the core, if the only honest canonical source for Lessons still lives in test fixtures rather than a setup/example package, or if the product docs still promise a generic authoring surface that the framework does not actually ship.
+That claim is false if any required Lessons capability still needs hard-coded Lessons names, Lessons-only slugs, Lessons-only prose branches, Lessons-only path assumptions in the core, if the only honest canonical source for Lessons still lives in test fixtures rather than a setup/example package, if common repeated setup authoring still has to fall back to raw `SetupInput` for most surface families we care about, or if the product docs promise fragment, composition, or validation conveniences that the framework does not actually ship.
 
 ## 0.2 In scope
 
@@ -144,6 +173,10 @@ That claim is false if any required Lessons capability still needs hard-coded Le
 - Finishing automated proof so the framework and the Lessons proving case are both tested end to end.
 - Removing current structural confusion where fixtures, examples, docs, and implementation each imply a different source of truth.
 - Finishing the framework-level authoring ergonomics the plain example already claims: reusable document shapes, markdown-fragment ingestion, and truthful separation between framework helpers and setup-local composition.
+- Broadening helper-backed authoring for the repeated surface families we want to treat as first-class setup ergonomics after the first helper cut.
+- Refactoring the canonical `setups/lessons` and `setups/core_dev` packages so they can be assembled from specialized local files instead of remaining monolithic `index.ts` sources.
+- Codifying the product boundary for fragment richness, composition overrides, and setup-level executable checks.
+- Codifying raw HTML section anchors as the stable section-target mechanism in rendered markdown.
 
 ## 0.3 Out of scope
 
@@ -153,6 +186,8 @@ That claim is false if any required Lessons capability still needs hard-coded Le
 - Preserving current Lessons-specific implementation shortcuts in the core for convenience.
 - Shipping partial framework decoupling without the matching test and doctrine guardrails.
 - Adding setup-local executable rule bundles or implicit setup-module hooks just to make higher-level authoring more convenient.
+- Modeling the full Lessons doctrine tree as part of this cleanup phase.
+- Replacing stable section targets with a platform-specific markdown trick unless it stays simpler and equally reliable across our real targets.
 
 ## 0.4 Definition of done (acceptance evidence)
 
@@ -167,6 +202,11 @@ That claim is false if any required Lessons capability still needs hard-coded Le
   - one setup that fills those shapes
   - markdown fragment loading for human-owned prose
   - generated runtime markdown
+- Every surface family already present in `setups/lessons` and `setups/core_dev` is helper-backed.
+- The fragment-loading contract remains narrow and explicit: paragraphs, nested lists, and fenced code blocks only; richer constructs stay inline TypeScript-authored.
+- The composition and setup-check boundaries are explicit and fixed: `composeSetup(...)` is append-only, and setup-level executable checks remain deferred with no shipped extra-check seam.
+- `setups/lessons` and `setups/core_dev` demonstrate modular local composition through specialized files assembled by `index.ts`, while still exporting plain `SetupInput`.
+- Generated markdown preserves stable section targets through deliberate retained raw HTML anchors.
 
 ## 0.5 Key invariants (fix immediately if violated)
 
@@ -178,6 +218,11 @@ That claim is false if any required Lessons capability still needs hard-coded Le
 - Hard cutover beats dual-path drift.
 - No fallbacks or runtime shims that preserve the current confusion.
 - High-level authoring helpers are allowed only as a thin layer over the existing low-level model; they do not create new core node kinds or a second semantic truth surface.
+- Cleanup of the authoring layer must stay above the core model unless evidence proves a lower-layer gap.
+- If a helper, fragment construct, or check seam is not shipped, the docs must say so plainly instead of implying it exists.
+- Setup-package modularization is allowed, but package assembly still terminates in one plain setup object at the `index.ts` boundary.
+- Stable section addressability matters more than raw markdown purity; raw HTML
+  anchors remain until architecture is explicitly reopened.
 
 # 1) Key Design Considerations (what matters most)
 
@@ -185,7 +230,7 @@ That claim is false if any required Lessons capability still needs hard-coded Le
 
 1. Restore a truthful framework versus setup boundary.
 2. Finish the generic architecture needed to support the real Lessons requirements.
-3. Finish the ergonomic authoring layer the product docs already claim.
+3. Finish broader authoring-layer completeness for the common surface families we actually care about.
 4. Keep the runtime markdown readable and close to the real Lessons corpus shape.
 5. Make completeness auditable through tests and clear setup-package ownership.
 6. Improve ergonomics so future setup work does not require touching framework internals.
@@ -197,6 +242,9 @@ That claim is false if any required Lessons capability still needs hard-coded Le
 - The live `paperclip_agents` Lessons tree is a real external truth surface and must remain an input to parity planning.
 - The current codebase already has meaningful core layers; this is a correction and completion plan, not a greenfield rewrite.
 - The verification bar must stay behavior-focused and avoid negative-value gates.
+- Not counting the full Lessons doctrine tree, the remaining work should stay mostly in the authoring layer unless real evidence shows a lower-layer gap.
+- New convenience helpers need direct proof and docs truth, or they are worse than honest raw `SetupInput` authoring.
+- The canonical setup packages are already large enough that staying monolithic is now an authoring-quality problem, not a simplification.
 
 ## 1.3 Architectural principles (rules we will enforce)
 
@@ -216,6 +264,11 @@ That claim is false if any required Lessons capability still needs hard-coded Le
 - A stricter framework/example split may force new extension points in the renderer and checker layers, but that is preferable to continuing with title- and slug-based branches.
 - Prefer richer authored document metadata over a renderer-plugin system in the first cut. That keeps the framework smaller, but it means truly exotic setup-local rendering behavior stays out of scope until a real second adopter justifies it.
 - Prefer plain TypeScript setup modules over a setup-module wrapper or per-setup rule bundle in the first cut. That keeps the authoring path close to the current repo pattern, but it means any future need for setup-local code hooks should be justified by real evidence rather than anticipation.
+- Broadening the helper layer will improve ergonomics, but every new helper family or fragment construct expands the tested and documented product surface we now have to keep truthful.
+- It is better to leave composition overrides or extra checks explicitly narrow or deferred than to invent a generic patch or plugin system without repeated real cases.
+- A modular setup package is now preferable to a single giant file for the canonical proving setups, as long as `index.ts` remains the plain assembly boundary.
+- Raw HTML anchors are acceptable output because stable section targets matter
+  more than prettier markdown in this phase.
 
 # 2) Problem Statement (existing architecture + why change)
 
@@ -234,11 +287,19 @@ The generic-core cut was also real by the time the reopened scope started: canon
 - The plain example and README said the product should support reusable document shapes and markdown fragment loading, but the shipped API still only exposed the lower-level `SetupInput` path.
 - `docs/schema.md` already admits the DSL is narrower than the full shape, so the README/example mismatch is a real product-surface drift signal rather than a harmless simplification.
 
+After Phases 1-8 landed, the remaining cleanup gaps became narrower and mostly authoring-layer concerns rather than core graph or compiler misses:
+
+- The helper-backed document-shape layer still stops at `role_home`, `workflow_owner`, and `standard`; repeated families such as `packet_workflow`, `gate`, `shared_entrypoint`, `reference`, `how_to`, `coordination`, and project-home roots still drop back to raw `SetupInput`.
+- `loadFragments(...)` is real, but the fragment contract is still narrow: paragraphs, nested ordered and unordered lists, and fenced code blocks only. Headings, tables, blockquotes, frontmatter, HTML, images, task lists, and multi-line list items still fail loudly.
+- `composeSetup(...)` is still append-only. It does not yet provide a clean supported way to replace one section, target, or link when a setup wants a shared baseline plus local overrides.
+- Setup-level executable checks are still deliberately absent. The runtime pipeline runs only `coreCheckRules`, and the extra-check seam remains an explicit product decision rather than a shipped hook.
+
 ## 2.3 Constraints implied by the problem
 
 - We need an architectural split that preserves the existing useful compiler layers instead of discarding them.
 - We need doctrine updates that stop future contributors from reintroducing setup-local logic into the core.
 - We need the final test matrix to prove both genericity and the full Lessons case, not one at the expense of the other.
+- We should not reopen the core model or quietly expand into the full Lessons doctrine tree just because the remaining cleanup work is ergonomics-heavy.
 
 <!-- arch_skill:block:research_grounding:start -->
 # 3) Research Grounding (external + internal “ground truth”)
@@ -366,6 +427,10 @@ follow-through. The generic core, helper layer, and product docs are aligned.
 ## 4.1 On-disk structure
 
 - `package.json` exports one framework package with `.` plus `./core`, `./markdown`, and `./testing`. Canonical repo-local setup modules now live under `setups/**`, but they remain repo-local and are not part of the public package API.
+- `setups/lessons/index.ts` and `setups/core_dev/index.ts` are now canonical
+  repo-local setup roots, but both still own every top-level setup collection
+  in one monolithic file. The repo proves plain setup modules today, not yet
+  modular setup-package assembly.
 - `package.json` now declares `engines.node >=24.12.0`, `tsconfig.json` and `test/types/tsconfig.json` type-check `setups/**`, and `tsconfig.build.json` stays `src/**`-only. The repo-local `.ts` authoring contract is encoded now.
 - `src/**` already contains real framework layers: source authoring and normalization, graph construction, checks, planning, markdown rendering, target resolution, emit, and CLI.
 - `src/source/index.ts` now re-exports the low-level source model plus the
@@ -375,6 +440,9 @@ follow-through. The generic core, helper layer, and product docs are aligned.
   instead of Lessons-only prose branches, and the shipped helper layer now
   lives above that renderer boundary rather than inside it.
 - `src/doc/ast.ts`, `src/doc/builders.ts`, and `src/core/defs.ts` already define a narrow document and authored-content vocabulary. There is no raw-markdown semantic layer, no fragment registry, and no markdown parser dependency in `package.json`.
+- `src/doc/markdown.ts` currently renders each section as a heading preceded by
+  a raw HTML anchor, and `test/doc/markdown.test.ts` plus the affected render
+  and e2e snapshots currently lock that in as the stable-target output shape.
 - `test/fixtures/source/**` now mixes intentionally synthetic fixtures with thin adapters over canonical setups such as `lessons_full` and `second_setup`. Canonical Lessons and `core_dev` truth no longer lives only inside tests.
 - `test/fixtures/*.test.ts`, `test/e2e/*.test.ts`, `test/render/*.test.ts`, and `test/perf/index.test.ts` still touch fixture modules heavily, but the repo now also imports canonical setups directly where that is the honest proof surface.
 - `test/goldens/lessons-live/**` is the frozen parity corpus for one external proving case. It is not semantic source, but it is the only repo-local mirror of the live Lessons runtime tree.
@@ -396,11 +464,15 @@ follow-through. The generic core, helper layer, and product docs are aligned.
    `SetupPart` values. `composeSetup(...)` merges those parts back into one
    plain setup, reusable document-shape helpers stamp out repeated document
    families, and `loadFragments(...)` resolves repo-local fragment files from
-   an explicit base directory.
+   an explicit base directory. `composeSetup(...)` is currently append-only;
+   there is no shipped override or patch layer above plain TypeScript.
 3. CLI path:
    `src/cli/shared.ts` loads setup modules by file extension for `.json`, `.js`, `.mjs`, `.cjs`, `.ts`, `.mts`, and `.cts`. The three CLI commands then route that plain object through the same public pipeline, and `doctor` still infers the setup id from the raw loaded value instead of a normalized result.
 4. Render path:
    `src/markdown/index.ts` dispatches by `surfaceClass`. `renderSurfaceDocumentAst` in `src/markdown/renderers/common.ts` already handles generic section trees, authored `title`, `intro`, `preamble`, and rich section-body content blocks. Specialized renderers now mostly add graph-derived family behavior rather than setup-aware prose.
+   Section-level addressability is implemented in the markdown stringifier
+   through raw HTML anchors emitted before headings, not through heading text
+   alone or a markdown-extension-specific attribute syntax.
 5. Target path:
    `src/plan/targets.ts` validates Paperclip-style runtime paths after compile planning. It now keeps Paperclip law at the family-boundary level rather than at Lessons-specific folder names.
 6. Proof path:
@@ -426,6 +498,9 @@ follow-through. The generic core, helper layer, and product docs are aligned.
 - The shipped authoring-helper layer is still intentionally thin: `SetupPart`
   composition plus reusable document-shape helpers lower into plain
   `SetupInput` before normalization.
+- That helper pack currently covers only `role_home`, `workflow_owner`, and
+  `standard`. Every other surface family used in the canonical proving setups
+  still falls back to raw `SetupInput` authoring today.
 - Fragment loading now has an explicit contract: paragraphs, nested ordered or
   unordered lists, and fenced code blocks only, with fail-loud errors for
   unsupported constructs.
@@ -479,20 +554,23 @@ No UI redesign is in scope. The user-facing surfaces are:
 - `src/source/**`
   - stable low-level `SetupInput` builders plus a thin ergonomic authoring layer
   - `src/source/compose.ts` provides an authoring-time `SetupPart` merge path that returns ordinary `SetupInput`
-  - `src/source/templates.ts` provides the first reusable document-shape helper pack for `role_home`, `workflow_owner`, and `standard` documents
+  - `src/source/templates.ts` provides the reusable document-shape helper pack for every surface family already exercised by the canonical proving setups: `role_home`, `project_home_root`, `shared_entrypoint`, `workflow_owner`, `packet_workflow`, `standard`, `gate`, `technical_reference`, `how_to`, and `coordination`
   - `src/source/fragments.ts` provides repo-local markdown fragment loading from an explicit `URL` or absolute-path base
   - reusable document-shape helpers and markdown fragment loaders lower into ordinary `SetupInput`
   - `src/source/index.ts` and root `src/index.ts` export those helpers
   - no new template node family or fragment registry in the core normalized model
-- `setups/lessons/index.ts`
-  - canonical Lessons setup module
-  - default export is a plain `SetupInput`
-  - primary authored source for the Lessons proving case
-- `setups/core_dev/index.ts`
-  - canonical non-Lessons setup module
-  - default export is a plain `SetupInput`
-  - proves the same framework without Lessons-shaped leaks
-  - starts as one file, not a split package tree
+- `setups/lessons/**` and `setups/core_dev/**`
+  - canonical proving setup packages
+  - exact local package layout:
+    - `roles.ts`
+    - `workflow.ts` for `workflowSteps`, `reviewGates`, and `packetContracts`
+    - `artifacts.ts`
+    - `references.ts`
+    - `surfaces.ts` for `surfaces` and `surfaceSections`
+    - `targets.ts` for `generatedTargets`
+    - `links.ts`
+    - `index.ts` as the only assembly boundary and default-exported plain `SetupInput`
+  - no wrapper format, no package manifest DSL, and no shadow entrypoint for source-mode imports
 - `tsconfig.json`
   - no-emit repo typecheck surface
   - includes `setups/**` once canonical setup packages exist
@@ -522,13 +600,14 @@ Public package exports stay framework-only. `setups/**` is a repo-local proving 
 2. Ergonomic authoring path:
    reusable document-shape helpers and markdown fragment loaders live above the low-level model. `src/source/templates.ts` produces authoring-time `SetupPart` values for the first repeated document families, `src/source/fragments.ts` produces `AuthoredContentBlock[]`, and `src/source/compose.ts` merges those pieces into plain `SetupInput` before normalization. That keeps the stable core small while making real setup authoring less repetitive.
 3. Repo-local canonical setup path:
-   the repo gains canonical setup locations under `setups/**`, but not a wrapper format. Canonical setup modules default-export plain `SetupInput` values so they remain directly usable with the public API. The first cut uses one file per canonical setup, `setups/<setup>/index.ts`, and only splits into `roles.ts`, `workflow.ts`, and similar files if a setup becomes too large to review sanely.
+   the repo keeps canonical setup locations under `setups/**`, but not a wrapper format. Canonical setup packages are split across specialized local files using the exact package layout from Section 5.1, and `setups/<setup>/index.ts` remains the only plain `SetupInput` assembly boundary and public entrypoint.
 4. CLI path:
    CLI setup loading becomes TypeScript-first and accepts `.ts`, `.mts`, and `.cts` in addition to current module formats. The default path is Node-native type stripping, not a bundled runtime loader, so canonical setup modules must stay erasable-TypeScript-only, use explicit relative file extensions, avoid `tsconfig`-only path aliases, and remain repo-local rather than living under published `node_modules` dependency paths. That contract is encoded in `package.json` `engines`, the repo no-emit typecheck config, and contributor docs, not left as tribal knowledge. Markdown fragment loading happens during plain setup-module evaluation, so the CLI does not get a second fragment-resolution path or cwd-specific behavior.
 5. Check path:
-   core compilation runs generic framework rules only in the reopened follow-through as well. `src/**` may contain framework rules and target-family rules, but not Lessons-only rules. Setup-level executable checks stay explicitly deferred unless a concrete rule set justifies a caller-supplied extra-check seam; no implicit setup-module rule loading is allowed.
+   core compilation runs generic framework rules only. `src/**` may contain framework rules and target-family rules, but not Lessons-only rules. Setup-level executable checks remain explicitly deferred in this cleanup phase too; no caller-wired seam is added and no implicit setup-module rule loading is allowed.
 6. Render path:
    document title and document intro become authored data, not path-derived setup inference. Generic renderers may emit fallback summaries only when the content is derivable from node kind and graph links. All setup-local wording moves into authored `surface` or `surface_section` content.
+   Raw HTML anchors remain the section-target mechanism in emitted markdown. They are the chosen stable-target output because they preserve section ids across heading rewrites without relying on renderer-specific autogenerated heading ids or non-portable markdown extensions.
 7. Target path:
    the Paperclip target adapter enforces family boundaries and path safety only. Exact subfolder naming under `shared/**` becomes authored setup choice, not framework semantics.
 8. Proof path:
@@ -537,10 +616,12 @@ Public package exports stay framework-only. `setups/**` is a repo-local proving 
 ## 5.3 Object model + abstractions (future)
 
 - Keep the current node families and link families as the generic baseline. Do not add Lessons-only node kinds.
-- Add reusable document-shape helpers only as authoring-time sugar. The first cut should ship a helper pack for repeated `role_home`, `workflow_owner`, and `standard` document shapes, not a new top-level DSL stored inside `SetupInput`. Those helpers must lower into the existing `surface`, `surface_section`, `generated_target`, and `documents`-link model before normalization.
+- Add reusable document-shape helpers only as authoring-time sugar. The helper pack should cover every surface family already present in the canonical proving setups: `role_home`, `project_home_root`, `shared_entrypoint`, `workflow_owner`, `packet_workflow`, `standard`, `gate`, `technical_reference`, `how_to`, and `coordination`. Those helpers must lower into the existing `surface`, `surface_section`, `generated_target`, and `documents`-link model before normalization.
 - Add an authoring-time `SetupPart` contract plus `composeSetup(baseSetup, ...parts)` so helper-produced document slices can merge into one plain `SetupInput` without widening the normalized model.
+- Keep `composeSetup(...)` append-only by contract. Do not add a framework-level replace or override helper in this phase; targeted overrides remain ordinary setup-side TypeScript at the package-assembly boundary.
 - Add first-class markdown fragment ingestion as an authoring-time helper that lowers repo-local markdown into the existing authored-content model. The contract should be synchronous and explicit-base only: `loadFragments(new URL("./fragments/workflow/", import.meta.url), spec)` or an equivalent absolute-path input. Do not keep raw markdown strings as a second semantic layer after normalization.
 - The first fragment-loader cut supports only paragraphs, ordered and unordered lists with nesting, and fenced code blocks. Inline markdown stays literal text within those blocks. Headings, blockquotes, tables, frontmatter, HTML, images, task lists, and example bundles fail loudly with file-context diagnostics and stay TypeScript-authored until a later deliberate expansion.
+- Keep that fragment subset unchanged in this cleanup phase. Richer authored-content constructs stay TypeScript-authored, and docs plus tests must present that boundary as deliberate product truth rather than pending parser work.
 - Extend `surface` with authored document-level metadata:
   - `title?: string`
   - `intro?: AuthoredContentBlock[]`
@@ -558,6 +639,7 @@ Public package exports stay framework-only. `setups/**` is a repo-local proving 
 - Keep target adapters as the explicit family-level extension seam.
 - Keep compile planning as the only provenance authority. No second provenance system is introduced for canonical setups or parity harnesses.
 - Keep `PlannedDocument` and `PlannedSection` provenance-focused. Do not widen compile-plan types just to cache authored `surface.title` or `surface.intro`; renderers can read that from the source graph through `surfaceId`.
+- Keep setup-level executable checks explicitly deferred. No caller-wired seam ships in this phase, and no setup-module side effects or hidden rule loading are introduced.
 
 ## 5.4 Invariants and boundaries
 
@@ -572,11 +654,22 @@ Public package exports stay framework-only. `setups/**` is a repo-local proving 
 - Any TypeScript options needed only for repo-local setup authoring, such as explicit `.ts` local imports, stay on the no-emit typecheck surface and must not silently leak into the emitted `src/**` package build.
 - Fragment loading must use explicit caller-local `URL` or absolute-path resolution. Do not add cwd-relative behavior or stack-based caller detection.
 - If a fragment construct cannot lower cleanly into the supported `AuthoredContentBlock[]` subset, the loader must fail loudly instead of flattening or silently dropping structure.
+- Canonical proving setups use the exact modular package layout from Section
+  5.1. `index.ts` is the only assembly boundary, and internal setup modules do
+  not become shadow public entrypoints.
+- Helper-family expansion must not widen `SetupInput` or require new normalized node kinds.
+- `composeSetup(...)` stays append-only. Do not add magic deep-merge behavior,
+  implicit patch semantics, or framework-level override helpers in this phase.
 - `test/goldens/lessons-live/**` stays a frozen parity surface only. It does not become a second semantic source.
 - Public exports remain framework-only until there is a concrete consumer for exported example packages.
 - Ergonomic authoring helpers are allowed in the public package surface, but they must lower into plain `SetupInput` and stay separate from `paperzod/core`.
 - No setup-module wrapper or setup-local executable rule bundle is introduced in the first cut. If later evidence demands either one, reopen architecture explicitly.
-- Any future extra-check seam must be opt-in and caller-wired. No setup module may gain hidden executable validation side effects.
+- No extra-check seam ships in this cleanup phase. Any future extra-check seam
+  would need explicit caller wiring and a reopened architecture decision. No
+  setup module may gain hidden executable validation side effects.
+- Raw HTML anchors remain the stable section-target mechanism in emitted
+  markdown. Do not switch to heading-derived ids or markdown-extension
+  attributes in this phase.
 - No compatibility shims or dual-path fixture ownership are allowed. Old fixture-owned canonical setups become thin imports or are deleted.
 
 ## 5.5 UI surfaces (ASCII mockups, if UI work)
@@ -594,17 +687,23 @@ No UI work is planned. The target user-facing improvements are:
 
 ## 6.1 Change map (table)
 
-Note: this table is the full plan inventory, not just the remaining work. Rows tied to Phases 1-5 are already landed. The rows still open after the reopened review are the product-shape doctrine, ergonomic authoring helpers, markdown fragment ingestion, example-truth proof, and extra-check docs truth.
+Note: this table is the full plan inventory, not just the remaining work. Rows tied to Phases 1-8 are already landed. The rows still open after this deep-dive are the broader helper-family pack, modular canonical setup packaging, and the docs-plus-proof work needed to make the fragment, composition, extra-check, and anchor decisions explicit.
 
 | Area | File | Symbol / Call site | Current behavior | Required change | Why | New API / contract | Tests impacted |
 | ---- | ---- | ------------------ | ---------------- | --------------- | --- | ------------------ | -------------- |
 | Repo doctrine | `AGENTS.md` | root repo instructions | Says Lessons is a proving case but does not explicitly lock the framework/setup-package boundary or require the agent skill for future AGENTS edits | Add explicit framework-only `src/**` rule, canonical `setups/**` rule, and anti-regression wording | Prevent the repo from drifting back into Lessons-first architecture | Plain-English SSOT rule for framework vs setup packages | docs-only smoke and later review |
 | Normative docs | `docs/requirements.md`, `docs/architecture.md`, `docs/schema.md`, `docs/testing.md`, `docs/example_lessons.md` | product, schema, architecture, testing, example doctrine | Docs describe a generic framework, but they still reference fixtures as the executable proving surface | Rewrite docs to point at canonical setup modules and the new renderer/source boundary | Prevent doc/code SSOT drift | Canonical setup-package doctrine and renderer-data-model doctrine | docs review plus release-gate docs pass |
 | Product-shape doctrine | `README.md`, `docs/schema.md`, `docs/ref/GENERIC_DOCTRINE_SYSTEM_PLAIN_EXAMPLE.md` | small example, authoring claims, product explanation | Public docs describe templates and fragment loading as if they already ship, while the code only exposes the lower-level `SetupInput` path | Treat the plain example as a binding product-shape anchor, then ship the missing thin helper layer and rewrite examples around the real helper contract instead of a speculative `templates` mini-DSL | Prevent the docs from outrunning the product again | Truthful authoring-surface contract tied to shipped helper APIs | docs review, API tests, type tests |
-| Public repo docs and runtime contract | `README.md`, `package.json`, `tsconfig.json`, `tsconfig.build.json`, `test/types/tsconfig.json` | README examples, `engines`, typecheck includes, TypeScript authoring options | README already advertises `setups/**` and direct `.ts` setup compilation, but the repo has no encoded Node floor, no `setups/**` typecheck surface, and no explicit separation between repo-only TypeScript authoring rules and the emitted package build | Declare the Node floor in `package.json` with `node >=24.12.0`, include `setups/**` in the no-emit typecheck surface, add the TypeScript options needed for explicit `.ts` local imports and Node-native constraints there, keep the emitted build `src/**`-only, and align README contributor guidance with canonical one-file setup modules | The Node-native `.ts` authoring path must be enforceable in config and docs, not implied | One explicit repo-local canonical setup authoring contract | `npm run typecheck`, `npm run test:types`, CLI tests, docs review |
+| Public repo docs and runtime contract | `README.md`, `package.json`, `tsconfig.json`, `tsconfig.build.json`, `test/types/tsconfig.json` | README examples, `engines`, typecheck includes, TypeScript authoring options | README already advertises `setups/**` and direct `.ts` setup compilation, but the repo has no encoded Node floor, no `setups/**` typecheck surface, and no explicit separation between repo-only TypeScript authoring rules and the emitted package build | Declare the Node floor in `package.json` with `node >=24.12.0`, include `setups/**` in the no-emit typecheck surface, add the TypeScript options needed for explicit `.ts` local imports and Node-native constraints there, keep the emitted build `src/**`-only, and align README contributor guidance with the modular canonical setup-package layout from Section 5.1 | The Node-native `.ts` authoring path must be enforceable in config and docs, not implied | One explicit repo-local canonical setup authoring contract | `npm run typecheck`, `npm run test:types`, CLI tests, docs review |
 | Public package surface | `package.json` | `exports` | Exports framework subpaths only | Keep framework-only exports explicit and decide whether any repo-local helpers need export changes | Avoid accidentally exporting proving packages as product API | Framework-only public export contract | CLI and self-import tests |
 | Ergonomic authoring helpers | `src/source/compose.ts`, `src/source/templates.ts`, `src/source/index.ts`, `src/index.ts` | `SetupPart`, `composeSetup`, reusable document-shape helpers, helper exports | Only low-level builders exist; repeated document shapes and cross-array wiring still have to be authored by hand | Add a thin helper layer that produces authoring-time `SetupPart` values for the first repeated document families and merges them back into plain `SetupInput` through `composeSetup` | Close the remaining product-surface gap without widening the core graph model or adding new top-level semantic arrays to `SetupInput` | Public helper layer that lowers into stable `SetupInput` before normalization | API tests, type tests, example e2e |
 | Markdown fragment ingestion | `src/source/fragments.ts`, `src/source/index.ts`, `src/index.ts`, `README.md`, `docs/schema.md` | `loadFragments`, supported-markdown contract, fragment path resolution | Authored prose must still arrive as inline `AuthoredContentBlock[]` in TypeScript, and there is no honest caller-local fragment-resolution contract | Add synchronous repo-local markdown fragment loading with explicit `URL` or absolute-path base input, a narrow supported block subset, and fail-loud diagnostics; do not add fragment nodes or widen `SetupInput` | Human-owned doctrine prose should not require AST-like inline authoring for every nontrivial setup, but the fragment contract must stay explicit and honest | `loadFragments(base, spec)` lowers paragraphs, nested lists, and fenced code blocks into `AuthoredContentBlock[]`; headings and richer constructs stay out of contract in the first cut | source tests, render tests, example e2e |
+| Helper-family coverage follow-through | `src/source/templates.ts`, `src/source/index.ts`, `src/index.ts`, `README.md`, `docs/schema.md`, `test/source/templates.test.ts`, canonical setup packages | helper pack for repeated surface families | The shipped helper layer covers `role_home`, `workflow_owner`, and `standard` only; every other surface family used in `lessons` and `core_dev` still falls back to raw `SetupInput` | Add helpers for the remaining proving-setup surface families: `project_home_root`, `shared_entrypoint`, `packet_workflow`, `gate`, `technical_reference`, `how_to`, and `coordination` | The proving setups already exercise these families, so leaving them raw is now the clearest remaining ergonomics gap | Full proving-surface helper pack that still lowers to `SetupPart` and plain `SetupInput` | source tests, type tests, API tests, canonical setup proof, docs review |
+| Fragment contract follow-through | `src/source/fragments.ts`, `README.md`, `docs/schema.md`, `test/source/fragments.test.ts`, fragment fixtures | supported markdown subset and diagnostics | Fragment loading is shipped, but the supported subset is intentionally narrow and still rejects headings, blockquotes, tables, task lists, and multi-line list items | Keep the current fragment subset unchanged and rewrite docs plus tests so that richer constructs are treated as explicit TypeScript-authored structure, not near-term parser work | The current helper contract is already honest and sufficient for the shipped example; widening it now adds parser surface without real setup evidence | Explicit retained fragment contract: paragraphs, nested lists, fenced code blocks only | source tests, example e2e, docs review |
+| Composition override stance | `src/source/compose.ts`, `README.md`, `docs/schema.md`, `test/source/compose.test.ts` | append-only composition versus override semantics | `composeSetup(...)` clones the base setup and appends each later collection; it does not support targeted replace or override behavior | Keep composition append-only by contract and document targeted local overrides as ordinary setup-package TypeScript instead of adding a framework override helper | Modular setup packages reduce the need for a second merge DSL, and append-only composition stays easier to reason about | Explicit composition boundary: append-only only; overrides happen in package assembly code | source tests, type tests, docs review |
+| Setup-level check seam decision | `src/checks/index.ts`, `src/index.ts`, `README.md`, `docs/requirements.md`, `docs/architecture.md`, `docs/schema.md` | core checks versus caller-supplied extra rules | Only `coreCheckRules` run today; the docs defer any setup-level executable checks | Keep that defer explicit across docs and examples; do not add an extra-check seam in this cleanup phase | Avoid another round of product-surface ambiguity without a concrete second rule set | Explicit validation-extension contract: framework ships core checks only in this phase | docs review only |
+| Canonical setup modularization | `setups/lessons/index.ts`, `setups/core_dev/index.ts`, new adjacent setup files, type and e2e proof | canonical setup package assembly | The canonical proving setups are currently large monolithic `index.ts` files, which makes the intended package-level composition story hard to believe and hard to maintain | Split `lessons` and `core_dev` into specialized local files assembled by `index.ts`, while keeping the final export a plain `SetupInput` value | The repo should prove that canonical setups can be modular without inventing wrappers or hiding the real assembly path | Plain setup-package assembly contract: specialized local files, plain `index.ts` default export | type tests, CLI tests, API tests, e2e suites |
+| Markdown section-target output | `src/doc/markdown.ts`, `docs/requirements.md`, `docs/testing.md`, test snapshots | stable section targets in emitted markdown | Section rendering currently emits raw HTML anchors via `<a id=\"...\"></a>` before headings | Keep those raw HTML anchors as the explicit stable-target mechanism and update docs to say that plainly | Stable ids must survive heading rewrites, and HTML anchors are the smallest portable mechanism already proven by the repo | Stable section targets by deliberate retained raw HTML anchors | docs review plus existing doc markdown, render, and e2e proof surfaces |
 | Source model | `src/core/defs.ts`, `src/source/builders.ts`, `src/source/schemas.ts`, `src/source/normalize.ts` | `SurfaceDef`, `SurfaceInput`, schema and normalization for surfaces | `surface` has `runtimePath` and optional `preamble`, but no authored document title or intro | Add authored document-level metadata and normalize it | Remove the need for title and intro inference in renderers | `surface.title?` and `surface.intro?` authored contract | type tests, source tests, normalization tests, fixture snapshots |
 | Compile types | `src/core/compile-types.ts` | `PlannedDocument`, `PlannedSection` | Compile plan is currently provenance-only | Keep compile-plan types minimal and avoid caching authored title or intro there | Prevent unnecessary widening of planning contracts | Provenance-only compile-plan contract | plan tests, render tests |
 | Public pipeline | `src/index.ts` | `renderSetup`, `compileSetup`, `compileAndEmitSetup` | Public API only consumes raw setup input plus adapter | Preserve raw-input public API with no setup wrapper layer | Keep product API generic while enabling canonical setup modules by plain import | Public framework API stays plain `unknown -> SetupInput` | API tests, e2e, CLI |
@@ -617,7 +716,7 @@ Note: this table is the full plan inventory, not just the remaining work. Rows t
 | Lessons-coupled renderers | `src/markdown/renderers/workflow-owner.ts`, `src/markdown/renderers/standard.ts`, `src/markdown/renderers/reference.ts`, `src/markdown/renderers/gate.ts`, `src/markdown/renderers/shared-entrypoint.ts` | title, intro, slug, and path-derived branches | Branch on project path parsing, Lessons-only titles, and setup-specific slugs like `owner-map`, `comment-shape`, `specialist-turn-shape`, `Poker KB`, `GitHub`, and `Bootstrap` | Remove setup-local branches and move setup-local wording into authored setup source | This is the core architectural confusion the refactor is fixing | Renderer fallback only from generic graph facts; all other wording authored in setup modules | extended surface render tests, lessons e2e, second setup e2e, snapshots |
 | CLI setup loading | `src/cli/shared.ts` | `loadSetupInput`, `analyzeSetupInput` | Loads only JSON and JS-family modules and assumes the loaded value is the setup object itself | Add TypeScript module support but keep the plain default-export contract and the repo-local Node-native `.ts` loading boundary | Canonical setups must be first-class authoring inputs without a wrapper format or second loader path | CLI plain-setup loading contract under the Node-native TypeScript authoring rules | CLI validate/compile tests, doctor tests |
 | CLI commands | `src/cli/compile.ts`, `src/cli/validate.ts`, `src/cli/doctor.ts` | command entrypoints | Commands compile or analyze raw setup input directly and doctor guesses the setup id from the raw object | Keep plain setup input, but make setup-id reporting robust for TypeScript canonical modules too | Keep CLI truthful once canonical modules exist | CLI command contract for plain module inputs | CLI tests |
-| Canonical setup modules | `setups/lessons/index.ts`, `setups/core_dev/index.ts` | new repo-local setup roots | Do not exist | Create canonical setup roots whose default export is a plain `SetupInput`, starting with one file per setup | Move canonical truth out of tests and out of core without inventing a wrapper format or premature package split | Canonical plain-module setup contract | all fixture, e2e, perf, CLI, parity suites |
+| Canonical setup modules | `setups/lessons/index.ts`, `setups/core_dev/index.ts` | repo-local setup roots | Canonical setup roots now exist, but the proving setups are still largely monolithic `index.ts` files | Keep the plain default-exported `SetupInput` contract, but refactor the proving setups into modular local packages assembled by `index.ts` | Move canonical truth out of tests and out of core without inventing a wrapper format or leaving the proving setups trapped in giant single files | Canonical plain-module setup contract with modular local assembly | all fixture, e2e, perf, CLI, parity suites |
 | Fixture source modules | `test/fixtures/source/demo-minimal.ts`, `test/fixtures/source/lessons-vertical-slice.ts`, `test/fixtures/source/lessons-full.ts`, `test/fixtures/source/second-setup.ts`, `test/fixtures/source/shared-overrides.ts` | current fixture exports | Some fixtures are canonical source in disguise | Convert canonical ones into thin imports from `setups/**`; keep only intentionally synthetic fixtures as standalone | Remove duplicate truth surfaces | Canonical import rule for test fixtures | fixture source tests, e2e, perf |
 | Fixture source snapshots | `test/fixtures/lessons-full-source.test.ts`, `test/fixtures/second-setup-source.test.ts`, `test/fixtures/lessons-vertical-slice-source.test.ts` | normalized setup snapshots | Snapshot fixture-owned canonical source | Re-point snapshots at canonical setup modules and make the second setup prove a real non-Lessons path mix | Proof should follow canonical source | Canonical source snapshot contract | fixture snapshot tests |
 | API and type proof | `test/api/index.test.ts`, `test/types/authoring.test.ts` | public API and DSL proof | Prove plain setup authoring and compile path, but not canonical setup imports from `setups/**` | Preserve framework API proof and add repo-local type or usage proof for plain TypeScript canonical setup modules | Keep public API generic while proving the repo-local authoring path | Framework API stays plain; canonical setups are still plain setup modules | API tests, type tests |
@@ -994,6 +1093,102 @@ Exit criteria
 Rollback
 
 - Revert docs and proof updates together if the README/example story still outruns the shipped helper contract.
+
+## Phase 9: Cleanup the authoring layer for broader setup ergonomics
+
+Status: COMPLETE
+
+Completed work:
+
+- Expanded `src/source/templates.ts` to cover every surface family used by the
+  canonical proving setups and tightened the helper contract so
+  `surfaceDocumentsTo: []` is an explicit no-surface-link override instead of
+  falling back to defaults.
+- Refactored `setups/lessons/**` and `setups/core_dev/**` into the planned
+  modular package layout and kept `index.ts` as the only plain `SetupInput`
+  assembly boundary.
+- Switched canonical setup helper imports to the `paperzod` package
+  self-reference path, added repo-local typecheck mapping for that import, and
+  added test-time aliasing so repo tests still execute against live source.
+- Extended the proving surface with helper-family tests, modular setup-package
+  type coverage, append-only compose coverage, canonical setup source tests,
+  canonical e2e proof, CLI validation, perf, stability, mutation, render, and
+  doc-markdown coverage.
+- Updated `README.md`, `docs/schema.md`, and `docs/testing.md` so the helper
+  family pack, narrow fragment contract, append-only compose boundary, no
+  extra-check seam, modular canonical setup layout, and raw HTML section
+  anchors are all stated plainly.
+
+Goal
+
+Make the shipped helper path broad and explicit enough that common setup
+authoring feels complete without reopening the core model or pretending every
+convenience already exists.
+
+Work
+
+- Expand the helper pack to cover every surface family already used by the
+  canonical proving setups: `project_home_root`, `shared_entrypoint`,
+  `packet_workflow`, `gate`, `technical_reference`, `how_to`, and
+  `coordination`, alongside the already-shipped `role_home`,
+  `workflow_owner`, and `standard` helpers.
+- Refactor `setups/lessons` and `setups/core_dev` so they are assembled from
+  the exact local package layout from Section 5.1: `roles.ts`, `workflow.ts`,
+  `artifacts.ts`, `references.ts`, `surfaces.ts`, `targets.ts`, `links.ts`,
+  and `index.ts`, with `index.ts` as the plain `SetupInput` assembly boundary
+  and public entrypoint.
+- Keep the current fragment subset unchanged and update docs plus tests so that
+  richer constructs stay explicitly TypeScript-authored.
+- Keep `composeSetup(...)` append-only by contract and document local
+  overrides as setup-package TypeScript instead of adding a framework override
+  helper.
+- Keep setup-level executable checks explicitly deferred with no extra-check
+  seam in this phase.
+- Keep raw HTML anchors in emitted markdown as the stable section-target
+  mechanism and update docs to describe them as deliberate output.
+- Extend the proving surface with focused helper-family, modular-setup,
+  compose-boundary, and docs-truth coverage for the shipped cleanup work.
+
+Verification (smallest signal)
+
+- Focused `npx vitest run ...` suites for `test/source/templates.test.ts`,
+  `test/source/fragments.test.ts`, `test/source/compose.test.ts`, and any
+  touched API, e2e, or CLI suites.
+- Keep `test/doc/markdown.test.ts`, affected render suites, and affected e2e
+  snapshots green to prove that stable raw HTML anchors remain the emitted
+  section-target mechanism.
+- `npm run typecheck` and `npm run test:types` if helper signatures or
+  authoring contracts change.
+- `npm run build` and `npm test` before restoring the plan to complete.
+
+Docs/comments (propagation; only if needed)
+
+- Keep `README.md`, `docs/schema.md`, and related doctrine on one truthful
+  helper contract. Do not let the public example outrun the shipped cleanup
+  again.
+- Say plainly that fragment breadth stays narrow, `composeSetup(...)` stays
+  append-only, setup-level executable checks stay deferred, and raw HTML
+  anchors are the chosen stable-target mechanism.
+
+Exit criteria
+
+- Every surface family actually present in `setups/lessons` and
+  `setups/core_dev` is helper-backed.
+- `setups/lessons` and `setups/core_dev` prove modular setup-package assembly
+  through specialized local files without changing the plain setup export
+  contract.
+- The fragment-loading contract and the composition/check boundaries are
+  explicit, tested, and truthful in docs: narrow fragment subset,
+  append-only composition, and no extra-check seam.
+- The emitted markdown section-target strategy is explicit and justified:
+  deliberate retained raw HTML anchors with documented rationale.
+- The cleanup phase does not widen the core model, sneak in setup-module side
+  effects, or expand into modeling the full Lessons doctrine tree.
+
+Rollback
+
+- Revert helper-surface expansion if it drifts into a second semantic DSL,
+  hidden deep-merge behavior, or speculative check plugins.
 <!-- arch_skill:block:phase_plan:end -->
 
 # 8) Verification Strategy (common-sense; non-blocking)
@@ -1003,14 +1198,18 @@ Rollback
 - Keep unit-level focus on generic semantic contracts, path-family contracts, authored-content conversion, and setup-loading behavior.
 - For the reopened authoring-layer work, prove helper lowering and fragment ingestion directly rather than relying on docs examples as evidence.
 - For fragment loading, prove both the happy path and the fail-loud boundary: headings, tables, blockquotes, and other out-of-contract markdown should error with usable file context instead of being silently flattened.
+- For the cleanup follow-through, prove the broadened helper family pack and the retained append-only compose boundary directly in source tests rather than only through README examples.
+- Keep proving exact stable-target behavior directly in `test/doc/markdown.test.ts` and the affected render or e2e surfaces because raw HTML anchors remain part of the emitted contract.
 - For CLI setup loading, prove the supported Node-native TypeScript contract directly rather than adding a second transpiler path just for tests.
 - Prefer extending existing checks, planning, and renderer tests rather than inventing new harnesses.
 
 ## 8.2 Integration tests (flows)
 
 - Compile canonical setup packages through the public API and CLI.
+- Keep canonical setup proof honest when they split across many files: API, CLI, and e2e coverage should continue to import the assembled `index.ts` entrypoint rather than special-case internal setup files.
 - Add one small fragment-backed editorial-style example compile so the product example is backed by executable proof rather than prose alone.
 - Keep the product example aligned on one real helper contract: `composeSetup` plus document-shape helpers plus explicit-base fragment loading.
+- Prove the cleanup-phase helper-family expansion and modular setup-package assembly with canonical setup paths rather than docs prose alone.
 - Assert structured diagnostics, compile plans, manifests, and rendered markdown where they prove boundary correctness.
 - Use mutation-style tests to prove drift detection and fail-loud behavior.
 - Final release-gate execution should run `npm run typecheck`, `npm run test:types`, `npm run build`, and `npm test`; use narrower honest suites in earlier phases.
@@ -1023,6 +1222,8 @@ Rollback
   - one small generic example that exercises reusable document shapes plus fragment loading
   - live Lessons inventory/parity alignment
   - final CLI flows
+- The cleanup phase should not reopen full Lessons parity by default; its main proof is that the broader authoring surface stays honest and executable.
+- Raw HTML anchors stay part of the emitted markdown contract, so the proof should keep asserting them directly.
 - Do not treat README prose alone as proof. The helper-backed example fixture and its fragment files are the executable evidence for the public authoring story.
 - Avoid doc-inventory bureaucracy outside the real live-parity contract.
 
@@ -1033,6 +1234,10 @@ Rollback
 - Land the refactor in architecture-first phases.
 - Keep the live `paperclip_agents` Lessons tree as an external proving input until the canonical Lessons package and parity harness are complete.
 - Do not claim the repo is fully decoupled until framework code, setup packages, docs, and tests all agree.
+- Keep raw `SetupInput` authoring as the low-level fallback even though the
+  helper pack now covers every surface family used by the canonical proving
+  setups.
+- Keep the existing raw HTML anchors as the explicit stable-target mechanism.
 
 ## 9.2 Telemetry changes
 
@@ -1371,3 +1576,201 @@ Follow-ups
 - Implement `composeSetup` and `loadFragments` before `templates.ts`.
 - Add the editorial proving example before rewriting README.
 - Run the reopened-scope final gate only after docs and code agree.
+
+## 2026-04-02 - Reopen for authoring-layer completeness cleanup without reopening the core model
+
+Context
+
+Phases 1-8 shipped the generic core cut, canonical setups, and the first
+helper-backed authoring layer. The remaining gaps are narrower: helper coverage
+still stops at three families, fragment support is intentionally narrow,
+composition is append-only, and the extra-check seam is still undecided.
+
+Options
+
+- Leave the plan complete and treat the remaining ergonomics gaps as ad hoc
+  future work.
+- Reopen the plan for one follow-on cleanup phase focused on broader helper
+  coverage plus explicit fragment, composition, and check boundaries.
+- Reopen the core architecture and try to model the full Lessons doctrine tree
+  through more framework primitives.
+
+Decision
+
+Reopen for one cleanup phase. Keep the core model stable, treat full
+Lessons-tree modeling as out of scope, and make the remaining authoring-layer
+gaps either truly supported or explicitly deferred.
+
+Consequences
+
+- The plan returns to `active` even though Phases 1-8 remain complete.
+- The new work is mostly helper-layer and docs truth, not another
+  core/compiler refactor.
+- Future implementation can close the cleanup phase by shipping the smallest
+  justified helper, fragment, compose, or check changes, or by documenting
+  explicit defers where support is still not worth it.
+
+Follow-ups
+
+- Add Phase 9 for authoring-layer completeness.
+- Expand the call-site audit to cover helper-family coverage, fragment breadth,
+  composition overrides, and the extra-check decision.
+- Restore `status: complete` only after the cleanup phase finishes and the
+  public docs stay honest.
+
+## 2026-04-02 - Prove modular canonical setup assembly instead of keeping `lessons` and `core_dev` monolithic
+
+Context
+
+The first canonical-setup cut used one file per setup to keep the migration
+small. That served the cutover, but the shipped `setups/lessons/index.ts` and
+`setups/core_dev/index.ts` are now large enough that they no longer show the
+intended package-level composition story well.
+
+Options
+
+- Keep both canonical setups monolithic and treat local file splitting as an
+  optional later refactor.
+- Split `lessons` and `core_dev` into specialized local files assembled by
+  `index.ts`, while preserving the plain default-exported `SetupInput`
+  contract.
+- Introduce a setup wrapper or package manifest format to make setup assembly
+  more explicit.
+
+Decision
+
+Prove modular canonical setup assembly in the repo. Split the canonical proving
+setups across the exact local package layout from Section 5.1:
+`roles.ts`, `workflow.ts`, `artifacts.ts`, `references.ts`, `surfaces.ts`,
+`targets.ts`, `links.ts`, and `index.ts`, while keeping `index.ts` as the
+plain assembly boundary and the only exported entrypoint.
+
+Consequences
+
+- The repo will show that canonical setups can scale past one giant file
+  without changing the product surface.
+- Tests and CLI proof should keep targeting the assembled `index.ts` entrypoint
+  so modularization does not create a shadow contract.
+- The previous "one file per setup first" rule becomes historical bootstrap
+  guidance, not the current target state for the proving setups.
+
+Follow-ups
+
+- Add modularization work for `setups/lessons` and `setups/core_dev` to Phase
+  9 using that exact package layout.
+- Update the call-site audit and target architecture so they describe the
+  fixed modular layout rather than one-file bootstrap guidance.
+
+## 2026-04-02 - Keep raw HTML section anchors as the stable addressability mechanism
+
+Context
+
+Rendered markdown currently emits raw HTML anchors from
+`src/doc/markdown.ts`. The product requirement is stable section targets or an
+equivalent stable addressability mechanism, not raw HTML for its own sake.
+
+Options
+
+- Keep raw HTML anchors unconditionally because they already work.
+- Replace raw HTML anchors with plain headings or a markdown-native convention
+  if that preserves stable section targets cheaply and portably enough for the
+  real target surfaces.
+- Remove explicit section targets entirely and rely on renderer-specific
+  autogenerated heading ids.
+
+Decision
+
+Keep raw HTML anchors as the emitted section-target mechanism. They are the
+smallest honest portable way to preserve stable section ids across heading
+rewrites in the current markdown contract.
+
+Consequences
+
+- Markdown output keeps the current raw HTML anchor form instead of chasing a
+  cleaner but less portable heading-id strategy.
+- Section-level addressability remains independent of heading text and heading
+  rewrites.
+- Docs should present those anchors as deliberate stable-target output rather
+  than accidental implementation detail.
+
+Follow-ups
+
+- Keep raw HTML anchors explicit in Phase 9 docs truth and proof.
+- Update render and markdown-output proof to keep asserting the retained
+  anchor contract.
+
+## 2026-04-02 - Freeze the remaining cleanup defaults instead of leaving Phase 9 optional
+
+Context
+
+After the cleanup reopen, the plan still contained a few implementation
+branches: whether to widen fragment parsing, whether to add a composition
+override helper, whether to add an extra-check seam, and which remaining
+surface families should get first-class helpers.
+
+Options
+
+- Leave those as Phase 9 implementation-time choices.
+- Freeze the defaults now so implementation follows one plan.
+
+Decision
+
+Freeze the cleanup defaults now:
+
+- expand helpers for every surface family already present in `lessons` and
+  `core_dev`
+- keep the fragment subset unchanged
+- keep `composeSetup(...)` append-only
+- keep setup-level executable checks deferred
+
+Consequences
+
+- Phase 9 is now an implementation checklist, not a product-shape decision
+  point.
+- The cleanup work stays narrow and avoids inventing a patch DSL, a richer
+  markdown parser contract, or a second validation mechanism.
+
+Follow-ups
+
+- Reflect those fixed defaults in Sections 5 through 8.
+- Restore `status: complete` only after implementation and docs match those
+  fixed choices.
+
+## 2026-04-02 - Canonical setup helpers load through package self-reference, not raw `src/**` runtime imports
+
+Context
+
+Phase 9 needed the canonical `setups/**` packages to use the shipped helper
+layer directly. Importing helper code from raw `src/**` runtime paths fails for
+repo-local source-mode execution because the framework source files use
+package-build `.js` specifiers internally.
+
+Options
+
+- Import helper code from raw `src/**` anyway and accept a broken source-mode
+  runtime path for canonical setups.
+- Add a second repo-local helper entrypoint just for source-mode imports.
+- Keep one public helper entrypoint and have canonical setups import helper
+  code through the `paperzod` package self-reference, while repo-local
+  typecheck and tests alias that import back to live source.
+
+Decision
+
+Use the `paperzod` package self-reference for canonical setup helper imports.
+Do not add a second source-mode-only helper entrypoint.
+
+Consequences
+
+- Canonical setup packages stay on the real public helper surface instead of a
+  private repo-only import path.
+- CLI source-mode validation works because canonical setup modules are inside
+  the repo package scope and can resolve the self-reference.
+- Repo-local typecheck and test execution need explicit aliasing so development
+  still runs against current source instead of stale `dist/**`.
+
+Follow-ups
+
+- Keep `tsconfig.json` and `vitest.config.ts` aligned with that aliasing
+  contract.
+- If a future use case truly needs repo-local helper imports outside package
+  scope, reopen architecture instead of sneaking in a second entrypoint.

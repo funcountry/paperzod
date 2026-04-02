@@ -83,3 +83,20 @@ Plan doc: /Users/aelaguiz/workspace/paperzod/docs/GENERIC_FRAMEWORK_LESSONS_SEPA
   - `npm test` - passed (`49` files, `162` tests).
 - Next steps:
   - None. The reopened implementation run is complete.
+
+## Phase 9 (Authoring Cleanup) Progress Update
+- Work completed:
+  - Expanded the helper family pack across the remaining proving-setup surface classes.
+  - Refactored `setups/lessons/**` and `setups/core_dev/**` into the planned modular local package layout.
+  - Kept canonical setup helper imports on the `paperzod` package self-reference path and aligned repo-local typecheck and test resolution around that contract.
+  - Updated `README.md`, `docs/schema.md`, `docs/testing.md`, and the canonical plan artifact to match the shipped cleanup contract.
+- Tests run + results:
+  - `npm run typecheck` - passed.
+  - `npx vitest run test/source/templates.test.ts test/source/compose.test.ts test/types/authoring.test.ts test/types/canonical-setups.test.ts` - passed.
+  - `npm run test:types` - passed.
+  - `npx vitest run test/fixtures/lessons-full-source.test.ts test/fixtures/second-setup-source.test.ts test/e2e/lessons-full.test.ts test/e2e/second-setup.test.ts test/api/index.test.ts test/cli/validate-compile.test.ts` - passed.
+  - `npx vitest run test/source/templates.test.ts test/source/compose.test.ts test/source/fragments.test.ts test/types/authoring.test.ts test/types/canonical-setups.test.ts test/fixtures/lessons-full-source.test.ts test/fixtures/second-setup-source.test.ts test/e2e/lessons-full.test.ts test/e2e/second-setup.test.ts test/api/index.test.ts test/cli/validate-compile.test.ts test/perf/index.test.ts test/stability/index.test.ts test/mutations/index.test.ts test/render/role-home-shared.test.ts test/render/extended-surfaces.test.ts test/doc/markdown.test.ts` - passed.
+  - `npm run build` - passed.
+  - `npm test` - passed (`49` files, `166` tests).
+- Next steps:
+  - None. The cleanup phase is complete.

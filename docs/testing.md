@@ -20,7 +20,7 @@ Status as of 2026-04-02:
 - the automated release gate is currently green
 - current automated evidence:
   - `49` test files passed
-  - `162` tests passed
+  - `166` tests passed
   - root typecheck passed
   - type-only authoring tests passed
   - build passed
@@ -174,6 +174,9 @@ slice.
 A high-fidelity Lessons proving setup.
 
 The canonical repo-local source now lives in `setups/lessons/index.ts`.
+That package is intentionally split across `roles.ts`, `workflow.ts`,
+`artifacts.ts`, `references.ts`, `surfaces.ts`, `targets.ts`, and `links.ts`,
+with `index.ts` as the only assembly boundary.
 `test/fixtures/source/lessons-full.ts` is only a thin test-facing import
 surface when a fixture-shaped path is still useful.
 
@@ -205,6 +208,8 @@ Its job is proving that the full Lessons requirement set is truly satisfied.
 A second non-Lessons setup.
 
 The canonical repo-local source now lives in `setups/core_dev/index.ts`.
+That package follows the same modular local layout and still exports one plain
+`SetupInput` from `index.ts`.
 
 Candidates:
 
@@ -399,7 +404,8 @@ They must prove:
 - output is deterministic
 - repeated renders are byte-identical on unchanged input
 - headings are correct
-- stable anchors or equivalent stable section targets are preserved
+- stable section targets are preserved through the deliberate raw HTML anchor
+  output contract
 - exact section identities survive heading rewrites
 - renderer output does not leak raw JSON, debug objects, or schema jargon
 - role-home output reads like a real `AGENTS.md`

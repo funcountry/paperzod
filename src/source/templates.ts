@@ -4,6 +4,7 @@ import type { SetupPart } from "./compose.js";
 
 export interface DocumentTemplateSection<TKey extends string = string> {
   key: TKey;
+  id?: string | undefined;
   title: string;
   stableSlug?: string | undefined;
   parentKey?: TKey | undefined;
@@ -26,17 +27,38 @@ interface BaseDocumentOptions<TKey extends string> {
   sections?: Partial<Record<TKey, DocumentSectionOptions>> | undefined;
 }
 
+export interface ProjectHomeRootDocumentOptions<TKey extends string> extends BaseDocumentOptions<TKey> {}
+
 export interface RoleHomeDocumentOptions<TKey extends string> extends BaseDocumentOptions<TKey> {
   roleId: string;
 }
 
+export interface SharedEntrypointDocumentOptions<TKey extends string> extends BaseDocumentOptions<TKey> {}
+
 export interface WorkflowOwnerDocumentOptions<TKey extends string> extends BaseDocumentOptions<TKey> {
+  workflowStepId?: string | undefined;
+}
+
+export interface PacketWorkflowDocumentOptions<TKey extends string> extends BaseDocumentOptions<TKey> {
+  packetContractId: string;
   workflowStepId?: string | undefined;
 }
 
 export interface StandardDocumentOptions<TKey extends string> extends BaseDocumentOptions<TKey> {
   artifactId: string;
 }
+
+export interface GateDocumentOptions<TKey extends string> extends BaseDocumentOptions<TKey> {
+  reviewGateId: string;
+}
+
+export interface ReferenceDocumentOptions<TKey extends string> extends BaseDocumentOptions<TKey> {
+  referenceId: string;
+}
+
+export type TechnicalReferenceDocumentOptions<TKey extends string> = ReferenceDocumentOptions<TKey>;
+export type HowToDocumentOptions<TKey extends string> = ReferenceDocumentOptions<TKey>;
+export type CoordinationDocumentOptions<TKey extends string> = ReferenceDocumentOptions<TKey>;
 
 export interface DocumentTemplate<
   TSurfaceClass extends SurfaceClass,
@@ -51,6 +73,7 @@ export interface DocumentTemplate<
 
 type NormalizedSection<TKey extends string> = {
   key: TKey;
+  id?: string | undefined;
   title: string;
   stableSlug: string;
   parentKey?: TKey | undefined;
@@ -60,12 +83,16 @@ function uniqueIds(values: readonly string[]): string[] {
   return [...new Set(values)];
 }
 
-function toTargetIds(value: string | readonly string[] | undefined): string[] {
+function toTargetIds(value: string | readonly string[]): string[] {
+  return uniqueIds(typeof value === "string" ? [value] : [...value]);
+}
+
+function resolveTargetIds(value: string | readonly string[] | undefined, defaults: readonly string[]): string[] {
   if (value === undefined) {
-    return [];
+    return uniqueIds([...defaults]);
   }
 
-  return uniqueIds(typeof value === "string" ? [value] : [...value]);
+  return toTargetIds(value);
 }
 
 function toStableSlug(value: string): string {
@@ -88,8 +115,8 @@ function toIdSegment(value: string): string {
   return value.replace(/-/g, "_");
 }
 
-function buildSectionId(surfaceId: string, stableSlug: string): string {
-  return `${surfaceId}_${toIdSegment(stableSlug)}`;
+function buildSectionId(surfaceId: string, section: NormalizedSection<string>): string {
+  return section.id ?? `${surfaceId}_${toIdSegment(section.stableSlug)}`;
 }
 
 function buildDocumentsLinkId(fromId: string, toId: string): string {
@@ -105,12 +132,20 @@ function normalizeSections<TKey extends string>(
   }
 
   const seenKeys = new Set<string>();
+  const seenIds = new Set<string>();
   const seenSlugs = new Set<string>();
   const normalized = sections.map((section) => {
     if (seenKeys.has(section.key)) {
       throw new Error(`Template "${templateId}" reuses section key "${section.key}".`);
     }
     seenKeys.add(section.key);
+
+    if (section.id) {
+      if (seenIds.has(section.id)) {
+        throw new Error(`Template "${templateId}" reuses section id "${section.id}".`);
+      }
+      seenIds.add(section.id);
+    }
 
     const stableSlug = section.stableSlug ? toStableSlug(section.stableSlug) : toStableSlug(section.key);
     if (seenSlugs.has(stableSlug)) {
@@ -120,6 +155,7 @@ function normalizeSections<TKey extends string>(
 
     return {
       key: section.key,
+      ...(section.id ? { id: section.id } : {}),
       title: section.title,
       stableSlug,
       ...(section.parentKey ? { parentKey: section.parentKey } : {})
@@ -162,9 +198,10 @@ function createDocumentPart<TKey extends string>(
     sectionDocumentsTo: (sectionKey: TKey) => string[];
   }
 ): SetupPart {
-  const sectionIdByKey = new Map(sections.map((section) => [section.key, buildSectionId(options.surfaceId, section.stableSlug)]));
-  const surfaceDocumentsTo = toTargetIds(options.surfaceDocumentsTo);
-  const resolvedSurfaceDocumentsTo = surfaceDocumentsTo.length > 0 ? surfaceDocumentsTo : defaults.surfaceDocumentsTo;
+  const sectionIdByKey = new Map(
+    sections.map((section) => [section.key, buildSectionId(options.surfaceId, section as NormalizedSection<string>)])
+  );
+  const resolvedSurfaceDocumentsTo = resolveTargetIds(options.surfaceDocumentsTo, defaults.surfaceDocumentsTo);
   const sharedSourceIds = uniqueIds([...(options.sourceIds ?? [])]);
   const links: LinkInput[] = resolvedSurfaceDocumentsTo.map((to) => ({
     id: buildDocumentsLinkId(options.surfaceId, to),
@@ -185,8 +222,7 @@ function createDocumentPart<TKey extends string>(
 
     const sectionOptions = options.sections?.[section.key];
     const defaultDocumentsTo = defaults.sectionDocumentsTo(section.key);
-    const sectionDocumentsTo = toTargetIds(sectionOptions?.documentsTo);
-    const resolvedSectionDocumentsTo = sectionDocumentsTo.length > 0 ? sectionDocumentsTo : defaultDocumentsTo;
+    const resolvedSectionDocumentsTo = resolveTargetIds(sectionOptions?.documentsTo, defaultDocumentsTo);
 
     surfaceSections.push({
       id: sectionId,
@@ -246,18 +282,57 @@ function createTemplateDefinition<
   };
 }
 
+function createSurfaceTemplateDefinition<
+  TSurfaceClass extends SurfaceClass,
+  const TSections extends readonly DocumentTemplateSection<string>[],
+  TOptions extends BaseDocumentOptions<TSections[number]["key"]>
+>(
+  surfaceClass: TSurfaceClass,
+  definition: { id: string; sections: TSections },
+  defaults: (options: TOptions) => {
+    surfaceDocumentsTo: string[];
+    sectionDocumentsTo: (sectionKey: TSections[number]["key"]) => string[];
+  }
+): DocumentTemplate<TSurfaceClass, TSections[number]["key"], TOptions> {
+  return createTemplateDefinition(surfaceClass, definition, (sections, options) =>
+    createDocumentPart(surfaceClass, sections, options, defaults(options))
+  );
+}
+
+export function defineProjectHomeRootTemplate<const TSections extends readonly DocumentTemplateSection<string>[]>(
+  definition: {
+    id: string;
+    sections: TSections;
+  }
+): DocumentTemplate<"project_home_root", TSections[number]["key"], ProjectHomeRootDocumentOptions<TSections[number]["key"]>> {
+  return createSurfaceTemplateDefinition("project_home_root", definition, () => ({
+    surfaceDocumentsTo: [],
+    sectionDocumentsTo: () => []
+  }));
+}
+
 export function defineRoleHomeTemplate<const TSections extends readonly DocumentTemplateSection<string>[]>(
   definition: {
     id: string;
     sections: TSections;
   }
 ): DocumentTemplate<"role_home", TSections[number]["key"], RoleHomeDocumentOptions<TSections[number]["key"]>> {
-  return createTemplateDefinition("role_home", definition, (sections, options) =>
-    createDocumentPart("role_home", sections, options, {
-      surfaceDocumentsTo: [options.roleId],
-      sectionDocumentsTo: () => [options.roleId]
-    })
-  );
+  return createSurfaceTemplateDefinition("role_home", definition, (options) => ({
+    surfaceDocumentsTo: [options.roleId],
+    sectionDocumentsTo: () => [options.roleId]
+  }));
+}
+
+export function defineSharedEntrypointTemplate<const TSections extends readonly DocumentTemplateSection<string>[]>(
+  definition: {
+    id: string;
+    sections: TSections;
+  }
+): DocumentTemplate<"shared_entrypoint", TSections[number]["key"], SharedEntrypointDocumentOptions<TSections[number]["key"]>> {
+  return createSurfaceTemplateDefinition("shared_entrypoint", definition, () => ({
+    surfaceDocumentsTo: [],
+    sectionDocumentsTo: () => []
+  }));
 }
 
 export function defineWorkflowOwnerTemplate<const TSections extends readonly DocumentTemplateSection<string>[]>(
@@ -266,13 +341,25 @@ export function defineWorkflowOwnerTemplate<const TSections extends readonly Doc
     sections: TSections;
   }
 ): DocumentTemplate<"workflow_owner", TSections[number]["key"], WorkflowOwnerDocumentOptions<TSections[number]["key"]>> {
-  return createTemplateDefinition("workflow_owner", definition, (sections, options) => {
+  return createSurfaceTemplateDefinition("workflow_owner", definition, (options) => {
     const defaultDocumentsTo = options.workflowStepId ? [options.workflowStepId] : [];
-    return createDocumentPart("workflow_owner", sections, options, {
+    return {
       surfaceDocumentsTo: defaultDocumentsTo,
       sectionDocumentsTo: () => defaultDocumentsTo
-    });
+    };
   });
+}
+
+export function definePacketWorkflowTemplate<const TSections extends readonly DocumentTemplateSection<string>[]>(
+  definition: {
+    id: string;
+    sections: TSections;
+  }
+): DocumentTemplate<"packet_workflow", TSections[number]["key"], PacketWorkflowDocumentOptions<TSections[number]["key"]>> {
+  return createSurfaceTemplateDefinition("packet_workflow", definition, (options) => ({
+    surfaceDocumentsTo: [options.packetContractId],
+    sectionDocumentsTo: () => (options.workflowStepId ? [options.workflowStepId] : [options.packetContractId])
+  }));
 }
 
 export function defineStandardTemplate<const TSections extends readonly DocumentTemplateSection<string>[]>(
@@ -281,10 +368,63 @@ export function defineStandardTemplate<const TSections extends readonly Document
     sections: TSections;
   }
 ): DocumentTemplate<"standard", TSections[number]["key"], StandardDocumentOptions<TSections[number]["key"]>> {
-  return createTemplateDefinition("standard", definition, (sections, options) =>
-    createDocumentPart("standard", sections, options, {
-      surfaceDocumentsTo: [options.artifactId],
-      sectionDocumentsTo: () => [options.artifactId]
-    })
-  );
+  return createSurfaceTemplateDefinition("standard", definition, (options) => ({
+    surfaceDocumentsTo: [options.artifactId],
+    sectionDocumentsTo: () => [options.artifactId]
+  }));
+}
+
+export function defineGateTemplate<const TSections extends readonly DocumentTemplateSection<string>[]>(
+  definition: {
+    id: string;
+    sections: TSections;
+  }
+): DocumentTemplate<"gate", TSections[number]["key"], GateDocumentOptions<TSections[number]["key"]>> {
+  return createSurfaceTemplateDefinition("gate", definition, (options) => ({
+    surfaceDocumentsTo: [options.reviewGateId],
+    sectionDocumentsTo: () => [options.reviewGateId]
+  }));
+}
+
+function createReferenceTemplateDefinition<
+  TSurfaceClass extends "technical_reference" | "how_to" | "coordination",
+  const TSections extends readonly DocumentTemplateSection<string>[]
+>(
+  surfaceClass: TSurfaceClass,
+  definition: {
+    id: string;
+    sections: TSections;
+  }
+): DocumentTemplate<TSurfaceClass, TSections[number]["key"], ReferenceDocumentOptions<TSections[number]["key"]>> {
+  return createSurfaceTemplateDefinition(surfaceClass, definition, (options) => ({
+    surfaceDocumentsTo: [options.referenceId],
+    sectionDocumentsTo: () => [options.referenceId]
+  }));
+}
+
+export function defineTechnicalReferenceTemplate<const TSections extends readonly DocumentTemplateSection<string>[]>(
+  definition: {
+    id: string;
+    sections: TSections;
+  }
+): DocumentTemplate<"technical_reference", TSections[number]["key"], TechnicalReferenceDocumentOptions<TSections[number]["key"]>> {
+  return createReferenceTemplateDefinition("technical_reference", definition);
+}
+
+export function defineHowToTemplate<const TSections extends readonly DocumentTemplateSection<string>[]>(
+  definition: {
+    id: string;
+    sections: TSections;
+  }
+): DocumentTemplate<"how_to", TSections[number]["key"], HowToDocumentOptions<TSections[number]["key"]>> {
+  return createReferenceTemplateDefinition("how_to", definition);
+}
+
+export function defineCoordinationTemplate<const TSections extends readonly DocumentTemplateSection<string>[]>(
+  definition: {
+    id: string;
+    sections: TSections;
+  }
+): DocumentTemplate<"coordination", TSections[number]["key"], CoordinationDocumentOptions<TSections[number]["key"]>> {
+  return createReferenceTemplateDefinition("coordination", definition);
 }

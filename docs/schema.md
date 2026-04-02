@@ -16,16 +16,21 @@ Status as of 2026-04-02:
 - canonical repo-local setups now ship as plain `SetupInput` modules under
   `setups/**`
 - the shipped helper layer now includes `composeSetup(...)`, reusable
-  document-shape helpers for `role_home`, `workflow_owner`, and `standard`,
-  and explicit-base `loadFragments(...)`
+  document-shape helpers for every surface family used by the canonical
+  proving setups, and explicit-base `loadFragments(...)`
 - the helper layer lowers back into plain `SetupInput`; it does not widen the
   normalized node model
-- packet workflows, gates, references, how-to docs, and coordination docs are
-  still authored directly through plain `SetupInput`
+- the canonical repo-local proving setups are now modular local packages under
+  `setups/lessons/**` and `setups/core_dev/**`, each assembled by `index.ts`
+  into one plain `SetupInput`
 - fragment loading is intentionally narrow in the first cut: paragraphs,
   nested ordered or unordered lists, and fenced code blocks only
+- `composeSetup(...)` is intentionally append-only; setup-local overrides stay
+  ordinary TypeScript for now
 - setup-level executable checks remain explicitly deferred; the shipped
   framework runs only its core generic checks
+- stable section targets are emitted through deliberate raw HTML anchors in
+  the runtime markdown
 
 ## Current authoring contract
 
@@ -35,8 +40,15 @@ The public source contract now has two layers:
 2. The shipped helper layer is a thin authoring convenience on top:
    - `composeSetup(baseSetup, ...parts)`
    - `defineRoleHomeTemplate(...)`
+   - `defineProjectHomeRootTemplate(...)`
+   - `defineSharedEntrypointTemplate(...)`
    - `defineWorkflowOwnerTemplate(...)`
+   - `definePacketWorkflowTemplate(...)`
    - `defineStandardTemplate(...)`
+   - `defineGateTemplate(...)`
+   - `defineTechnicalReferenceTemplate(...)`
+   - `defineHowToTemplate(...)`
+   - `defineCoordinationTemplate(...)`
    - `loadFragments(new URL("./fragments/.../", import.meta.url), spec)`
 
 Those helpers lower into the existing `surface`, `surface_section`,

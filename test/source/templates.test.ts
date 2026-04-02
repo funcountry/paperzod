@@ -1,6 +1,16 @@
 import { describe, expect, it } from "vitest";
 
-import { defineWorkflowOwnerTemplate } from "../../src/source/index.js";
+import {
+  defineCoordinationTemplate,
+  defineGateTemplate,
+  defineHowToTemplate,
+  definePacketWorkflowTemplate,
+  defineProjectHomeRootTemplate,
+  defineSharedEntrypointTemplate,
+  defineStandardTemplate,
+  defineTechnicalReferenceTemplate,
+  defineWorkflowOwnerTemplate
+} from "../../src/source/index.js";
 
 describe("document-shape helpers", () => {
   it("lower reusable workflow-owner templates into ordinary setup parts", () => {
@@ -98,5 +108,181 @@ describe("document-shape helpers", () => {
         }
       ]
     });
+  });
+
+  it("supports the remaining proving-setup surface families", () => {
+    const projectHomeRoot = defineProjectHomeRootTemplate({
+      id: "project_home",
+      sections: [{ key: "map", title: "Map", id: "project_home_map" }] as const
+    }).document({
+      surfaceId: "project_home_root",
+      runtimePath: "generated/README.md",
+      sections: {
+        map: {
+          documentsTo: "step_1"
+        }
+      }
+    });
+
+    const sharedEntrypoint = defineSharedEntrypointTemplate({
+      id: "shared_entrypoint",
+      sections: [{ key: "readOrder", title: "Read Order" }] as const
+    }).document({
+      surfaceId: "shared_readme",
+      runtimePath: "generated/shared/README.md",
+      sections: {
+        readOrder: {
+          documentsTo: "step_1"
+        }
+      }
+    });
+
+    const packetWorkflow = definePacketWorkflowTemplate({
+      id: "packet_workflow",
+      sections: [{ key: "laneContract", title: "Lane Contract" }] as const
+    }).document({
+      surfaceId: "packet_workflow",
+      runtimePath: "generated/workflows/PACKET.md",
+      packetContractId: "packet_contract",
+      workflowStepId: "step_1"
+    });
+
+    const gate = defineGateTemplate({
+      id: "gate",
+      sections: [{ key: "criteria", title: "Criteria" }] as const
+    }).document({
+      surfaceId: "review_gate_surface",
+      runtimePath: "generated/gates/REVIEW.md",
+      reviewGateId: "review_gate"
+    });
+
+    const technicalReference = defineTechnicalReferenceTemplate({
+      id: "technical_reference",
+      sections: [{ key: "reference", title: "Reference" }] as const
+    }).document({
+      surfaceId: "technical_reference_surface",
+      runtimePath: "generated/references/KB.md",
+      referenceId: "kb_reference"
+    });
+
+    const howTo = defineHowToTemplate({
+      id: "how_to",
+      sections: [{ key: "procedure", title: "Procedure" }] as const
+    }).document({
+      surfaceId: "how_to_surface",
+      runtimePath: "generated/runbooks/PROCEDURE.md",
+      referenceId: "procedure_reference"
+    });
+
+    const coordination = defineCoordinationTemplate({
+      id: "coordination",
+      sections: [{ key: "bootstrap", title: "Bootstrap" }] as const
+    }).document({
+      surfaceId: "coordination_surface",
+      runtimePath: "generated/coordination/BOOTSTRAP.md",
+      referenceId: "bootstrap_reference"
+    });
+
+    expect(projectHomeRoot.surfaces?.[0]?.surfaceClass).toBe("project_home_root");
+    expect(projectHomeRoot.surfaceSections?.[0]?.id).toBe("project_home_map");
+    expect(projectHomeRoot.links).toEqual([
+      { id: "project_home_map_documents_step_1", kind: "documents", from: "project_home_map", to: "step_1" }
+    ]);
+
+    expect(sharedEntrypoint.surfaces?.[0]?.surfaceClass).toBe("shared_entrypoint");
+    expect(sharedEntrypoint.links).toEqual([
+      { id: "shared_readme_read_order_documents_step_1", kind: "documents", from: "shared_readme_read_order", to: "step_1" }
+    ]);
+
+    expect(packetWorkflow.links).toEqual([
+      { id: "packet_workflow_documents_packet_contract", kind: "documents", from: "packet_workflow", to: "packet_contract" },
+      {
+        id: "packet_workflow_lane_contract_documents_step_1",
+        kind: "documents",
+        from: "packet_workflow_lane_contract",
+        to: "step_1"
+      }
+    ]);
+
+    expect(gate.links).toEqual([
+      { id: "review_gate_surface_documents_review_gate", kind: "documents", from: "review_gate_surface", to: "review_gate" },
+      {
+        id: "review_gate_surface_criteria_documents_review_gate",
+        kind: "documents",
+        from: "review_gate_surface_criteria",
+        to: "review_gate"
+      }
+    ]);
+
+    expect(technicalReference.links).toEqual([
+      {
+        id: "technical_reference_surface_documents_kb_reference",
+        kind: "documents",
+        from: "technical_reference_surface",
+        to: "kb_reference"
+      },
+      {
+        id: "technical_reference_surface_reference_documents_kb_reference",
+        kind: "documents",
+        from: "technical_reference_surface_reference",
+        to: "kb_reference"
+      }
+    ]);
+
+    expect(howTo.links).toEqual([
+      { id: "how_to_surface_documents_procedure_reference", kind: "documents", from: "how_to_surface", to: "procedure_reference" },
+      {
+        id: "how_to_surface_procedure_documents_procedure_reference",
+        kind: "documents",
+        from: "how_to_surface_procedure",
+        to: "procedure_reference"
+      }
+    ]);
+
+    expect(coordination.links).toEqual([
+      {
+        id: "coordination_surface_documents_bootstrap_reference",
+        kind: "documents",
+        from: "coordination_surface",
+        to: "bootstrap_reference"
+      },
+      {
+        id: "coordination_surface_bootstrap_documents_bootstrap_reference",
+        kind: "documents",
+        from: "coordination_surface_bootstrap",
+        to: "bootstrap_reference"
+      }
+    ]);
+  });
+
+  it("lets setup authors disable default surface links while keeping section defaults", () => {
+    const standardTemplate = defineStandardTemplate({
+      id: "standard",
+      sections: [{ key: "qualityBar", id: "quality_bar_section", title: "Quality Bar" }] as const
+    });
+
+    const part = standardTemplate.document({
+      surfaceId: "quality_bar_standard",
+      runtimePath: "generated/QUALITY.md",
+      artifactId: "quality_bar_artifact",
+      surfaceDocumentsTo: []
+    });
+
+    expect(part.links).toEqual([
+      {
+        id: "quality_bar_section_documents_quality_bar_artifact",
+        kind: "documents",
+        from: "quality_bar_section",
+        to: "quality_bar_artifact"
+      }
+    ]);
+    expect(part.generatedTargets).toEqual([
+      {
+        id: "quality_bar_section_target",
+        path: "generated/QUALITY.md",
+        sourceIds: ["quality_bar_section", "quality_bar_artifact"],
+        sectionId: "quality_bar_section"
+      }
+    ]);
   });
 });

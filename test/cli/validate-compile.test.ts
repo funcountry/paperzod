@@ -73,7 +73,7 @@ describe("cli validate and compile", () => {
           "const markdown = await import('paperzod/markdown');",
           "const testing = await import('paperzod/testing');",
           "console.log(JSON.stringify({",
-          "  root: ['validateSetup','compileSetup','composeSetup','loadFragments','defineRoleHomeTemplate'].every((key) => typeof root[key] === 'function'),",
+          "  root: ['validateSetup','compileSetup','composeSetup','loadFragments','defineRoleHomeTemplate','defineGateTemplate'].every((key) => typeof root[key] === 'function'),",
           "  core: typeof core.createDiagnostic === 'function',",
           "  markdown: typeof markdown.renderDocuments === 'function',",
           "  testing: typeof testing.stableJson === 'function'",

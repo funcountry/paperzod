@@ -256,13 +256,15 @@ Markdown owns the prose humans should write directly.
 
 ## Current Helper Layer
 
-The shipped helper layer is intentionally narrow:
+The shipped helper layer is still thin, but it now covers every surface family
+used by the canonical proving setups:
 
 - `composeSetup(baseSetup, ...parts)` merges helper-produced setup parts back
   into one plain `SetupInput`.
-- `defineRoleHomeTemplate(...)`, `defineWorkflowOwnerTemplate(...)`, and
-  `defineStandardTemplate(...)` stamp out reusable document shapes for the
-  first supported families.
+- Document-shape helpers now ship for:
+  `role_home`, `project_home_root`, `shared_entrypoint`, `workflow_owner`,
+  `packet_workflow`, `standard`, `gate`, `technical_reference`, `how_to`, and
+  `coordination`.
 - `loadFragments(new URL("./fragments/.../", import.meta.url), spec)` loads
   repo-local markdown fragments from an explicit base directory.
 - The fragment loader currently supports paragraphs, nested ordered or
@@ -270,10 +272,14 @@ The shipped helper layer is intentionally narrow:
 - Headings, tables, blockquotes, frontmatter, HTML, images, and task lists
   fail loudly today and should stay TypeScript-authored until the contract
   expands.
-- Packet workflows, gates, references, how-to docs, and coordination docs are
-  still authored directly through plain `SetupInput`.
+- `composeSetup(...)` stays append-only. If one setup needs a local override,
+  write that override in ordinary TypeScript instead of expecting a framework
+  patch or deep-merge system.
 - Extra setup-level executable checks are not a shipped hook yet. The
   framework currently runs only its core generic checks.
+- The canonical proving setups under `setups/lessons/**` and
+  `setups/core_dev/**` are modular local packages assembled by `index.ts`, but
+  they still export plain `SetupInput`.
 
 ## What You Compile
 
@@ -319,6 +325,8 @@ That output can include:
 The markdown remains the runtime read surface.
 The structured source exists so the graph does not have to be maintained by
 hand.
+Stable section targets are preserved with deliberate raw HTML anchors in the
+emitted markdown.
 
 ## Proving The Generic System
 
