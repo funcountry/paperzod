@@ -195,7 +195,7 @@ describe("graph indexes", () => {
       name: "Index Document Reads",
       roles: [{ id: "role_1", name: "Role 1", purpose: "Read the runtime doctrine honestly." }],
       surfaces: [
-        { id: "surface_1", surfaceClass: "shared_entrypoint", runtimePath: "paperclip_home/project_homes/lessons/shared/README.md" }
+        { id: "surface_1", surfaceClass: "shared_entrypoint", runtimePath: "paperclip_home/project_homes/editorial/shared/README.md" }
       ],
       surfaceSections: [
         { id: "section_1", surfaceId: "surface_1", stableSlug: "read-order", title: "Read Order" }
@@ -228,11 +228,11 @@ describe("graph indexes", () => {
     const graph = requireGraph({
       id: "index_nested_sections",
       name: "Index Nested Sections",
-      surfaces: [{ id: "surface_1", surfaceClass: "shared_entrypoint", runtimePath: "paperclip_home/project_homes/lessons/shared/README.md" }],
+      surfaces: [{ id: "surface_1", surfaceClass: "shared_entrypoint", runtimePath: "paperclip_home/project_homes/editorial/shared/README.md" }],
       surfaceSections: [
         { id: "terms", surfaceId: "surface_1", stableSlug: "terms", title: "Terms" },
         { id: "workflow_items", surfaceId: "surface_1", stableSlug: "workflow-items", title: "Workflow Items", parentSectionId: "terms" },
-        { id: "poker_items", surfaceId: "surface_1", stableSlug: "poker-items", title: "PokerSkill Lessons Items", parentSectionId: "terms" },
+        { id: "poker_items", surfaceId: "surface_1", stableSlug: "story-items", title: "Editorial Story Items", parentSectionId: "terms" },
         { id: "lesson_root", surfaceId: "surface_1", stableSlug: "lesson-root", title: "Lesson Root", parentSectionId: "poker_items" }
       ]
     });

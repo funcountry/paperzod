@@ -8,7 +8,7 @@ function compile(input: unknown) {
     input,
     createPaperclipMarkdownTarget({
       repoRoot: "/repo",
-      outputRoot: "paperclip_agents"
+      outputRoot: "."
     })
   );
 }
@@ -52,7 +52,7 @@ describe("authored doctrine content flow", () => {
         {
           id: "shared_readme",
           surfaceClass: "shared_entrypoint",
-          runtimePath: "paperclip_home/project_homes/lessons/shared/README.md"
+          runtimePath: "paperclip_home/project_homes/editorial/shared/README.md"
         }
       ],
       surfaceSections: [
@@ -67,7 +67,7 @@ describe("authored doctrine content flow", () => {
               kind: "ordered_steps",
               items: ["Open the shared README.", { text: "Then open the named owner.", children: ["Only then open packet doctrine."] }]
             },
-            { kind: "code_block", code: "paperzod doctor setups/lessons/index.ts", language: "sh" }
+            { kind: "code_block", code: "paperzod doctor setups/editorial/index.ts", language: "sh" }
           ]
         },
         {
@@ -80,7 +80,7 @@ describe("authored doctrine content flow", () => {
       generatedTargets: [
         { id: "author_read_first_target", path: "paperclip_home/agents/author/AGENTS.md", sourceIds: ["author"], sectionId: "read_first" },
         { id: "author_role_contract_target", path: "paperclip_home/agents/author/AGENTS.md", sourceIds: ["author"], sectionId: "role_contract" },
-        { id: "shared_target", path: "paperclip_home/project_homes/lessons/shared/README.md", sourceIds: ["author"] }
+        { id: "shared_target", path: "paperclip_home/project_homes/editorial/shared/README.md", sourceIds: ["author"] }
       ],
       links: [
         { id: "documents_author_surface", kind: "documents", from: "author_home", to: "author" },
@@ -121,7 +121,7 @@ describe("authored doctrine content flow", () => {
 
       | Owner | Primary doc |
       | --- | --- |
-      | Lessons Project Lead | AUTHORITATIVE_LESSONS_WORKFLOW.md |
+      | Editorial Project Lead | AUTHORITATIVE_EDITORIAL_WORKFLOW.md |
 
       <a id="read-first"></a>
       ## Read First
@@ -133,7 +133,7 @@ describe("authored doctrine content flow", () => {
         1. Only then open packet doctrine.
 
       \`\`\`sh
-      paperzod doctor setups/lessons/index.ts
+      paperzod doctor setups/editorial/index.ts
       \`\`\`
 
       <a id="role-contract"></a>

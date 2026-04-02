@@ -284,8 +284,8 @@ used by the canonical proving setups:
   setup module declares local rules.
 - Dry-run compile can preview deletes inside declared ownership scopes. Write
   mode requires `--prune` before those deletes are applied.
-- The canonical proving setups under `setups/lessons/**` and
-  `setups/core_dev/**` are modular local packages assembled by `index.ts` and
+- The canonical proving setups under `setups/editorial/**` and
+  `setups/release_ops/**` are modular local packages assembled by `index.ts` and
   now use `defineSetupModule(...)` to declare owned output scopes.
 
 ## Optional Framework Additions
@@ -375,12 +375,11 @@ emitted markdown.
 ## Proving The Generic System
 
 This repo is a generic open source compiler.
-It is not a Lessons-specific product.
+It is not an editorial-specific product.
 
 The repo proves the generic system against multiple setup shapes, including one
-high-fidelity Lessons-shaped fixture because that is a demanding real-world
-case. That fixture is a proving target, not the public product boundary, and
-the open source project does not depend on proprietary Lessons source code.
+high-fidelity editorial fixture because that is a demanding public proving
+case. That fixture is a proving target, not the product boundary.
 
 What the proving cases are meant to show is generic:
 
@@ -468,17 +467,17 @@ When you are extending the system:
 
 ## Docs Map
 
-- [docs/ref/GENERIC_DOCTRINE_SYSTEM_PLAIN_EXAMPLE.md](/Users/aelaguiz/workspace/paperzod/docs/ref/GENERIC_DOCTRINE_SYSTEM_PLAIN_EXAMPLE.md)
+- [docs/ref/GENERIC_DOCTRINE_SYSTEM_PLAIN_EXAMPLE.md](docs/ref/GENERIC_DOCTRINE_SYSTEM_PLAIN_EXAMPLE.md)
   - the shortest plain-English explanation of the finished product shape
-- [docs/requirements.md](/Users/aelaguiz/workspace/paperzod/docs/requirements.md)
+- [docs/requirements.md](docs/requirements.md)
   - product contract and boundaries
-- [docs/schema.md](/Users/aelaguiz/workspace/paperzod/docs/schema.md)
+- [docs/schema.md](docs/schema.md)
   - source language and node model
-- [docs/architecture.md](/Users/aelaguiz/workspace/paperzod/docs/architecture.md)
+- [docs/architecture.md](docs/architecture.md)
   - compiler layers and pipeline shape
-- [docs/testing.md](/Users/aelaguiz/workspace/paperzod/docs/testing.md)
+- [docs/testing.md](docs/testing.md)
   - proving standard and release gate
-- [docs/example_lessons.md](/Users/aelaguiz/workspace/paperzod/docs/example_lessons.md)
-  - the high-fidelity Lessons proving example and canonical setup readback
-- [docs/ref](/Users/aelaguiz/workspace/paperzod/docs/ref)
+- [docs/example_editorial.md](docs/example_editorial.md)
+  - the high-fidelity editorial proving example and canonical setup readback
+- [docs/ref](docs/ref)
   - grounding material and reference inputs

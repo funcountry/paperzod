@@ -1,16 +1,16 @@
 import { describe, expect, it } from "vitest";
 
 import { compileSetup, createPaperclipMarkdownTarget, createTargetAdapter, emitDocuments } from "../../src/index.js";
-import lessonsSetup from "../../setups/lessons/index.ts";
+import editorialSetup from "../../setups/editorial/index.ts";
 import demoMinimalSeed from "../fixtures/source/demo-minimal.js";
 import { withTempDir } from "../helpers/fs.js";
 
-function compileLessonsFull() {
+function compileEditorialFull() {
   return compileSetup(
-    lessonsSetup,
+    editorialSetup,
     createPaperclipMarkdownTarget({
       repoRoot: "/repo",
-      outputRoot: "paperclip_agents"
+      outputRoot: "."
     })
   );
 }
@@ -26,8 +26,8 @@ function requireEmitSuccess(result: Awaited<ReturnType<typeof emitDocuments>>) {
 
 describe("stability and diff locality", () => {
   it("produces byte-identical output on repeated compile", () => {
-    const first = compileLessonsFull();
-    const second = compileLessonsFull();
+    const first = compileEditorialFull();
+    const second = compileEditorialFull();
 
     expect(first).toEqual(second);
   });

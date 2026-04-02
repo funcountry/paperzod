@@ -1,0 +1,84 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`editorial_full source model > represents the full Editorial requirement shape without hacks 1`] = `
+{
+  "keySections": [
+    "Comment Shape",
+    "Read First",
+    "Read First",
+    "Role Contract",
+    "Role Contract",
+    "Specialist Turn Shape",
+    "What This Lane Must Do",
+    "What This Lane Must Do",
+    "What the critic judges",
+  ],
+  "packetContracts": [
+    {
+      "conceptualArtifactIds": [
+        "editorial_brief_packet",
+      ],
+      "id": "editorial_brief_contract",
+      "runtimeArtifactIds": [
+        "prior_research_notes_md",
+        "brief_request_md",
+        "source_notes_md",
+      ],
+    },
+    {
+      "conceptualArtifactIds": [
+        "story_outline_packet",
+      ],
+      "id": "story_outline_contract",
+      "runtimeArtifactIds": [
+        "story_outline_runtime",
+      ],
+    },
+  ],
+  "references": [
+    {
+      "id": "editorial_simple_clear_ref",
+      "referenceClass": "imported_reference",
+      "sourcePath": "docs/ref/EDITORIAL_WORKFLOW_SIMPLE_CLEAR.md",
+    },
+    {
+      "id": "editorial_structured_requirements_ref",
+      "referenceClass": "imported_reference",
+      "sourcePath": "docs/ref/EDITORIAL_STRUCTURED_DOCTRINE_REQUIREMENTS.md",
+    },
+    {
+      "id": "audience_research_reference",
+      "referenceClass": "runtime_reference",
+      "sourcePath": "paperclip_home/project_homes/editorial/shared/technical_references/AUDIENCE_RESEARCH_KB.md",
+    },
+    {
+      "id": "github_access_reference",
+      "referenceClass": "support_reference",
+      "sourcePath": "paperclip_home/project_homes/editorial/shared/how_to_guides/EDITORIAL_GITHUB_PROTOCOL.md",
+    },
+    {
+      "id": "publish_bootstrap_reference",
+      "referenceClass": "support_reference",
+      "sourcePath": "paperclip_home/project_homes/editorial/shared/agent_coordination/EDITORIAL_PUBLISH_BOOTSTRAP.md",
+    },
+  ],
+  "setup": {
+    "description": "The canonical public editorial proving setup for the full doctrine requirement set.",
+    "id": "editorial",
+    "kind": "setup",
+    "name": "Editorial",
+  },
+  "surfaceClasses": [
+    "coordination",
+    "gate",
+    "how_to",
+    "packet_workflow",
+    "project_home_root",
+    "role_home",
+    "shared_entrypoint",
+    "standard",
+    "technical_reference",
+    "workflow_owner",
+  ],
+}
+`;

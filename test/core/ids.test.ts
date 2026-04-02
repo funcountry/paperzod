@@ -4,7 +4,7 @@ import { compareStableIds, findDuplicateIds, makeStableId, toSectionSlug } from 
 
 describe("core ids", () => {
   it("normalizes stable ids", () => {
-    expect(makeStableId("Section Dossier Engineer")).toBe("section_dossier_engineer");
+    expect(makeStableId("Brief Researcher")).toBe("brief_researcher");
   });
 
   it("creates stable section slugs", () => {

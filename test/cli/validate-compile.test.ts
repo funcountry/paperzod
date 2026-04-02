@@ -300,10 +300,10 @@ describe("cli validate and compile", () => {
     });
   });
 
-  it("validates the canonical core_dev setup from setups/**", async () => {
-    const result = await runNodeScript(["dist/cli/index.js", "validate", "setups/core_dev/index.ts"], repoRoot);
+  it("validates the canonical release_ops setup from setups/**", async () => {
+    const result = await runNodeScript(["dist/cli/index.js", "validate", "setups/release_ops/index.ts"], repoRoot);
     expect(result.code).toBe(0);
-    expect(result.stdout).toContain("VALID core_dev");
+    expect(result.stdout).toContain("VALID release_ops");
   });
 
   it("reports compile failures and exits nonzero", async () => {

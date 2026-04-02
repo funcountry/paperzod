@@ -1,28 +1,28 @@
 import { describe, expect, it } from "vitest";
 
 import { compileSetup, createPaperclipMarkdownTarget } from "../../src/index.js";
-import lessonsSetup from "../../setups/lessons/index.ts";
-import lessonsVerticalSliceSeed from "../fixtures/source/lessons-vertical-slice.js";
-import coreDevSetup from "../../setups/core_dev/index.ts";
+import editorialSetup from "../../setups/editorial/index.ts";
+import editorialVerticalSliceSeed from "../fixtures/source/editorial-vertical-slice.js";
+import releaseOpsSetup from "../../setups/release_ops/index.ts";
 
-const lessonsSource = lessonsSetup.setup;
-const coreDevSource = coreDevSetup.setup;
+const editorialSource = editorialSetup.setup;
+const releaseOpsSource = releaseOpsSetup.setup;
 
-function withLessonsSetup(patch: Partial<typeof lessonsSource>) {
+function withEditorialSetup(patch: Partial<typeof editorialSource>) {
   return {
-    ...lessonsSetup,
+    ...editorialSetup,
     setup: {
-      ...lessonsSource,
+      ...editorialSource,
       ...patch
     }
   };
 }
 
-function withCoreDevSetup(patch: Partial<typeof coreDevSource>) {
+function withReleaseOpsSetup(patch: Partial<typeof releaseOpsSource>) {
   return {
-    ...coreDevSetup,
+    ...releaseOpsSetup,
     setup: {
-      ...coreDevSource,
+      ...releaseOpsSource,
       ...patch
     }
   };
@@ -33,17 +33,17 @@ function compile(input: unknown) {
     input,
     createPaperclipMarkdownTarget({
       repoRoot: "/repo",
-      outputRoot: "paperclip_agents"
+      outputRoot: "."
     })
   );
 }
 
 describe("mutation suite", () => {
   it("catches packet rename drift", () => {
-    const result = compile(withLessonsSetup({
-      packetContracts: lessonsSource.packetContracts.map((contract) =>
-        contract.id === "section_dossier_contract"
-          ? { ...contract, conceptualArtifactIds: ["section_dossier_packet_renamed"] }
+    const result = compile(withEditorialSetup({
+      packetContracts: editorialSource.packetContracts.map((contract) =>
+        contract.id === "editorial_brief_contract"
+          ? { ...contract, conceptualArtifactIds: ["editorial_brief_packet_renamed"] }
           : contract
       )
     }));
@@ -55,10 +55,10 @@ describe("mutation suite", () => {
   });
 
   it("keeps section renames localized", () => {
-    const original = compile(lessonsVerticalSliceSeed);
+    const original = compile(editorialVerticalSliceSeed);
     const renamed = compile({
-      ...lessonsVerticalSliceSeed,
-      surfaceSections: lessonsVerticalSliceSeed.surfaceSections.map((section) =>
+      ...editorialVerticalSliceSeed,
+      surfaceSections: editorialVerticalSliceSeed.surfaceSections.map((section) =>
         section.id === "standard_comment_shape" ? { ...section, title: "Comment Pattern" } : section
       )
     });
@@ -77,8 +77,8 @@ describe("mutation suite", () => {
   });
 
   it("catches role-contract drift", () => {
-    const result = compile(withCoreDevSetup({
-      workflowSteps: coreDevSource.workflowSteps.map((step) =>
+    const result = compile(withReleaseOpsSetup({
+      workflowSteps: releaseOpsSource.workflowSteps.map((step) =>
         step.id === "release_readiness_step" ? { ...step, roleId: "missing_role" } : step
       )
     }));
@@ -90,9 +90,9 @@ describe("mutation suite", () => {
   });
 
   it("catches gate-check drift", () => {
-    const result = compile(withLessonsSetup({
-      reviewGates: lessonsSource.reviewGates.map((gate) =>
-        gate.id === "lessons_acceptance_critic_gate" ? { ...gate, checkIds: ["missing_packet"] } : gate
+    const result = compile(withEditorialSetup({
+      reviewGates: editorialSource.reviewGates.map((gate) =>
+        gate.id === "editorial_acceptance_gate" ? { ...gate, checkIds: ["missing_packet"] } : gate
       )
     }));
 
@@ -103,8 +103,8 @@ describe("mutation suite", () => {
   });
 
   it("catches downstream consumer-or-gate drift", () => {
-    const result = compile(withCoreDevSetup({
-      reviewGates: coreDevSource.reviewGates.map((gate) =>
+    const result = compile(withReleaseOpsSetup({
+      reviewGates: releaseOpsSource.reviewGates.map((gate) =>
         gate.id === "release_readiness_gate" ? { ...gate, checkIds: ["release_protocol_standard"] } : gate
       )
     }));
@@ -118,9 +118,9 @@ describe("mutation suite", () => {
   });
 
   it("catches compatibility-mapping drift", () => {
-    const result = compile(withLessonsSetup({
-      packetContracts: lessonsSource.packetContracts.map((contract) =>
-        contract.id === "lesson_plan_contract" ? { ...contract, runtimeArtifactIds: ["section_dossier_packet"] } : contract
+    const result = compile(withEditorialSetup({
+      packetContracts: editorialSource.packetContracts.map((contract) =>
+        contract.id === "story_outline_contract" ? { ...contract, runtimeArtifactIds: ["editorial_brief_packet"] } : contract
       )
     }));
 
@@ -131,9 +131,9 @@ describe("mutation suite", () => {
   });
 
   it("catches exact-section reads drift", () => {
-    const result = compile(withLessonsSetup({
-      links: lessonsSource.links.map((link) =>
-        link.id === "lesson_step_reads_quality_bar" ? { ...link, to: "missing_quality_bar_section" } : link
+    const result = compile(withEditorialSetup({
+      links: editorialSource.links.map((link) =>
+        link.id === "story_step_reads_quality_bar" ? { ...link, to: "missing_quality_bar_section" } : link
       )
     }));
 
@@ -145,11 +145,11 @@ describe("mutation suite", () => {
 
   it("catches typed workflow-routing drift", () => {
     const result = compile({
-      ...lessonsVerticalSliceSeed,
+      ...editorialVerticalSliceSeed,
       links: [
-        ...lessonsVerticalSliceSeed.links,
-        { id: "bad_routes_to_source", kind: "routes_to", from: "section_dossier_engineer", to: "workflow_lane_contract" },
-        { id: "bad_routes_to_target", kind: "routes_to", from: "section_dossier_step", to: "standard_comment_shape" }
+        ...editorialVerticalSliceSeed.links,
+        { id: "bad_routes_to_source", kind: "routes_to", from: "brief_researcher", to: "workflow_lane_contract" },
+        { id: "bad_routes_to_target", kind: "routes_to", from: "brief_research_step", to: "standard_comment_shape" }
       ]
     });
 
@@ -163,8 +163,8 @@ describe("mutation suite", () => {
 
   it("catches orphaned-section drift", () => {
     const result = compile({
-      ...lessonsVerticalSliceSeed,
-      links: lessonsVerticalSliceSeed.links.filter(
+      ...editorialVerticalSliceSeed,
+      links: editorialVerticalSliceSeed.links.filter(
         (link) => !["standard_comment_shape_documents_artifact", "role_reads_comment_shape"].includes(link.id)
       )
     });
@@ -177,10 +177,10 @@ describe("mutation suite", () => {
 
   it("catches duplicate canonical-owner drift", () => {
     const result = compile({
-      ...lessonsVerticalSliceSeed,
+      ...editorialVerticalSliceSeed,
       links: [
-        ...lessonsVerticalSliceSeed.links,
-        { id: "workflow_lane_contract_owned_by_gate", kind: "owns", from: "lessons_acceptance_critic_gate", to: "workflow_lane_contract" }
+        ...editorialVerticalSliceSeed.links,
+        { id: "workflow_lane_contract_owned_by_gate", kind: "owns", from: "editorial_acceptance_gate", to: "workflow_lane_contract" }
       ]
     });
 
@@ -191,11 +191,11 @@ describe("mutation suite", () => {
   });
 
   it("catches typed artifact-flow link drift", () => {
-    const result = compile(withCoreDevSetup({
+    const result = compile(withReleaseOpsSetup({
       links: [
-        ...coreDevSource.links,
+        ...releaseOpsSource.links,
         { id: "bad_produces_target", kind: "produces", from: "release_readiness_step", to: "release_how_to_surface" },
-        { id: "bad_consumes_source", kind: "consumes", from: "shared_role", to: "release_readiness_contract" },
+        { id: "bad_consumes_source", kind: "consumes", from: "coordinator", to: "release_readiness_contract" },
         { id: "bad_supports_target", kind: "supports", from: "release_readiness_step", to: "shared_release_order" }
       ]
     }));
@@ -213,12 +213,12 @@ describe("mutation suite", () => {
   });
 
   it("catches typed ownership and reference-link drift", () => {
-    const result = compile(withLessonsSetup({
+    const result = compile(withEditorialSetup({
       links: [
-        ...lessonsSource.links,
+        ...editorialSource.links,
         { id: "bad_owns_source", kind: "owns", from: "packet_shape_standard_artifact", to: "packet_shape_section" },
-        { id: "bad_grounds_source", kind: "grounds", from: "section_dossier_packet", to: "lessons_simple_clear_ref" },
-        { id: "bad_references_source", kind: "references", from: "section_dossier_packet", to: "poker_kb_reference" }
+        { id: "bad_grounds_source", kind: "grounds", from: "editorial_brief_packet", to: "editorial_simple_clear_ref" },
+        { id: "bad_references_source", kind: "references", from: "editorial_brief_packet", to: "audience_research_reference" }
       ]
     }));
 
@@ -235,14 +235,14 @@ describe("mutation suite", () => {
   });
 
   it("catches link-level maps_to_runtime drift", () => {
-    const valid = withLessonsSetup({
+    const valid = withEditorialSetup({
       links: [
-        ...lessonsSource.links,
+        ...editorialSource.links,
         {
-          id: "lesson_plan_contract_maps_to_runtime_workflow",
+          id: "story_outline_contract_maps_to_runtime_workflow",
           kind: "maps_to_runtime",
-          from: "lesson_plan_contract",
-          to: "lesson_architect_workflow"
+          from: "story_outline_contract",
+          to: "story_architect_workflow"
         }
       ]
     });
@@ -253,7 +253,7 @@ describe("mutation suite", () => {
       setup: {
         ...valid.setup,
         links: valid.setup.links.map((link) =>
-          link.id === "lesson_plan_contract_maps_to_runtime_workflow" ? { ...link, to: "comment_shape_contract" } : link
+          link.id === "story_outline_contract_maps_to_runtime_workflow" ? { ...link, to: "comment_shape_contract" } : link
         )
       }
     });
@@ -266,11 +266,11 @@ describe("mutation suite", () => {
 
   it("catches explicit generated_from provenance drift", () => {
     const result = compile({
-      ...lessonsVerticalSliceSeed,
+      ...editorialVerticalSliceSeed,
       links: [
-        ...lessonsVerticalSliceSeed.links,
-        { id: "bad_generated_from_source", kind: "generated_from", from: "section_dossier_engineer", to: "role_contract" },
-        { id: "bad_generated_from_target", kind: "generated_from", from: "dossier_role_home_read_first_target", to: "dossier_role_home" }
+        ...editorialVerticalSliceSeed.links,
+        { id: "bad_generated_from_source", kind: "generated_from", from: "brief_researcher", to: "role_contract" },
+        { id: "bad_generated_from_target", kind: "generated_from", from: "brief_researcher_home_read_first_target", to: "brief_researcher_home" }
       ]
     });
 

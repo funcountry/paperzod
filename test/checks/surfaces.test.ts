@@ -159,7 +159,7 @@ describe("surface and reference checks", () => {
         id: "surface_section_hierarchy_valid",
         name: "Surface Section Hierarchy Valid",
         roles: [{ id: "role_1", name: "Role 1", purpose: "Own doctrine." }],
-        surfaces: [{ id: "surface_1", surfaceClass: "shared_entrypoint", runtimePath: "paperclip_home/project_homes/lessons/shared/README.md" }],
+        surfaces: [{ id: "surface_1", surfaceClass: "shared_entrypoint", runtimePath: "paperclip_home/project_homes/editorial/shared/README.md" }],
         surfaceSections: [
           { id: "terms", surfaceId: "surface_1", stableSlug: "terms", title: "Terms" },
           { id: "workflow_items", surfaceId: "surface_1", stableSlug: "workflow-items", title: "Workflow Items", parentSectionId: "terms" }

@@ -166,17 +166,17 @@ describe("role-home and shared renderers", () => {
           {
             id: "project_home_root",
             surfaceClass: "project_home_root",
-            runtimePath: "paperclip_home/project_homes/lessons/README.md"
+            runtimePath: "paperclip_home/project_homes/editorial/README.md"
           },
           {
             id: "shared_readme",
             surfaceClass: "shared_entrypoint",
-            runtimePath: "paperclip_home/project_homes/lessons/shared/README.md"
+            runtimePath: "paperclip_home/project_homes/editorial/shared/README.md"
           },
           {
             id: "workflow_surface",
             surfaceClass: "workflow_owner",
-            runtimePath: "paperclip_home/project_homes/lessons/shared/AUTHORITATIVE_LESSONS_WORKFLOW.md"
+            runtimePath: "paperclip_home/project_homes/editorial/shared/AUTHORITATIVE_EDITORIAL_WORKFLOW.md"
           },
           {
             id: "lead_home",
@@ -192,11 +192,11 @@ describe("role-home and shared renderers", () => {
           { id: "lead_role_contract", surfaceId: "lead_home", stableSlug: "role-contract", title: "Role Contract" }
         ],
         generatedTargets: [
-          { id: "root_target", path: "paperclip_home/project_homes/lessons/README.md", sourceIds: ["route_work"], sectionId: "project_home_map" },
-          { id: "shared_target", path: "paperclip_home/project_homes/lessons/shared/README.md", sourceIds: ["route_work"], sectionId: "shared_read_order" },
+          { id: "root_target", path: "paperclip_home/project_homes/editorial/README.md", sourceIds: ["route_work"], sectionId: "project_home_map" },
+          { id: "shared_target", path: "paperclip_home/project_homes/editorial/shared/README.md", sourceIds: ["route_work"], sectionId: "shared_read_order" },
           {
             id: "workflow_target",
-            path: "paperclip_home/project_homes/lessons/shared/AUTHORITATIVE_LESSONS_WORKFLOW.md",
+            path: "paperclip_home/project_homes/editorial/shared/AUTHORITATIVE_EDITORIAL_WORKFLOW.md",
             sourceIds: ["route_work"],
             sectionId: "owner_map"
           },
@@ -231,8 +231,8 @@ describe("role-home and shared renderers", () => {
 
       Use this project home as the runtime doctrine map for this project.
 
-      1. Start with \`paperclip_home/project_homes/lessons/shared/README.md\` for the shared doctrine entrypoint.
-      2. Use \`paperclip_home/project_homes/lessons/shared/AUTHORITATIVE_LESSONS_WORKFLOW.md\` as the authoritative workflow owner for routing and handoff decisions.
+      1. Start with \`paperclip_home/project_homes/editorial/shared/README.md\` for the shared doctrine entrypoint.
+      2. Use \`paperclip_home/project_homes/editorial/shared/AUTHORITATIVE_EDITORIAL_WORKFLOW.md\` as the authoritative workflow owner for routing and handoff decisions.
       3. Use \`paperclip_home/agents/<role>/AGENTS.md\` for role-local guidance.
       "
     `);

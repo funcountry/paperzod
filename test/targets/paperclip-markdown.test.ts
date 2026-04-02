@@ -27,7 +27,7 @@ function requirePlan(input: unknown) {
 }
 
 describe("Paperclip markdown target", () => {
-  it("resolves paperclip_agents-style document paths", () => {
+  it("resolves Paperclip-style document paths", () => {
     const plan = requirePlan({
       id: "paperclip_paths",
       name: "Paperclip Paths",
@@ -40,36 +40,36 @@ describe("Paperclip markdown target", () => {
         {
           id: "project_home_root",
           surfaceClass: "project_home_root",
-          runtimePath: "paperclip_home/project_homes/lessons/README.md"
+          runtimePath: "paperclip_home/project_homes/editorial/README.md"
         },
         {
           id: "shared_readme",
           surfaceClass: "shared_entrypoint",
-          runtimePath: "paperclip_home/project_homes/lessons/shared/README.md"
+          runtimePath: "paperclip_home/project_homes/editorial/shared/README.md"
         },
         {
           id: "workflow_owner",
           surfaceClass: "workflow_owner",
-          runtimePath: "paperclip_home/project_homes/lessons/shared/AUTHORITATIVE_LESSONS_WORKFLOW.md"
+          runtimePath: "paperclip_home/project_homes/editorial/shared/AUTHORITATIVE_EDITORIAL_WORKFLOW.md"
         },
         {
           id: "technical_ref",
           surfaceClass: "technical_reference",
-          runtimePath: "paperclip_home/project_homes/lessons/shared/technical_references/POKER_KB.md"
+          runtimePath: "paperclip_home/project_homes/editorial/shared/technical_references/AUDIENCE_RESEARCH_KB.md"
         }
       ],
       generatedTargets: [
         { id: "target_role", path: "paperclip_home/agents/author/AGENTS.md", sourceIds: ["role_home_author"] },
-        { id: "target_root", path: "paperclip_home/project_homes/lessons/README.md", sourceIds: ["project_home_root"] },
-        { id: "target_shared", path: "paperclip_home/project_homes/lessons/shared/README.md", sourceIds: ["shared_readme"] },
+        { id: "target_root", path: "paperclip_home/project_homes/editorial/README.md", sourceIds: ["project_home_root"] },
+        { id: "target_shared", path: "paperclip_home/project_homes/editorial/shared/README.md", sourceIds: ["shared_readme"] },
         {
           id: "target_workflow",
-          path: "paperclip_home/project_homes/lessons/shared/AUTHORITATIVE_LESSONS_WORKFLOW.md",
+          path: "paperclip_home/project_homes/editorial/shared/AUTHORITATIVE_EDITORIAL_WORKFLOW.md",
           sourceIds: ["workflow_owner"]
         },
         {
           id: "target_ref",
-          path: "paperclip_home/project_homes/lessons/shared/technical_references/POKER_KB.md",
+          path: "paperclip_home/project_homes/editorial/shared/technical_references/AUDIENCE_RESEARCH_KB.md",
           sourceIds: ["technical_ref"]
         }
       ]
@@ -79,7 +79,7 @@ describe("Paperclip markdown target", () => {
       plan,
       createPaperclipMarkdownTarget({
         repoRoot: "/repo",
-        outputRoot: "paperclip_agents"
+        outputRoot: "."
       })
     );
 
@@ -89,11 +89,11 @@ describe("Paperclip markdown target", () => {
     }
 
     expect(result.data.documentPaths).toEqual({
-      project_home_root: "/repo/paperclip_agents/paperclip_home/project_homes/lessons/README.md",
-      role_home_author: "/repo/paperclip_agents/paperclip_home/agents/author/AGENTS.md",
-      shared_readme: "/repo/paperclip_agents/paperclip_home/project_homes/lessons/shared/README.md",
-      technical_ref: "/repo/paperclip_agents/paperclip_home/project_homes/lessons/shared/technical_references/POKER_KB.md",
-      workflow_owner: "/repo/paperclip_agents/paperclip_home/project_homes/lessons/shared/AUTHORITATIVE_LESSONS_WORKFLOW.md"
+      project_home_root: "/repo/paperclip_home/project_homes/editorial/README.md",
+      role_home_author: "/repo/paperclip_home/agents/author/AGENTS.md",
+      shared_readme: "/repo/paperclip_home/project_homes/editorial/shared/README.md",
+      technical_ref: "/repo/paperclip_home/project_homes/editorial/shared/technical_references/AUDIENCE_RESEARCH_KB.md",
+      workflow_owner: "/repo/paperclip_home/project_homes/editorial/shared/AUTHORITATIVE_EDITORIAL_WORKFLOW.md"
     });
   });
 
@@ -105,17 +105,17 @@ describe("Paperclip markdown target", () => {
         {
           id: "surface_a",
           surfaceClass: "shared_entrypoint",
-          runtimePath: "paperclip_home/project_homes/lessons/shared/README.md"
+          runtimePath: "paperclip_home/project_homes/editorial/shared/README.md"
         },
         {
           id: "surface_b",
           surfaceClass: "shared_entrypoint",
-          runtimePath: "paperclip_home/project_homes/lessons/shared/README.md"
+          runtimePath: "paperclip_home/project_homes/editorial/shared/README.md"
         }
       ],
       generatedTargets: [
-        { id: "target_a", path: "paperclip_home/project_homes/lessons/shared/README.md", sourceIds: ["surface_a"] },
-        { id: "target_b", path: "paperclip_home/project_homes/lessons/shared/README.md", sourceIds: ["surface_b"] }
+        { id: "target_a", path: "paperclip_home/project_homes/editorial/shared/README.md", sourceIds: ["surface_a"] },
+        { id: "target_b", path: "paperclip_home/project_homes/editorial/shared/README.md", sourceIds: ["surface_b"] }
       ]
     });
 
@@ -123,7 +123,7 @@ describe("Paperclip markdown target", () => {
       plan,
       createPaperclipMarkdownTarget({
         repoRoot: "/repo",
-        outputRoot: "paperclip_agents"
+        outputRoot: "."
       })
     );
 

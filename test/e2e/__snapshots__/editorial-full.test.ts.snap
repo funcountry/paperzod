@@ -1,0 +1,352 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`editorial_full e2e > compiles the full Editorial proving fixture with stable manifest, traces, and markdown 1`] = `
+{
+  "exactDependencies": {
+    "gateChecks": [
+      "quality_bar_section",
+      "story_outline_packet",
+    ],
+    "gateReads": [
+      "quality_bar_section",
+    ],
+    "lessonStepReads": [
+      "packet_shape_section",
+      "quality_bar_section",
+    ],
+    "roleReads": [
+      "workflow_comment_shape",
+      "workflow_specialist_turn_shape",
+    ],
+    "sectionOwners": {
+      "brief_researcher_role_contract": [
+        "brief_researcher",
+      ],
+      "gate_what_critic_judges": [
+        "editorial_acceptance_gate",
+      ],
+      "story_architect_lane_contract": [
+        "story_architect_step",
+      ],
+    },
+  },
+  "manifest": {
+    "adapterName": "paperclip_markdown",
+    "documentPaths": {
+      "acceptance_critic_gate_surface": "/repo/paperclip_home/project_homes/editorial/shared/editorial_standards/EDITORIAL_ACCEPTANCE_CRITERIA.md",
+      "audience_research_surface": "/repo/paperclip_home/project_homes/editorial/shared/technical_references/AUDIENCE_RESEARCH_KB.md",
+      "authoritative_workflow": "/repo/paperclip_home/project_homes/editorial/shared/AUTHORITATIVE_EDITORIAL_WORKFLOW.md",
+      "brief_researcher_home": "/repo/paperclip_home/agents/brief_researcher/AGENTS.md",
+      "brief_researcher_workflow": "/repo/paperclip_home/project_homes/editorial/shared/workflow_packets/BRIEF_RESEARCHER_WORKFLOW.md",
+      "editorial_project_home_root": "/repo/paperclip_home/project_homes/editorial/README.md",
+      "editorial_readme": "/repo/paperclip_home/project_homes/editorial/shared/README.md",
+      "github_protocol_surface": "/repo/paperclip_home/project_homes/editorial/shared/how_to_guides/EDITORIAL_GITHUB_PROTOCOL.md",
+      "packet_shapes_standard": "/repo/paperclip_home/project_homes/editorial/shared/editorial_standards/EDITORIAL_PACKET_SHAPES.md",
+      "publish_bootstrap_surface": "/repo/paperclip_home/project_homes/editorial/shared/agent_coordination/EDITORIAL_PUBLISH_BOOTSTRAP.md",
+      "quality_bar_standard": "/repo/paperclip_home/project_homes/editorial/shared/editorial_standards/EDITORIAL_QUALITY_BAR.md",
+      "story_architect_home": "/repo/paperclip_home/agents/story_architect/AGENTS.md",
+      "story_architect_workflow": "/repo/paperclip_home/project_homes/editorial/shared/workflow_packets/STORY_ARCHITECT_WORKFLOW.md",
+    },
+    "outputRoot": ".",
+    "ownedScopes": [
+      {
+        "absolutePath": "/repo/paperclip_home/agents/brief_researcher/AGENTS.md",
+        "kind": "file",
+      },
+      {
+        "absolutePath": "/repo/paperclip_home/agents/story_architect/AGENTS.md",
+        "kind": "file",
+      },
+      {
+        "absolutePath": "/repo/paperclip_home/project_homes/editorial",
+        "kind": "root",
+      },
+    ],
+    "repoRoot": "/repo",
+  },
+  "rendered": {
+    "acceptance_critic_gate_surface": "# Editorial Acceptance Criteria
+
+This file owns what Editorial Acceptance Gate checks before work moves on.
+
+Use it with the governing workflow and any supporting standards for this gate.
+
+<a id="what-the-critic-judges"></a>
+## What the critic judges
+
+Judge whether the packet chain is trustworthy and the quality bar still holds.
+
+- Checks that must pass: STORY_OUTLINE.md, Quality Bar
+- Read before acting: Quality Bar
+",
+    "audience_research_surface": "# Audience Research KB
+
+This file owns the shared audience-research reference path, lookup discipline, and example commands.
+
+Use it when the current task needs repo-owned audience-research guidance.
+
+<a id="audience-research"></a>
+## Audience Research KB
+
+Use this section when the current task needs the local audience-research guidance.
+
+- Reference source: \`paperclip_home/project_homes/editorial/shared/technical_references/AUDIENCE_RESEARCH_KB.md\`.
+",
+    "authoritative_workflow": "# Editorial Workflow
+
+This is the top-level workflow for the Editorial setup.
+
+Use this file for lane order, same-issue handoff, and owner routing.
+
+<a id="owner-map"></a>
+## Owner Map
+
+Use this section to understand the represented workflow order for the current setup.
+
+1. Brief Researcher: Define what the piece needs to communicate, what it does not cover, and the evidence behind those calls.
+2. Story Architect: Turn the upstream brief into a story outline with explicit structure and deferred work.
+
+This section currently documents the Story Architect lane.
+
+- Read before acting: Packet Shape
+- Read before acting: Quality Bar
+- Required inputs: Editorial Brief
+- Support inputs: Packet Shape Standard, Quality Bar Standard, Editorial Structured Doctrine Requirements
+- Interim artifacts: none
+- Outputs the next owner may trust: STORY_OUTLINE.md
+- Stop line: Stop once the story outline is stable enough for the critic to judge.
+- Hand off to gate: Editorial Acceptance Gate
+
+<a id="comment-shape"></a>
+## Comment Shape
+
+Use \`Comment Shape\` as the shared handoff comment contract.
+
+<a id="specialist-turn-shape"></a>
+## Specialist Turn Shape
+
+Use \`Specialist Turn Shape\` as the shared specialist-turn contract.
+",
+    "brief_researcher_home": "# Brief Researcher
+
+You are the Brief Researcher.
+
+Your repo-owned role home is \`paperclip_home/agents/brief_researcher/AGENTS.md\`.
+
+<a id="read-first"></a>
+## Read First
+
+Read these shared doctrine surfaces before taking a turn.
+
+- Read \`Comment Shape\`.
+- Read \`Specialist Turn Shape\`.
+
+<a id="role-contract"></a>
+## Role Contract
+
+Define the editorial brief and produce the source packet the next lane can trust.
+
+- Do not choose final publication copy.
+- Do not silently collapse runtime bundle drift.
+",
+    "brief_researcher_workflow": "# Brief Researcher Workflow
+
+This file defines the shared workflow for the Brief Researcher lane.
+
+It does not define handoff mechanics, the shared packet file rules, or critic verdicts.
+
+<a id="what-this-lane-must-do"></a>
+## What This Lane Must Do
+
+Use this section as the lane contract for the \`Editorial Brief\` packet.
+
+Define what the piece needs to communicate, what it does not cover, and the evidence behind those calls.
+
+- Current owner: Brief Researcher
+- Read before acting: none
+- Required inputs: none
+- Support inputs: Editorial Workflow Simple Clear, Audience Research KB
+- Interim artifacts: none
+- Outputs the next owner may trust: EDITORIAL_BRIEF.md
+- Stop line: Stop once the editorial brief packet is coherent enough for story outlining to trust.
+- Hand off to step: story_architect_step
+",
+    "editorial_project_home_root": "# Editorial Project Home
+
+This is the repo home for shared editorial doctrine and role-local runtime guidance.
+
+<a id="project-home-map"></a>
+## Project Home Map
+
+Use this project home as the runtime doctrine map for this project.
+
+1. Start with \`paperclip_home/project_homes/editorial/shared/README.md\` for the shared doctrine entrypoint.
+2. Use \`paperclip_home/project_homes/editorial/shared/AUTHORITATIVE_EDITORIAL_WORKFLOW.md\` as the authoritative workflow owner for routing and handoff decisions.
+3. Use \`paperclip_home/agents/<role>/AGENTS.md\` for role-local guidance.
+",
+    "editorial_readme": "# Editorial Shared Doctrine
+
+This folder is the live shared doctrine home for the Editorial project.
+
+Start here, then open the one surface that owns your current question.
+
+<a id="read-order"></a>
+## Read Order
+
+After this map, read in this order.
+
+1. \`paperclip_home/project_homes/editorial/shared/AUTHORITATIVE_EDITORIAL_WORKFLOW.md\`
+
+Open packet workflows, standards, and coordination docs only when the workflow owner points you there.
+",
+    "github_protocol_surface": "# Editorial GitHub Protocol
+
+This file is the shared GitHub access guide for the Editorial project.
+
+<a id="github-access"></a>
+## GitHub Access
+
+Use this guide when the current task depends on \`Editorial GitHub Protocol\`.
+
+- Procedure source: \`paperclip_home/project_homes/editorial/shared/how_to_guides/EDITORIAL_GITHUB_PROTOCOL.md\`.
+",
+    "packet_shapes_standard": "# Editorial Packet Shapes
+
+This file owns the packet families used to start editorial work.
+
+Use it to answer one question: what packet shape should I create for this job?
+
+<a id="packet-shape"></a>
+## Packet Shape
+
+Use this section when the current job needs the canonical packet-shape rule.
+
+- Current standard source: \`Packet Shape Standard\`.
+",
+    "publish_bootstrap_surface": "# Editorial Publish Bootstrap
+
+This file owns publish bootstrap and runtime coordination guidance.
+
+<a id="bootstrap"></a>
+## Bootstrap
+
+Use this guide when the current task depends on \`Editorial Publish Bootstrap\`.
+
+- Coordination source: \`paperclip_home/project_homes/editorial/shared/agent_coordination/EDITORIAL_PUBLISH_BOOTSTRAP.md\`.
+",
+    "quality_bar_standard": "# Editorial Quality Bar
+
+This is the shared qualitative standard for judging editorial output.
+
+Use it when the current task needs the quality bar the critic and downstream lanes should trust.
+
+<a id="quality-bar"></a>
+## Quality Bar
+
+Use this section as the shared quality bar the critic and downstream lanes should trust.
+
+- Current standard source: \`Quality Bar Standard\`.
+",
+    "story_architect_home": "# Story Architect
+
+You are the Story Architect.
+
+Your repo-owned role home is \`paperclip_home/agents/story_architect/AGENTS.md\`.
+
+<a id="read-first"></a>
+## Read First
+
+Read these shared doctrine surfaces before taking a turn.
+
+- No additional shared doctrine reads are declared yet.
+
+<a id="role-contract"></a>
+## Role Contract
+
+Turn the editorial brief into a concrete story outline for one publishable slot.
+
+- Do not change locked upstream concepts.
+- Do not invent downstream assets outside the accepted scope.
+",
+    "story_architect_workflow": "# Story Architect Workflow
+
+This file defines the shared workflow for the Story Architect lane.
+
+It does not define handoff mechanics, the shared packet file rules, or critic verdicts.
+
+<a id="what-this-lane-must-do"></a>
+## What This Lane Must Do
+
+Use this section as the lane contract for the \`Story Outline\` packet.
+
+Turn the upstream brief into a story outline with explicit structure and deferred work.
+
+- Current owner: Story Architect
+- Read before acting: Packet Shape
+- Read before acting: Quality Bar
+- Required inputs: Editorial Brief
+- Support inputs: Packet Shape Standard, Quality Bar Standard, Editorial Structured Doctrine Requirements
+- Interim artifacts: none
+- Outputs the next owner may trust: STORY_OUTLINE.md
+- Stop line: Stop once the story outline is stable enough for the critic to judge.
+- Hand off to gate: Editorial Acceptance Gate
+",
+  },
+  "sectionTraces": [
+    {
+      "documentId": "editorial_project_home_root",
+      "id": "project_home_map",
+      "sourceIds": [
+        "brief_research_step",
+        "project_home_map",
+      ],
+      "title": "Project Home Map",
+    },
+    {
+      "documentId": "authoritative_workflow",
+      "id": "workflow_comment_shape",
+      "sourceIds": [
+        "comment_shape_contract",
+        "workflow_comment_shape",
+      ],
+      "title": "Comment Shape",
+    },
+    {
+      "documentId": "authoritative_workflow",
+      "id": "workflow_specialist_turn_shape",
+      "sourceIds": [
+        "specialist_turn_shape_contract",
+        "workflow_specialist_turn_shape",
+      ],
+      "title": "Specialist Turn Shape",
+    },
+    {
+      "documentId": "brief_researcher_workflow",
+      "id": "brief_researcher_lane_contract",
+      "sourceIds": [
+        "brief_research_step",
+        "brief_researcher_lane_contract",
+      ],
+      "title": "What This Lane Must Do",
+    },
+    {
+      "documentId": "story_architect_workflow",
+      "id": "story_architect_lane_contract",
+      "sourceIds": [
+        "story_architect_lane_contract",
+        "story_architect_step",
+      ],
+      "title": "What This Lane Must Do",
+    },
+    {
+      "documentId": "acceptance_critic_gate_surface",
+      "id": "gate_what_critic_judges",
+      "sourceIds": [
+        "editorial_acceptance_gate",
+        "gate_what_critic_judges",
+      ],
+      "title": "What the critic judges",
+    },
+  ],
+}
+`;

@@ -256,7 +256,7 @@ describe("setup normalization", () => {
         {
           id: "surface_1",
           surfaceClass: "project_home_root",
-          runtimePath: "paperclip_home/project_homes/lessons/README.md",
+          runtimePath: "paperclip_home/project_homes/editorial/README.md",
           preamble: [
             { kind: "paragraph", text: "This project home maps the runtime doctrine surface." },
             {
@@ -278,12 +278,12 @@ describe("setup normalization", () => {
             {
               kind: "table",
               headers: ["Owner", "Primary doc"],
-              rows: [["Lessons Project Lead", "AUTHORITATIVE_LESSONS_WORKFLOW.md"]]
+              rows: [["Editorial Project Lead", "AUTHORITATIVE_EDITORIAL_WORKFLOW.md"]]
             },
             {
               kind: "example",
               title: "Example compile command",
-              blocks: [{ kind: "code_block", code: "paperzod compile setups/lessons/index.ts", language: "sh" }]
+              blocks: [{ kind: "code_block", code: "paperzod compile setups/editorial/index.ts", language: "sh" }]
             },
             {
               kind: "good_bad_examples",
@@ -315,7 +315,7 @@ describe("setup normalization", () => {
               kind: "ordered_steps",
               items: ["Open README.", { text: "Open AUTHORITATIVE workflow.", children: ["Then open only the named owner."] }]
             },
-            { kind: "code_block", code: "paperzod compile setups/lessons/index.ts", language: "sh" }
+            { kind: "code_block", code: "paperzod compile setups/editorial/index.ts", language: "sh" }
           ]
         }
       ],
@@ -343,7 +343,7 @@ describe("setup normalization", () => {
         id: "surface_1",
         setupId: "authored_content",
         surfaceClass: "project_home_root",
-        runtimePath: "paperclip_home/project_homes/lessons/README.md",
+        runtimePath: "paperclip_home/project_homes/editorial/README.md",
         preamble: [
           { kind: "paragraph", text: "This project home maps the runtime doctrine surface." },
           {
@@ -365,12 +365,12 @@ describe("setup normalization", () => {
           {
             kind: "table",
             headers: ["Owner", "Primary doc"],
-            rows: [["Lessons Project Lead", "AUTHORITATIVE_LESSONS_WORKFLOW.md"]]
+            rows: [["Editorial Project Lead", "AUTHORITATIVE_EDITORIAL_WORKFLOW.md"]]
           },
           {
             kind: "example",
             title: "Example compile command",
-            blocks: [{ kind: "code_block", code: "paperzod compile setups/lessons/index.ts", language: "sh" }]
+            blocks: [{ kind: "code_block", code: "paperzod compile setups/editorial/index.ts", language: "sh" }]
           },
           {
             kind: "good_bad_examples",
@@ -404,7 +404,7 @@ describe("setup normalization", () => {
             kind: "ordered_steps",
             items: ["Open README.", { text: "Open AUTHORITATIVE workflow.", children: ["Then open only the named owner."] }]
           },
-          { kind: "code_block", code: "paperzod compile setups/lessons/index.ts", language: "sh" }
+          { kind: "code_block", code: "paperzod compile setups/editorial/index.ts", language: "sh" }
         ]
       }
     ]);
@@ -425,11 +425,11 @@ describe("setup normalization", () => {
     const result = normalizeSetup({
       id: "hierarchical_sections",
       name: "Hierarchical Sections",
-      surfaces: [{ id: "surface_1", surfaceClass: "shared_entrypoint", runtimePath: "paperclip_home/project_homes/lessons/shared/README.md" }],
+      surfaces: [{ id: "surface_1", surfaceClass: "shared_entrypoint", runtimePath: "paperclip_home/project_homes/editorial/shared/README.md" }],
       surfaceSections: [
         { id: "terms", surfaceId: "surface_1", stableSlug: "terms", title: "Terms" },
         { id: "workflow_items", surfaceId: "surface_1", stableSlug: "workflow-items", title: "Workflow Items", parentSectionId: "terms" },
-        { id: "poker_items", surfaceId: "surface_1", stableSlug: "poker-items", title: "PokerSkill Lessons Items", parentSectionId: "terms" },
+        { id: "poker_items", surfaceId: "surface_1", stableSlug: "story-items", title: "Editorial Story Items", parentSectionId: "terms" },
         { id: "lesson_root", surfaceId: "surface_1", stableSlug: "lesson-root", title: "Lesson Root", parentSectionId: "poker_items" }
       ]
     });
@@ -462,8 +462,8 @@ describe("setup normalization", () => {
         id: "poker_items",
         setupId: "hierarchical_sections",
         surfaceId: "surface_1",
-        stableSlug: "poker-items",
-        title: "PokerSkill Lessons Items",
+        stableSlug: "story-items",
+        title: "Editorial Story Items",
         parentSectionId: "terms"
       },
       {

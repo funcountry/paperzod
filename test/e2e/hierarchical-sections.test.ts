@@ -7,7 +7,7 @@ function compile(input: unknown) {
     input,
     createPaperclipMarkdownTarget({
       repoRoot: "/repo",
-      outputRoot: "paperclip_agents"
+      outputRoot: "."
     })
   );
 }
@@ -22,7 +22,7 @@ describe("hierarchical section authoring", () => {
         {
           id: "shared_readme",
           surfaceClass: "shared_entrypoint",
-          runtimePath: "paperclip_home/project_homes/lessons/shared/README.md",
+          runtimePath: "paperclip_home/project_homes/editorial/shared/README.md",
           preamble: [{ kind: "paragraph", text: "Start here, then open the one file that owns the question." }]
         }
       ],
@@ -50,10 +50,10 @@ describe("hierarchical section authoring", () => {
         {
           id: "poker_items",
           surfaceId: "shared_readme",
-          stableSlug: "poker-items",
-          title: "PokerSkill Lessons Items",
+          stableSlug: "story-items",
+          title: "Editorial Story Items",
           parentSectionId: "terms",
-          body: [{ kind: "paragraph", text: "These are the attached-checkout units the Lessons flow operates on." }]
+          body: [{ kind: "paragraph", text: "These are the shared editorial units the workflow operates on." }]
         },
         {
           id: "lesson_root",
@@ -77,11 +77,11 @@ describe("hierarchical section authoring", () => {
         }
       ],
       generatedTargets: [
-        { id: "terms_target", path: "paperclip_home/project_homes/lessons/shared/README.md", sourceIds: ["owner"], sectionId: "terms" },
-        { id: "workflow_items_target", path: "paperclip_home/project_homes/lessons/shared/README.md", sourceIds: ["owner"], sectionId: "workflow_items" },
-        { id: "poker_items_target", path: "paperclip_home/project_homes/lessons/shared/README.md", sourceIds: ["owner"], sectionId: "poker_items" },
-        { id: "lesson_root_target", path: "paperclip_home/project_homes/lessons/shared/README.md", sourceIds: ["owner"], sectionId: "lesson_root" },
-        { id: "read_order_target", path: "paperclip_home/project_homes/lessons/shared/README.md", sourceIds: ["owner"], sectionId: "read_order" }
+        { id: "terms_target", path: "paperclip_home/project_homes/editorial/shared/README.md", sourceIds: ["owner"], sectionId: "terms" },
+        { id: "workflow_items_target", path: "paperclip_home/project_homes/editorial/shared/README.md", sourceIds: ["owner"], sectionId: "workflow_items" },
+        { id: "poker_items_target", path: "paperclip_home/project_homes/editorial/shared/README.md", sourceIds: ["owner"], sectionId: "poker_items" },
+        { id: "lesson_root_target", path: "paperclip_home/project_homes/editorial/shared/README.md", sourceIds: ["owner"], sectionId: "lesson_root" },
+        { id: "read_order_target", path: "paperclip_home/project_homes/editorial/shared/README.md", sourceIds: ["owner"], sectionId: "read_order" }
       ],
       links: [
         { id: "terms_documents_owner", kind: "documents", from: "terms", to: "owner" },
@@ -129,10 +129,10 @@ describe("hierarchical section authoring", () => {
       - packet
       - proof
 
-      <a id="poker-items"></a>
-      ### PokerSkill Lessons Items
+      <a id="story-items"></a>
+      ### Editorial Story Items
 
-      These are the attached-checkout units the Lessons flow operates on.
+      These are the shared editorial units the workflow operates on.
 
       <a id="lesson-root"></a>
       #### Lesson Root

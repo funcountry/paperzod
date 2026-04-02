@@ -31,8 +31,8 @@ The graph part is not the hard part.
 The hard part is making it easy to declare those rules once, reuse them, and
 get usable markdown out.
 
-Lessons is the same problem with more roles, more packets, and more shared
-docs.
+The canonical editorial example is the same problem with more roles, more
+packets, and more shared docs.
 
 ## What A Good Product Would Let Us Do
 
@@ -305,25 +305,23 @@ The system becomes truly useful when a setup author can say:
 
 without re-implementing those ideas by hand every time.
 
-## How This Maps To Lessons
+## How This Maps To Editorial
 
-Lessons is the same pattern at a larger size.
+The canonical editorial example is the same pattern at a larger size.
 
-Instead of `Writer`, `Critic`, and `Publisher`, Lessons has roles like:
+Instead of `Writer`, `Critic`, and `Publisher`, editorial has roles like:
 
-- `Section Dossier Engineer`
-- `Section Concepts and Terms Curator`
-- `Lessons Section Architect`
-- `Lessons Acceptance Critic`
-- `Lessons Copywriter`
+- `Brief Researcher`
+- `Story Architect`
+- `Quality Critic`
+- `Publication Coordinator`
 
-Instead of one `DRAFT.md`, Lessons has packets like:
+Instead of one `DRAFT.md`, editorial has packets like:
 
-- `SECTION_DOSSIER.md`
-- `SECTION_CONCEPTS_AND_TERMS.md`
-- `LESSON_PLAN.md`
-- `LESSON_SITUATIONS.md`
-- `lesson_manifest.json`
+- `EDITORIAL_BRIEF.md`
+- `STORY_OUTLINE.md`
+- `REVIEW_NOTES.md`
+- `PUBLICATION_PACKET.md`
 
 The point is the same:
 

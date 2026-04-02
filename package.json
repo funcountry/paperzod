@@ -6,6 +6,15 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "description": "Structured doctrine compiler for Paperclip setups.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/funcountry/paperzod.git"
+  },
+  "homepage": "https://github.com/funcountry/paperzod",
+  "bugs": {
+    "url": "https://github.com/funcountry/paperzod/issues"
+  },
   "engines": {
     "node": ">=24.12.0"
   },

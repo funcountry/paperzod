@@ -1,0 +1,29 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`release_ops source model > represents a non-editorial setup with a different surface mix and path shape 1`] = `
+{
+  "paths": [
+    "paperclip_home/agents/coordinator/AGENTS.md",
+    "paperclip_home/project_homes/release_ops/shared/README.md",
+    "paperclip_home/project_homes/release_ops/shared/workflows/AUTHORITATIVE_RELEASE_OPS_WORKFLOW.md",
+    "paperclip_home/project_homes/release_ops/shared/gates/RELEASE_READINESS_GATE.md",
+    "paperclip_home/project_homes/release_ops/shared/runbooks/RELEASE_PROTOCOL.md",
+  ],
+  "rolePurposes": [
+    "Coordinate the release workflow and keep the shared release operations doctrine coherent.",
+  ],
+  "setup": {
+    "description": "The canonical non-editorial proving setup for a different Paperclip workflow.",
+    "id": "release_ops",
+    "kind": "setup",
+    "name": "Release Ops",
+  },
+  "surfaceClasses": [
+    "gate",
+    "how_to",
+    "role_home",
+    "shared_entrypoint",
+    "workflow_owner",
+  ],
+}
+`;

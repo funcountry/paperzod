@@ -95,14 +95,14 @@ describe("source node schemas", () => {
           {
             kind: "table",
             headers: ["Owner", "Reads"],
-            rows: [["Lessons Project Lead", "shared/README.md"]]
+            rows: [["Editorial Project Lead", "shared/README.md"]]
           },
           {
             kind: "example",
             title: "Example command",
             blocks: [
               { kind: "paragraph", text: "Use this command when validating the setup." },
-              { kind: "code_block", code: "paperzod doctor setups/lessons/index.ts", language: "sh" }
+              { kind: "code_block", code: "paperzod doctor setups/editorial/index.ts", language: "sh" }
             ]
           },
           {
@@ -144,7 +144,7 @@ describe("source node schemas", () => {
             kind: "ordered_steps",
             items: ["Open the shared README.", { text: "Then read the owner map.", children: ["Only after that open lane doctrine."] }]
           },
-          { kind: "code_block", code: "paperzod doctor setups/lessons/index.ts", language: "sh" }
+          { kind: "code_block", code: "paperzod doctor setups/editorial/index.ts", language: "sh" }
         ]
       }).success
     ).toBe(true);
@@ -182,7 +182,7 @@ describe("source node schemas", () => {
           {
             kind: "table",
             headers: ["Owner", "Reads"],
-            rows: [["Lessons Project Lead"]]
+            rows: [["Editorial Project Lead"]]
           }
         ]
       }).success

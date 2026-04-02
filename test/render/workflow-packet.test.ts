@@ -57,14 +57,14 @@ describe("workflow and packet renderers", () => {
           {
             id: "workflow_surface",
             surfaceClass: "workflow_owner",
-            runtimePath: "paperclip_home/project_homes/lessons/shared/AUTHORITATIVE_LESSONS_WORKFLOW.md"
+            runtimePath: "paperclip_home/project_homes/editorial/shared/AUTHORITATIVE_EDITORIAL_WORKFLOW.md"
           }
         ],
         surfaceSections: [{ id: "lane_order", surfaceId: "workflow_surface", stableSlug: "owner-map", title: "Owner Map" }],
         generatedTargets: [
           {
             id: "target_1",
-            path: "paperclip_home/project_homes/lessons/shared/AUTHORITATIVE_LESSONS_WORKFLOW.md",
+            path: "paperclip_home/project_homes/editorial/shared/AUTHORITATIVE_EDITORIAL_WORKFLOW.md",
             sourceIds: ["draft_packet"],
             sectionId: "lane_order"
           }

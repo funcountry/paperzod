@@ -70,7 +70,7 @@ describe("loadFragments", () => {
     await withTempDir(async (dir) => {
       await writeFile(
         path.join(dir, "owners.md"),
-        ["| Owner | Primary doc |", "| --- | --- |", "| Lessons Project Lead | AUTHORITATIVE_LESSONS_WORKFLOW.md |", ""].join("\n"),
+        ["| Owner | Primary doc |", "| --- | --- |", "| Editorial Project Lead | AUTHORITATIVE_EDITORIAL_WORKFLOW.md |", ""].join("\n"),
         "utf8"
       );
 
@@ -80,7 +80,7 @@ describe("loadFragments", () => {
         {
           kind: "table",
           headers: ["Owner", "Primary doc"],
-          rows: [["Lessons Project Lead", "AUTHORITATIVE_LESSONS_WORKFLOW.md"]]
+          rows: [["Editorial Project Lead", "AUTHORITATIVE_EDITORIAL_WORKFLOW.md"]]
         }
       ]);
     });
