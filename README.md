@@ -13,8 +13,10 @@ references, you should not hand-maintain all of those files separately.
 With `paperzod`, you:
 
 - define the semantic graph once
-- define reusable document shapes once
-- keep long prose in normal markdown fragments where humans should own the words
+- reuse first-cut document-shape helpers for role homes, workflow owners, and
+  standards
+- keep long prose in repo-local markdown fragments where humans should own the
+  words
 - compile repo-owned markdown output for runtime use
 
 Structured source is the only semantic truth.
@@ -22,8 +24,10 @@ Generated markdown is runtime output.
 
 ## What You Get
 
-- reusable document shapes for role homes, workflow owners, packet workflows,
-  standards, gates, references, how-to guides, and coordination docs
+- reusable document-shape helpers for role homes, workflow owners, and
+  standards
+- the lower-level `SetupInput` path for packet workflows, gates, references,
+  how-to guides, coordination docs, and any other surface family
 - setup-local roles, workflow steps, packet contracts, artifacts, read order,
   handoff rules, stop lines, and output paths
 - authored markdown fragments for the sections where humans should write the
@@ -55,9 +59,9 @@ In `paperzod`, you do not hand-write all of those surfaces separately.
 
 You define:
 
-- the reusable shape for a role home
-- the reusable shape for a workflow owner doc
-- the reusable shape for a standard
+- one reusable role-home shape
+- one reusable workflow-owner shape
+- one reusable standard shape
 - the actual workflow facts for this setup
 - the authored prose fragments that should stay in markdown
 
@@ -70,101 +74,175 @@ changing the product boundary.
 
 The authoring flow has four parts:
 
-1. Define reusable document shapes.
-2. Fill those shapes with setup-local roles, workflow steps, standards, and
-   paths.
+1. Define the base setup facts as plain `SetupInput`.
+2. Add reusable document-shape parts with helper-backed templates.
 3. Load authored markdown fragments for the prose humans should own directly.
-4. Compile the runtime markdown that agents will read.
+4. Compose those parts back into one plain setup and compile it.
 
 That means a setup author does not hand-maintain ten slightly different
 `AGENTS.md` files.
-They define one role-home shape, fill it with real facts for each role, and
-let the compiler keep the generated output aligned.
+They define one role-home shape, reuse it for each role, and let the compiler
+keep the generated output aligned.
 
 ## Small Example
 
-The example below shows the product surface: reusable templates, setup-local
-facts, authored fragments, and repo-local `.ts` compilation.
+The example below shows the actual helper contract that ships today:
+`composeSetup`, family-specific document-shape helpers, explicit-base
+`loadFragments`, and plain repo-local `.ts` compilation.
 
 ```ts
 import {
+  composeSetup,
+  defineRoleHomeTemplate,
   defineSetup,
-  defineTemplate,
+  defineStandardTemplate,
+  defineWorkflowOwnerTemplate,
   loadFragments,
 } from "paperzod";
 
-const roleHome = defineTemplate({
+const roleHome = defineRoleHomeTemplate({
   id: "role_home",
-  surfaceClass: "role_home",
-  sections: ["read_first", "your_job", "inputs", "outputs", "stop_line"],
+  sections: [
+    { key: "readFirst", title: "Read First" },
+    { key: "yourJob", title: "Your Job" },
+    { key: "inputs", title: "Inputs" },
+    { key: "outputs", title: "Outputs" },
+    { key: "stopLine", title: "Stop Line" },
+  ] as const,
 });
 
-const workflowOwner = defineTemplate({
+const workflowOwner = defineWorkflowOwnerTemplate({
   id: "workflow_owner",
-  surfaceClass: "workflow_owner",
-  sections: ["goal", "step_order", "handoff_rules", "send_back_rules"],
+  sections: [
+    { key: "goal", title: "Goal" },
+    { key: "stepOrder", title: "Step Order" },
+    { key: "handoffRules", title: "Handoff Rules" },
+    { key: "sendBackRules", title: "Send Back Rules" },
+  ] as const,
 });
 
-const draftQuality = defineTemplate({
+const draftQuality = defineStandardTemplate({
   id: "draft_quality_standard",
-  surfaceClass: "standard",
-  sections: ["what_good_looks_like", "send_back_when", "examples"],
+  sections: [
+    { key: "whatGoodLooksLike", title: "What Good Looks Like" },
+    { key: "sendBackWhen", title: "Send Back When" },
+    { key: "examples", title: "Examples" },
+  ] as const,
 });
 
-const workflowText = loadFragments("./fragments/workflow", {
+const workflowText = loadFragments(new URL("./fragments/workflow/", import.meta.url), {
   goal: "goal.md",
   handoffRules: "handoff_rules.md",
   sendBackRules: "send_back_rules.md",
 });
 
-export default defineSetup({
-  id: "editorial",
-  name: "Editorial",
-  templates: [roleHome, workflowOwner, draftQuality],
-  roles: [
-    {
-      id: "writer",
-      name: "Writer",
-      template: "role_home",
-      reads: ["shared.workflow", "standards.draft_quality", "packets.brief"],
-      writes: ["packets.draft"],
-      stopLine: "Stop when the draft is ready for critic review.",
-      nextRoleId: "critic",
-    },
-    {
-      id: "critic",
-      name: "Critic",
-      template: "role_home",
-      reads: ["shared.workflow", "standards.draft_quality", "packets.draft"],
-      writes: ["packets.review"],
-      stopLine: "Stop when the draft either passes or goes back with clear notes.",
-      nextRoleId: "publisher",
-    },
-  ],
-  workflows: [
-    {
-      id: "main",
-      template: "workflow_owner",
-      steps: ["writer", "critic", "publisher"],
-      sections: {
-        goal: workflowText.goal,
-        handoff_rules: workflowText.handoffRules,
-        send_back_rules: workflowText.sendBackRules,
+export default composeSetup(
+  defineSetup({
+    id: "editorial",
+    name: "Editorial",
+    roles: [
+      { id: "writer", name: "Writer", purpose: "Write the draft." },
+      { id: "critic", name: "Critic", purpose: "Review the draft." },
+      { id: "publisher", name: "Publisher", purpose: "Publish after review." },
+    ],
+    workflowSteps: [
+      {
+        id: "draft_issue",
+        roleId: "writer",
+        purpose: "Draft the issue from the brief.",
+        requiredInputIds: ["brief_packet"],
+        requiredOutputIds: ["draft_packet"],
+        stopLine: "Stop when the draft is ready for critic review.",
+        nextStepId: "review_draft",
       },
-      rules: [
-        "Critic review must happen before publish.",
-        "Publisher cannot skip critic review.",
-      ],
+      {
+        id: "review_draft",
+        roleId: "critic",
+        purpose: "Review the draft against the standard.",
+        requiredInputIds: ["draft_packet"],
+        requiredOutputIds: ["review_notes"],
+        stopLine: "Stop when the draft passes or goes back with clear notes.",
+        nextStepId: "publish_issue",
+      },
+      {
+        id: "publish_issue",
+        roleId: "publisher",
+        purpose: "Publish after critic review passes.",
+        requiredInputIds: ["draft_packet", "review_notes"],
+        requiredOutputIds: ["published_issue"],
+        stopLine: "Stop when the issue is published.",
+        nextGateId: "publish_gate",
+      },
+    ],
+    reviewGates: [
+      {
+        id: "publish_gate",
+        name: "Publish Gate",
+        purpose: "Confirm the final issue is ready to ship.",
+        checkIds: ["published_issue"],
+      },
+    ],
+    artifacts: [
+      { id: "brief_packet", name: "BRIEF.md", artifactClass: "required" },
+      { id: "draft_packet", name: "DRAFT.md", artifactClass: "required" },
+      { id: "review_notes", name: "REVIEW_NOTES.md", artifactClass: "required" },
+      { id: "published_issue", name: "PUBLISHED_ISSUE.md", artifactClass: "required" },
+    ],
+  }),
+  roleHome.document({
+    surfaceId: "writer_home",
+    runtimePath: "generated/editorial/roles/writer/AGENTS.md",
+    roleId: "writer",
+    sections: {
+      readFirst: {
+        body: [{ kind: "paragraph", text: "Read the shared workflow, then the standard, then the brief." }],
+      },
+      yourJob: {
+        body: [{ kind: "paragraph", text: "Write the draft for the current issue. Do not publish it yourself." }],
+      },
     },
-  ],
-  standards: [
-    {
-      id: "draft_quality",
-      name: "Draft Quality Standard",
-      template: "draft_quality_standard",
+  }),
+  workflowOwner.document({
+    surfaceId: "editorial_workflow",
+    runtimePath: "generated/editorial/shared/AUTHORITATIVE_WORKFLOW.md",
+    workflowStepId: "draft_issue",
+    title: "Authoritative Workflow",
+    sections: {
+      goal: { body: workflowText.goal },
+      stepOrder: {
+        documentsTo: ["draft_issue", "review_draft", "publish_issue"],
+        body: [
+          {
+            kind: "ordered_list",
+            items: [
+              "Writer drafts the issue.",
+              "Critic reviews the draft.",
+              "Publisher publishes after review passes.",
+            ],
+          },
+        ],
+      },
+      handoffRules: { body: workflowText.handoffRules },
+      sendBackRules: { documentsTo: "review_draft", body: workflowText.sendBackRules },
     },
-  ],
-});
+  }),
+  draftQuality.document({
+    surfaceId: "draft_quality_standard",
+    runtimePath: "generated/editorial/standards/DRAFT_QUALITY.md",
+    artifactId: "draft_packet",
+    title: "Draft Quality Standard",
+    sections: {
+      whatGoodLooksLike: {
+        body: [
+          {
+            kind: "unordered_list",
+            items: ["The draft matches the brief.", "Claims are grounded.", "The wording is clear."],
+          },
+        ],
+      },
+    },
+  }),
+);
 ```
 
 The long prose still lives in plain markdown files such as:
@@ -175,6 +253,27 @@ The long prose still lives in plain markdown files such as:
 
 TypeScript owns the graph, ids, paths, routing, and validation.
 Markdown owns the prose humans should write directly.
+
+## Current Helper Layer
+
+The shipped helper layer is intentionally narrow:
+
+- `composeSetup(baseSetup, ...parts)` merges helper-produced setup parts back
+  into one plain `SetupInput`.
+- `defineRoleHomeTemplate(...)`, `defineWorkflowOwnerTemplate(...)`, and
+  `defineStandardTemplate(...)` stamp out reusable document shapes for the
+  first supported families.
+- `loadFragments(new URL("./fragments/.../", import.meta.url), spec)` loads
+  repo-local markdown fragments from an explicit base directory.
+- The fragment loader currently supports paragraphs, nested ordered or
+  unordered lists, and fenced code blocks.
+- Headings, tables, blockquotes, frontmatter, HTML, images, and task lists
+  fail loudly today and should stay TypeScript-authored until the contract
+  expands.
+- Packet workflows, gates, references, how-to docs, and coordination docs are
+  still authored directly through plain `SetupInput`.
+- Extra setup-level executable checks are not a shipped hook yet. The
+  framework currently runs only its core generic checks.
 
 ## What You Compile
 

@@ -1,5 +1,6 @@
-import { writeFile } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 
 import { beforeAll, describe, expect, it } from "vitest";
 
@@ -20,6 +21,41 @@ function tsFixtureModuleSource(setupLiteral: string): string {
   return `const setup = ${setupLiteral} as const;\nexport default setup;\n`;
 }
 
+function helperTsFixtureModuleSource(importSpecifier: string): string {
+  return [
+    `import { composeSetup, defineRoleHomeTemplate, loadFragments } from ${JSON.stringify(importSpecifier)};`,
+    "",
+    "const roleHome = defineRoleHomeTemplate({",
+    '  id: "role_home",',
+    "  sections: [",
+    '    { key: "readFirst", title: "Read First" },',
+    '    { key: "roleContract", title: "Role Contract", stableSlug: "role-contract" }',
+    "  ] as const",
+    "});",
+    "",
+    'const fragments = loadFragments(new URL("./fragments/", import.meta.url), {',
+    '  readFirst: "read_first.md"',
+    "});",
+    "",
+    "export default composeSetup(",
+    "  {",
+    '    id: "cli_helper_ts",',
+    '    name: "CLI Helper TS",',
+    "    roles: [{ id: \"writer\", name: \"Writer\", purpose: \"Write the draft.\" }]",
+    "  },",
+    "  roleHome.document({",
+    '    surfaceId: "writer_home",',
+    '    runtimePath: "generated/writer/AGENTS.md",',
+    '    roleId: "writer",',
+    "    sections: {",
+    "      readFirst: { body: fragments.readFirst }",
+    "    }",
+    "  })",
+    ");",
+    ""
+  ].join("\n");
+}
+
 beforeAll(async () => {
   const build = await runProcess(npmCommand(), ["run", "build"], repoRoot);
   expect(build.code).toBe(0);
@@ -37,7 +73,7 @@ describe("cli validate and compile", () => {
           "const markdown = await import('paperzod/markdown');",
           "const testing = await import('paperzod/testing');",
           "console.log(JSON.stringify({",
-          "  root: ['validateSetup','compileSetup'].every((key) => typeof root[key] === 'function'),",
+          "  root: ['validateSetup','compileSetup','composeSetup','loadFragments','defineRoleHomeTemplate'].every((key) => typeof root[key] === 'function'),",
           "  core: typeof core.createDiagnostic === 'function',",
           "  markdown: typeof markdown.renderDocuments === 'function',",
           "  testing: typeof testing.stableJson === 'function'",
@@ -93,6 +129,21 @@ describe("cli validate and compile", () => {
       const result = await runNodeScript(["dist/cli/index.js", "validate", fixturePath], repoRoot);
       expect(result.code).toBe(0);
       expect(result.stdout).toContain("VALID cli_valid_ts");
+    });
+  });
+
+  it("validates a helper-backed TypeScript setup with fragment loading and exits zero", async () => {
+    await withTempDir(async (dir) => {
+      const fixturePath = path.join(dir, "helper-setup.ts");
+      const fragmentsDir = path.join(dir, "fragments");
+      const importSpecifier = pathToFileURL(path.join(repoRoot, "dist/index.js")).href;
+      await mkdir(fragmentsDir, { recursive: true });
+      await writeFile(path.join(fragmentsDir, "read_first.md"), "Read the shared workflow first.\n", "utf8");
+      await writeFile(fixturePath, helperTsFixtureModuleSource(importSpecifier), "utf8");
+
+      const result = await runNodeScript(["dist/cli/index.js", "validate", fixturePath], repoRoot);
+      expect(result.code).toBe(0);
+      expect(result.stdout).toContain("VALID cli_helper_ts");
     });
   });
 

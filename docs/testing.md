@@ -15,15 +15,17 @@ The standard is:
 - we can trust that the product satisfies the Lessons proving case without
   becoming Lessons-specific
 
-Status as of 2026-04-01:
+Status as of 2026-04-02:
 
 - the automated release gate is currently green
 - current automated evidence:
-  - `40` test files passed
-  - `132` tests passed
+  - `49` test files passed
+  - `162` tests passed
   - root typecheck passed
   - type-only authoring tests passed
   - build passed
+  - the helper-backed editorial proving example passed through source, API,
+    e2e, and CLI proof
 - this document remains the normative release-gate spec for future changes
 
 ## First rule

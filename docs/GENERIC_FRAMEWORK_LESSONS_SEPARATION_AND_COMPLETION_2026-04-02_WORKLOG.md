@@ -42,3 +42,44 @@ Plan doc: /Users/aelaguiz/workspace/paperzod/docs/GENERIC_FRAMEWORK_LESSONS_SEPA
   - `npm test` - passed.
 - Next steps:
   - Close out the implementation run as complete.
+
+## Phase 6 (Authoring Primitives And Fragment Contract) Progress Update
+- Work completed:
+  - Reopened the implementation run against the active plan after the post-audit product-surface gap review.
+  - Added `composeSetup` and `loadFragments` under `src/source/**`.
+  - Added focused source tests for helper composition and the fragment-loader success and failure boundary.
+- Tests run + results:
+  - `npx vitest run test/source/compose.test.ts test/source/fragments.test.ts` - passed.
+  - `npm run typecheck` - passed.
+  - `npm run build` - passed.
+- Next steps:
+  - Land reusable document-shape helpers and the executable proving example.
+
+## Phase 7 (Reusable Shapes And Proving Example) Progress Update
+- Work completed:
+  - Added reusable helper-backed document shapes for `role_home`, `workflow_owner`, and `standard`.
+  - Added the helper-backed editorial proving setup and fragment fixtures.
+  - Added type, API, e2e, source, and CLI proof for the helper-backed path.
+- Tests run + results:
+  - `npx vitest run test/source/templates.test.ts test/e2e/editorial-example.test.ts test/cli/validate-compile.test.ts` - passed.
+  - `npm run typecheck` - passed.
+  - `npm run test:types` - passed.
+  - `npm run build` - passed.
+- Issues / deviations:
+  - The CLI helper-backed temp-module proof needed a file-URL import of `dist/index.js` because package self-reference only works from within the repo package scope. The separate self-import proof remains in place.
+- Next steps:
+  - Rewrite README and schema docs to match the shipped helper API and rerun the final gate.
+
+## Phase 8 (Docs Truth And Final Gate) Progress Update
+- Work completed:
+  - Rewrote `README.md` and `docs/schema.md` around the shipped helper layer and explicit fragment boundary.
+  - Added a direct public-API compile proof for the helper-backed editorial example.
+  - Restored the plan audit to complete after the final gate passed.
+- Tests run + results:
+  - `npx vitest run test/source/compose.test.ts test/source/fragments.test.ts test/source/templates.test.ts test/api/index.test.ts test/e2e/editorial-example.test.ts test/cli/validate-compile.test.ts` - passed.
+  - `npm run typecheck` - passed.
+  - `npm run test:types` - passed.
+  - `npm run build` - passed.
+  - `npm test` - passed (`49` files, `162` tests).
+- Next steps:
+  - None. The reopened implementation run is complete.

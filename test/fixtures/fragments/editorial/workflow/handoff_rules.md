@@ -1,0 +1,2 @@
+- Writer hands off only when the draft is ready for critic review.
+- Critic hands off only after the review outcome is explicit.

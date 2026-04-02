@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { buildGraph, compileAndEmitSetup, compileSetup, createTargetAdapter, renderSetup, validateSetup } from "../../src/index.js";
+import editorialExample from "../fixtures/source/editorial-example.js";
 import demoMinimalSeed from "../fixtures/source/demo-minimal.js";
 import { withTempDir } from "../helpers/fs.js";
 
@@ -131,5 +132,24 @@ describe("public library api", () => {
       expect(compiled.data.emit.files.map((file) => file.status)).toEqual(["create"]);
       expect(compiled.data.manifest.documentPaths.surface_1).toContain("generated/WORKFLOW.md");
     });
+  });
+
+  it("compiles a helper-backed setup through the public api", () => {
+    const compiled = compileSetup(
+      editorialExample,
+      createTargetAdapter({ name: "test", repoRoot: "/repo", outputRoot: "out" })
+    );
+
+    expect(compiled.success).toBe(true);
+    if (!compiled.success) {
+      return;
+    }
+
+    expect(compiled.data.manifest.documentPaths.editorial_workflow).toBe(
+      "/repo/out/generated/editorial/shared/AUTHORITATIVE_WORKFLOW.md"
+    );
+    expect(compiled.data.rendered.documents.find((document) => document.id === "editorial_workflow")?.markdown).toContain(
+      "Move one issue from draft to publish in a fixed order."
+    );
   });
 });

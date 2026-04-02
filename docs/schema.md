@@ -10,13 +10,39 @@ But it is now grounded by the concrete Lessons example in
 
 If the schema language cannot express that example cleanly, it is not ready.
 
-Status as of 2026-04-01:
+Status as of 2026-04-02:
 
 - the current prototype implements this schema family closely
 - canonical repo-local setups now ship as plain `SetupInput` modules under
   `setups/**`
-- where the shipped authoring DSL is narrower than the full schema, plain
-  object authoring is used for the remaining node families
+- the shipped helper layer now includes `composeSetup(...)`, reusable
+  document-shape helpers for `role_home`, `workflow_owner`, and `standard`,
+  and explicit-base `loadFragments(...)`
+- the helper layer lowers back into plain `SetupInput`; it does not widen the
+  normalized node model
+- packet workflows, gates, references, how-to docs, and coordination docs are
+  still authored directly through plain `SetupInput`
+- fragment loading is intentionally narrow in the first cut: paragraphs,
+  nested ordered or unordered lists, and fenced code blocks only
+- setup-level executable checks remain explicitly deferred; the shipped
+  framework runs only its core generic checks
+
+## Current authoring contract
+
+The public source contract now has two layers:
+
+1. The stable low-level contract is still plain `SetupInput`.
+2. The shipped helper layer is a thin authoring convenience on top:
+   - `composeSetup(baseSetup, ...parts)`
+   - `defineRoleHomeTemplate(...)`
+   - `defineWorkflowOwnerTemplate(...)`
+   - `defineStandardTemplate(...)`
+   - `loadFragments(new URL("./fragments/.../", import.meta.url), spec)`
+
+Those helpers lower into the existing `surface`, `surface_section`,
+`generated_target`, and `documents` link model before normalization.
+They do not add `templates`, `workflows`, or `standards` arrays to
+`SetupInput`, and they do not create new normalized node kinds.
 
 ## Design rule
 
