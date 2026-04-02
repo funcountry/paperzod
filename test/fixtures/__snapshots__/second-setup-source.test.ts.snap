@@ -1,0 +1,29 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`second_setup source model > represents a non-Lessons setup with a different surface mix and path shape 1`] = `
+{
+  "paths": [
+    "project_homes/core_dev/roles/coordinator/AGENTS.md",
+    "project_homes/core_dev/shared/README.md",
+    "project_homes/core_dev/shared/AUTHORITATIVE_CORE_DEV_WORKFLOW.md",
+    "project_homes/core_dev/shared/lessons_content_standards/RELEASE_READINESS_GATE.md",
+    "project_homes/core_dev/shared/how_to_guides/RELEASE_PROTOCOL.md",
+  ],
+  "rolePurposes": [
+    "Coordinate the core-dev workflow and keep the shared release doctrine coherent.",
+  ],
+  "setup": {
+    "description": "A non-Lessons proving fixture for a different Paperclip setup.",
+    "id": "core_dev",
+    "kind": "setup",
+    "name": "Core Dev",
+  },
+  "surfaceClasses": [
+    "gate",
+    "how_to",
+    "role_home",
+    "shared_entrypoint",
+    "workflow_owner",
+  ],
+}
+`;

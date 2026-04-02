@@ -1,0 +1,310 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`lessons_full e2e > compiles the full Lessons proving fixture with stable manifest, traces, and markdown 1`] = `
+{
+  "exactDependencies": {
+    "gateChecks": [
+      "lesson_plan_packet",
+      "quality_bar_section",
+    ],
+    "gateReads": [
+      "quality_bar_section",
+    ],
+    "lessonStepReads": [
+      "packet_shape_section",
+      "quality_bar_section",
+    ],
+    "roleReads": [
+      "workflow_comment_shape",
+      "workflow_specialist_turn_shape",
+    ],
+    "sectionOwners": {
+      "dossier_role_contract": [
+        "section_dossier_engineer",
+      ],
+      "gate_what_critic_judges": [
+        "lessons_acceptance_critic_gate",
+      ],
+      "lesson_architect_lane_contract": [
+        "lesson_architect_step",
+      ],
+    },
+  },
+  "manifest": {
+    "adapterName": "paperclip_markdown",
+    "documentPaths": {
+      "acceptance_critic_gate_surface": "/repo/paperclip_agents/project_homes/lessons/shared/lessons_content_standards/LESSONS_ACCEPTANCE_CRITIC_CRITERIA.md",
+      "authoritative_workflow": "/repo/paperclip_agents/project_homes/lessons/shared/AUTHORITATIVE_LESSONS_WORKFLOW.md",
+      "dossier_role_home": "/repo/paperclip_agents/project_homes/lessons/roles/section_dossier_engineer/AGENTS.md",
+      "github_protocol_surface": "/repo/paperclip_agents/project_homes/lessons/shared/how_to_guides/LESSONS_GITHUB_ACCESS_PROTOCOL.md",
+      "lesson_architect_home": "/repo/paperclip_agents/project_homes/lessons/roles/lessons_lesson_architect/AGENTS.md",
+      "lesson_architect_workflow": "/repo/paperclip_agents/project_homes/lessons/shared/proof_packets/LESSONS_LESSON_ARCHITECT_WORKFLOW.md",
+      "lessons_readme": "/repo/paperclip_agents/project_homes/lessons/shared/README.md",
+      "mobile_bootstrap_surface": "/repo/paperclip_agents/project_homes/lessons/shared/agent_coordination/LESSONS_PSMOBILE_BOOTSTRAP.md",
+      "packet_shapes_standard": "/repo/paperclip_agents/project_homes/lessons/shared/lessons_content_standards/LESSONS_PACKET_SHAPES.md",
+      "poker_kb_surface": "/repo/paperclip_agents/project_homes/lessons/shared/technical_references/POKER_KB.md",
+      "quality_bar_standard": "/repo/paperclip_agents/project_homes/lessons/shared/lessons_content_standards/LESSONS_QUALITY_BAR.md",
+      "section_dossier_workflow": "/repo/paperclip_agents/project_homes/lessons/shared/proof_packets/SECTION_DOSSIER_ENGINEER_WORKFLOW.md",
+    },
+    "outputRoot": "paperclip_agents",
+    "repoRoot": "/repo",
+  },
+  "rendered": {
+    "acceptance_critic_gate_surface": "# Gate: Lessons Acceptance Critic
+
+This gate document records review and acceptance checks.
+
+<a id="what-the-critic-judges"></a>
+## What the critic judges
+
+Judge whether the packet chain is trustworthy and the quality bar still holds.
+
+- Checks: lesson_plan_packet, quality_bar_section
+- Reads: quality_bar_section
+",
+    "authoritative_workflow": "# Workflow Owner
+
+This workflow owner document describes the operational turn order and stop lines.
+
+<a id="comment-shape"></a>
+## Comment Shape
+
+Artifact class: reference.
+
+- Runtime path: none
+- Conceptual only: no
+- Compatibility only: no
+
+<a id="owner-map"></a>
+## Owner Map
+
+Turn the upstream dossier into a lesson plan with explicit teaching burden and deferred work.
+
+- Role: lessons_lesson_architect
+- Reads: packet_shape_section, quality_bar_section
+- Required inputs: section_dossier_contract
+- Support inputs: packet_shape_standard_artifact, quality_bar_standard_artifact, lessons_structured_requirements_ref
+- Interim artifacts: none
+- Required outputs: lesson_plan_packet
+- Stop line: Stop once the lesson plan is stable enough for the critic to judge.
+- Next gate: lessons_acceptance_critic_gate
+
+<a id="specialist-turn-shape"></a>
+## Specialist Turn Shape
+
+Artifact class: reference.
+
+- Runtime path: none
+- Conceptual only: no
+- Compatibility only: no
+",
+    "dossier_role_home": "# Role Home: Section Dossier Engineer
+
+This role-home document states the contract for one runtime role.
+
+<a id="read-first"></a>
+## Read First
+
+Define the section burden and produce the section dossier contract.
+
+- Boundary: Do not choose final lesson copy.
+- Boundary: Do not silently collapse runtime bundle drift.
+- Reads: workflow_comment_shape, workflow_specialist_turn_shape
+
+<a id="role-contract"></a>
+## Role Contract
+
+Define the section burden and produce the section dossier contract.
+
+- Boundary: Do not choose final lesson copy.
+- Boundary: Do not silently collapse runtime bundle drift.
+- Reads: workflow_comment_shape, workflow_specialist_turn_shape
+",
+    "github_protocol_surface": "# How To
+
+This how-to document explains a repeatable operational procedure.
+
+<a id="github-access"></a>
+## GitHub Access
+
+Reference class: support_reference.
+
+- Source path: project_homes/lessons/shared/how_to_guides/LESSONS_GITHUB_ACCESS_PROTOCOL.md
+- URL: none
+",
+    "lesson_architect_home": "# Role Home: Lessons Lesson Architect
+
+This role-home document states the contract for one runtime role.
+
+<a id="read-first"></a>
+## Read First
+
+Turn the section burden into a concrete lesson plan for one lesson slot.
+
+- Boundary: Do not change locked upstream concepts.
+- Boundary: Do not invent playables outside the accepted strategy.
+- Reads: none
+
+<a id="role-contract"></a>
+## Role Contract
+
+Turn the section burden into a concrete lesson plan for one lesson slot.
+
+- Boundary: Do not change locked upstream concepts.
+- Boundary: Do not invent playables outside the accepted strategy.
+- Reads: none
+",
+    "lesson_architect_workflow": "# Packet Workflow: Lesson Plan
+
+This packet workflow document describes the trusted packet contract.
+
+<a id="what-this-lane-must-do"></a>
+## What This Lane Must Do
+
+Turn the upstream dossier into a lesson plan with explicit teaching burden and deferred work.
+
+- Role: lessons_lesson_architect
+- Reads: packet_shape_section, quality_bar_section
+- Required inputs: section_dossier_contract
+- Support inputs: packet_shape_standard_artifact, quality_bar_standard_artifact, lessons_structured_requirements_ref
+- Interim artifacts: none
+- Required outputs: lesson_plan_packet
+- Stop line: Stop once the lesson plan is stable enough for the critic to judge.
+- Next gate: lessons_acceptance_critic_gate
+",
+    "lessons_readme": "# Shared Entrypoint
+
+This shared entrypoint introduces the setup-wide doctrine surface.
+
+<a id="read-order"></a>
+## Read Order
+
+Define what the section teaches, what it does not teach, and the receipts behind those calls.
+
+- Role: section_dossier_engineer
+- Reads: none
+- Required inputs: none
+- Support inputs: lessons_simple_clear_ref, poker_kb_reference
+- Interim artifacts: none
+- Required outputs: section_dossier_packet
+- Stop line: Stop once the section dossier packet is coherent enough for lesson planning to trust.
+- Next step: lesson_architect_step
+",
+    "mobile_bootstrap_surface": "# Coordination
+
+This coordination document records shared execution expectations.
+
+<a id="bootstrap"></a>
+## Bootstrap
+
+Reference class: support_reference.
+
+- Source path: project_homes/lessons/shared/agent_coordination/LESSONS_PSMOBILE_BOOTSTRAP.md
+- URL: none
+",
+    "packet_shapes_standard": "# Standard
+
+This standard document records reusable doctrine rules.
+
+<a id="packet-shape"></a>
+## Packet Shape
+
+Artifact class: reference.
+
+- Runtime path: none
+- Conceptual only: no
+- Compatibility only: no
+",
+    "poker_kb_surface": "# Technical Reference: Poker KB
+
+This technical reference captures support material that shapes implementation.
+
+<a id="poker-kb"></a>
+## Poker KB
+
+Reference class: runtime_reference.
+
+- Source path: project_homes/lessons/shared/technical_references/POKER_KB.md
+- URL: none
+",
+    "quality_bar_standard": "# Standard
+
+This standard document records reusable doctrine rules.
+
+<a id="quality-bar"></a>
+## Quality Bar
+
+Artifact class: reference.
+
+- Runtime path: none
+- Conceptual only: no
+- Compatibility only: no
+",
+    "section_dossier_workflow": "# Packet Workflow: Section Dossier
+
+This packet workflow document describes the trusted packet contract.
+
+<a id="what-this-lane-must-do"></a>
+## What This Lane Must Do
+
+Define what the section teaches, what it does not teach, and the receipts behind those calls.
+
+- Role: section_dossier_engineer
+- Reads: none
+- Required inputs: none
+- Support inputs: lessons_simple_clear_ref, poker_kb_reference
+- Interim artifacts: none
+- Required outputs: section_dossier_packet
+- Stop line: Stop once the section dossier packet is coherent enough for lesson planning to trust.
+- Next step: lesson_architect_step
+",
+  },
+  "sectionTraces": [
+    {
+      "documentId": "acceptance_critic_gate_surface",
+      "id": "gate_what_critic_judges",
+      "sourceIds": [
+        "gate_what_critic_judges",
+        "lessons_acceptance_critic_gate",
+      ],
+      "title": "What the critic judges",
+    },
+    {
+      "documentId": "authoritative_workflow",
+      "id": "workflow_comment_shape",
+      "sourceIds": [
+        "comment_shape_contract",
+        "workflow_comment_shape",
+      ],
+      "title": "Comment Shape",
+    },
+    {
+      "documentId": "authoritative_workflow",
+      "id": "workflow_specialist_turn_shape",
+      "sourceIds": [
+        "specialist_turn_shape_contract",
+        "workflow_specialist_turn_shape",
+      ],
+      "title": "Specialist Turn Shape",
+    },
+    {
+      "documentId": "lesson_architect_workflow",
+      "id": "lesson_architect_lane_contract",
+      "sourceIds": [
+        "lesson_architect_lane_contract",
+        "lesson_architect_step",
+      ],
+      "title": "What This Lane Must Do",
+    },
+    {
+      "documentId": "section_dossier_workflow",
+      "id": "section_dossier_lane_contract",
+      "sourceIds": [
+        "section_dossier_lane_contract",
+        "section_dossier_step",
+      ],
+      "title": "What This Lane Must Do",
+    },
+  ],
+}
+`;

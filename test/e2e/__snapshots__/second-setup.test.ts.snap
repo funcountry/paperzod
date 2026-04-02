@@ -1,0 +1,98 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`second_setup e2e > compiles the same pipeline for a non-Lessons setup 1`] = `
+{
+  "manifest": {
+    "adapterName": "paperclip_markdown",
+    "documentPaths": {
+      "coordinator_home": "/repo/paperclip_agents/project_homes/core_dev/roles/coordinator/AGENTS.md",
+      "core_dev_readme": "/repo/paperclip_agents/project_homes/core_dev/shared/README.md",
+      "release_gate_surface": "/repo/paperclip_agents/project_homes/core_dev/shared/lessons_content_standards/RELEASE_READINESS_GATE.md",
+      "release_how_to_surface": "/repo/paperclip_agents/project_homes/core_dev/shared/how_to_guides/RELEASE_PROTOCOL.md",
+      "release_workflow_surface": "/repo/paperclip_agents/project_homes/core_dev/shared/AUTHORITATIVE_CORE_DEV_WORKFLOW.md",
+    },
+    "outputRoot": "paperclip_agents",
+    "repoRoot": "/repo",
+  },
+  "rendered": {
+    "coordinator_home": "# Role Home: Shared Role
+
+This role-home document states the contract for one runtime role.
+
+<a id="read-first"></a>
+## Read First
+
+Coordinate the core-dev workflow and keep the shared release doctrine coherent.
+
+- Reads: none
+
+<a id="role-contract"></a>
+## Role Contract
+
+Coordinate the core-dev workflow and keep the shared release doctrine coherent.
+
+- Reads: none
+",
+    "core_dev_readme": "# Shared Entrypoint
+
+This shared entrypoint introduces the setup-wide doctrine surface.
+
+<a id="release-order"></a>
+## Release Order
+
+Prepare the release-readiness packet and route it into the final review.
+
+- Role: shared_role
+- Reads: none
+- Required inputs: none
+- Support inputs: release_protocol_reference
+- Interim artifacts: none
+- Required outputs: release_readiness_packet
+- Stop line: Stop once the release packet is stable enough for final review.
+- Next gate: release_readiness_gate
+",
+    "release_gate_surface": "# Gate: Release Readiness Gate
+
+This gate document records review and acceptance checks.
+
+<a id="final-checks"></a>
+## Final Checks
+
+Judge whether the release packet is ready for handoff.
+
+- Checks: release_readiness_packet
+- Reads: none
+",
+    "release_how_to_surface": "# How To
+
+This how-to document explains a repeatable operational procedure.
+
+<a id="protocol"></a>
+## Protocol
+
+Reference class: support_reference.
+
+- Source path: project_homes/core_dev/shared/how_to_guides/RELEASE_PROTOCOL.md
+- URL: none
+",
+    "release_workflow_surface": "# Workflow Owner
+
+This workflow owner document describes the operational turn order and stop lines.
+
+<a id="release-shape"></a>
+## Release Shape
+
+Prepare the release-readiness packet and route it into the final review.
+
+- Role: shared_role
+- Reads: none
+- Required inputs: none
+- Support inputs: release_protocol_reference
+- Interim artifacts: none
+- Required outputs: release_readiness_packet
+- Stop line: Stop once the release packet is stable enough for final review.
+- Next gate: release_readiness_gate
+",
+  },
+}
+`;
