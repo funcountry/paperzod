@@ -38,6 +38,46 @@ function compile(input: unknown) {
   );
 }
 
+const evidenceMutationSeed = {
+  id: "evidence_mutation_seed",
+  name: "Evidence Mutation Seed",
+  registries: [
+    {
+      id: "publish_result",
+      name: "Publish Result",
+      entries: [
+        { id: "pass", label: "PASS" },
+        { id: "revise", label: "Revise" }
+      ]
+    }
+  ],
+  artifacts: [
+    {
+      id: "authority_note",
+      name: "Authority Note",
+      artifactClass: "required" as const,
+      evidence: {
+        requiredArtifactIds: ["review_receipt"],
+        requiredClaims: [
+          {
+            id: "publish_decision",
+            label: "Publish decision",
+            allowedValue: {
+              registryId: "publish_result",
+              entryId: "pass"
+            }
+          }
+        ]
+      }
+    },
+    {
+      id: "review_receipt",
+      name: "Review Receipt",
+      artifactClass: "support" as const
+    }
+  ]
+};
+
 describe("mutation suite", () => {
   it("catches packet rename drift", () => {
     const result = compile(withEditorialSetup({
@@ -279,6 +319,60 @@ describe("mutation suite", () => {
       expect(result.diagnostics.map((diagnostic) => diagnostic.code)).toEqual(
         expect.arrayContaining(["plan.generated_from_source_invalid", "plan.generated_from_target_invalid"])
       );
+    }
+  });
+
+  it("catches registry-backed evidence drift", () => {
+    const result = compile({
+      ...evidenceMutationSeed,
+      artifacts: evidenceMutationSeed.artifacts.map((artifact) =>
+        artifact.id === "authority_note"
+          ? {
+              ...artifact,
+              evidence: {
+                ...artifact.evidence,
+                requiredClaims: artifact.evidence?.requiredClaims?.map((claim) =>
+                  claim.id === "publish_decision"
+                    ? {
+                        ...claim,
+                        allowedValue: {
+                          registryId: "publish_result",
+                          entryId: "missing_entry"
+                        }
+                      }
+                    : claim
+                )
+              }
+            }
+          : artifact
+      )
+    });
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.diagnostics.map((diagnostic) => diagnostic.code)).toContain("check.registry.unknown_allowed_value_entry");
+    }
+  });
+
+  it("catches artifact-evidence dependency drift", () => {
+    const result = compile({
+      ...evidenceMutationSeed,
+      artifacts: evidenceMutationSeed.artifacts.map((artifact) =>
+        artifact.id === "authority_note"
+          ? {
+              ...artifact,
+              evidence: {
+                ...artifact.evidence,
+                requiredArtifactIds: ["missing_receipt"]
+              }
+            }
+          : artifact
+      )
+    });
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.diagnostics.map((diagnostic) => diagnostic.code)).toContain("check.artifact_evidence.unknown_required_artifact");
     }
   });
 });

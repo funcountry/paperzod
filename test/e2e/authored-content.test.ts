@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import { compileSetup, createPaperclipMarkdownTarget } from "../../src/index.js";
 import { loadFragments } from "../../src/source/index.js";
+import registryEvidenceSeed from "../fixtures/source/registry-evidence.js";
+import typedDoctrineRefsSeed from "../fixtures/source/typed-doctrine-refs.js";
 
 function compile(input: unknown) {
   return compileSetup(
@@ -105,9 +107,7 @@ describe("authored doctrine content flow", () => {
     expect(result.data.documents.find((document) => document.id === "author_home")?.markdown).toMatchInlineSnapshot(`
       "# Author
 
-      You are the Author.
-
-      Your repo-owned role home is \`paperclip_home/agents/author/AGENTS.md\`.
+      Core job: Produce the runtime doctrine honestly.
 
       Start here before opening any packet-specific doctrine.
 
@@ -139,10 +139,59 @@ describe("authored doctrine content flow", () => {
       <a id="role-contract"></a>
       ## Role Contract
 
-      Produce the runtime doctrine honestly.
-
       - No additional role boundaries are declared yet.
       - Read \`Shared Entrypoint\`. When: When you are deciding which shared owner governs the issue.. Context: Read the whole shared map before opening packet-specific doctrine..
+      "
+    `);
+  });
+
+  it("compiles registry-backed artifact evidence summaries end to end", () => {
+    const result = compile(registryEvidenceSeed);
+
+    expect(result.success).toBe(true);
+    if (!result.success) {
+      return;
+    }
+
+    expect(result.data.documents.find((document) => document.id === "shared_evidence_surface")?.markdown).toContain(
+      "Required evidence claim: Publish decision. Allowed value: Publish Result -> Approved."
+    );
+    expect(result.data.documents.find((document) => document.id === "shared_evidence_surface")?.markdown).toContain(
+      "Required evidence artifacts: Review Receipt"
+    );
+  });
+
+  it("renders typed doctrine refs as plain markdown from canonical truth", () => {
+    const result = compile(typedDoctrineRefsSeed);
+
+    expect(result.success).toBe(true);
+    if (!result.success) {
+      return;
+    }
+
+    expect(result.data.documents.find((document) => document.id === "author_home")?.markdown).toMatchInlineSnapshot(`
+      "# Author
+
+      Core job: Author the runtime doctrine honestly.
+
+      Read ACTION_AUTHORITY.md before asking Author to take final action.
+
+      - Run \`./paperclip status\` before changing runtime docs.
+      - Then open Owner Map.
+        - If routing is still unclear, read Workflow Owner end to end.
+
+      - Owner Map
+        - The canonical owner-routing section in Workflow Owner.
+
+      <a id="read-first"></a>
+      ## Read First
+
+      Start with Owner Map.
+
+      <a id="role-contract"></a>
+      ## Role Contract
+
+      Treat ACTION_AUTHORITY.md as the action gate.
       "
     `);
   });

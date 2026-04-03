@@ -16,7 +16,8 @@ import {
 
 const projectHomeTemplate = defineProjectHomeRootTemplate({
   id: "editorial_project_home_root",
-  sections: [{ key: "projectHomeMap", id: "project_home_map", stableSlug: "project-home-map", title: "Project Home Map" }] as const
+  sections: [{ key: "projectHomeMap", id: "project_home_map", stableSlug: "project-home-map", title: "Project Home Map" }] as const,
+  requiredSections: ["projectHomeMap"] as const
 });
 
 const briefResearcherRoleHomeTemplate = defineRoleHomeTemplate({
@@ -24,7 +25,8 @@ const briefResearcherRoleHomeTemplate = defineRoleHomeTemplate({
   sections: [
     { key: "readFirst", id: "brief_researcher_read_first", stableSlug: "read-first", title: "Read First" },
     { key: "roleContract", id: "brief_researcher_role_contract", stableSlug: "role-contract", title: "Role Contract" }
-  ] as const
+  ] as const,
+  requiredSections: ["readFirst", "roleContract"] as const
 });
 
 const storyArchitectRoleHomeTemplate = defineRoleHomeTemplate({
@@ -32,12 +34,14 @@ const storyArchitectRoleHomeTemplate = defineRoleHomeTemplate({
   sections: [
     { key: "readFirst", id: "story_architect_read_first", stableSlug: "read-first", title: "Read First" },
     { key: "roleContract", id: "story_architect_role_contract", stableSlug: "role-contract", title: "Role Contract" }
-  ] as const
+  ] as const,
+  requiredSections: ["readFirst", "roleContract"] as const
 });
 
 const sharedEntrypointTemplate = defineSharedEntrypointTemplate({
   id: "editorial_shared_entrypoint",
-  sections: [{ key: "readOrder", id: "shared_read_order", stableSlug: "read-order", title: "Read Order" }] as const
+  sections: [{ key: "readOrder", id: "shared_read_order", stableSlug: "read-order", title: "Read Order" }] as const,
+  requiredSections: ["readOrder"] as const
 });
 
 const workflowOwnerTemplate = defineWorkflowOwnerTemplate({
@@ -51,7 +55,8 @@ const workflowOwnerTemplate = defineWorkflowOwnerTemplate({
       stableSlug: "specialist-turn-shape",
       title: "Specialist Turn Shape"
     }
-  ] as const
+  ] as const,
+  requiredSections: ["ownerMap", "commentShape", "specialistTurnShape"] as const
 });
 
 const briefResearcherWorkflowTemplate = definePacketWorkflowTemplate({

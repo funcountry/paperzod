@@ -1,14 +1,29 @@
 import { z } from "zod";
 
-import type { AuthoredDefinitionListItem, AuthoredListEntry } from "../core/defs.js";
+import type {
+  AuthoredCatalogInlineRefDef,
+  AuthoredDefinitionListItem,
+  AuthoredInlineRefDef,
+  AuthoredInlineTextDef,
+  AuthoredListEntry,
+  AuthoredNodeInlineRefDef,
+  AuthoredSectionInlineRefDef
+} from "../core/defs.js";
 import type { Diagnostic } from "../core/diagnostics.js";
 import { createDiagnostic } from "../core/diagnostics.js";
 import type {
   ArtifactInput,
+  ArtifactEvidenceClaimInput,
+  ArtifactEvidenceInput,
+  CatalogEntryInput,
+  CatalogInput,
   GeneratedTargetInput,
   LinkInput,
   PacketContractInput,
   ReferenceInput,
+  RegistryEntryInput,
+  RegistryEntryRefInput,
+  RegistryInput,
   ReviewGateInput,
   RoleInput,
   SetupInput,
@@ -20,17 +35,49 @@ import type {
 const idSchema = z.string().min(1);
 const nonEmptyStringSchema = z.string().min(1);
 const sectionSlugSchema = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
+const nodeInlineRefSchema = z
+  .object({
+    kind: z.literal("ref"),
+    refKind: z.enum(["artifact", "surface", "role"]),
+    id: idSchema
+  })
+  .strict() satisfies z.ZodType<AuthoredNodeInlineRefDef>;
+const sectionInlineRefSchema = z
+  .object({
+    kind: z.literal("ref"),
+    refKind: z.literal("section"),
+    surfaceId: idSchema,
+    stableSlug: sectionSlugSchema
+  })
+  .strict() satisfies z.ZodType<AuthoredSectionInlineRefDef>;
+const catalogInlineRefSchema = z
+  .object({
+    kind: z.literal("ref"),
+    refKind: z.literal("catalog_entry"),
+    catalogKind: z.enum(["command"]),
+    entryId: idSchema
+  })
+  .strict() satisfies z.ZodType<AuthoredCatalogInlineRefDef>;
+export const inlineRefSchema = z.union([
+  nodeInlineRefSchema,
+  sectionInlineRefSchema,
+  catalogInlineRefSchema
+]) satisfies z.ZodType<AuthoredInlineRefDef>;
+export const inlineTextSchema = z.union([
+  nonEmptyStringSchema,
+  z.array(z.union([nonEmptyStringSchema, inlineRefSchema])).min(1)
+]) satisfies z.ZodType<AuthoredInlineTextDef>;
 const listEntrySchema: z.ZodType<AuthoredListEntry> = z.lazy(() =>
   z.union([
-    nonEmptyStringSchema,
+    inlineTextSchema,
     z.object({
-      text: nonEmptyStringSchema,
+      text: inlineTextSchema,
       children: z.array(listEntrySchema).min(1).optional()
     })
   ])
 );
 const definitionListItemSchema = z.object({
-  term: nonEmptyStringSchema,
+  term: inlineTextSchema,
   definitions: z.array(listEntrySchema).min(1)
 }) satisfies z.ZodType<AuthoredDefinitionListItem>;
 const tableBlockSchema = z
@@ -45,7 +92,7 @@ const tableBlockSchema = z
 const simpleContentBlockSchema = z.union([
   z.object({
     kind: z.literal("paragraph"),
-    text: nonEmptyStringSchema
+    text: inlineTextSchema
   }),
   z.object({
     kind: z.literal("unordered_list"),
@@ -130,13 +177,70 @@ export const packetContractSchema = z.object({
   runtimeArtifactIds: z.array(idSchema).optional()
 }) satisfies z.ZodType<PacketContractInput>;
 
+export const registryEntryRefSchema = z.object({
+  registryId: idSchema,
+  entryId: idSchema
+}) satisfies z.ZodType<RegistryEntryRefInput>;
+
+export const artifactEvidenceClaimSchema = z
+  .object({
+    id: idSchema,
+    label: nonEmptyStringSchema,
+    description: nonEmptyStringSchema.optional(),
+    allowedValue: registryEntryRefSchema.optional()
+  })
+  .strict() satisfies z.ZodType<ArtifactEvidenceClaimInput>;
+
+export const artifactEvidenceSchema = z
+  .object({
+    requiredArtifactIds: z.array(idSchema).min(1).optional(),
+    requiredClaims: z.array(artifactEvidenceClaimSchema).min(1).optional()
+  })
+  .strict()
+  .refine((value) => value.requiredArtifactIds !== undefined || value.requiredClaims !== undefined, {
+    message: "Artifact evidence must declare requiredArtifactIds, requiredClaims, or both."
+  }) satisfies z.ZodType<ArtifactEvidenceInput>;
+
+export const registryEntrySchema = z
+  .object({
+    id: idSchema,
+    label: nonEmptyStringSchema,
+    description: nonEmptyStringSchema.optional()
+  })
+  .strict() satisfies z.ZodType<RegistryEntryInput>;
+
+export const catalogEntrySchema = z
+  .object({
+    id: idSchema,
+    display: nonEmptyStringSchema,
+    description: nonEmptyStringSchema.optional()
+  })
+  .strict() satisfies z.ZodType<CatalogEntryInput>;
+
+export const catalogSchema = z
+  .object({
+    kind: z.enum(["command"]),
+    entries: z.array(catalogEntrySchema).min(1)
+  })
+  .strict() satisfies z.ZodType<CatalogInput>;
+
+export const registrySchema = z
+  .object({
+    id: idSchema,
+    name: nonEmptyStringSchema,
+    description: nonEmptyStringSchema.optional(),
+    entries: z.array(registryEntrySchema).min(1)
+  })
+  .strict() satisfies z.ZodType<RegistryInput>;
+
 export const artifactSchema = z.object({
   id: idSchema,
   name: nonEmptyStringSchema,
   artifactClass: z.enum(["required", "conditional", "support", "reference", "legacy"]),
   runtimePath: nonEmptyStringSchema.optional(),
   conceptualOnly: z.boolean().optional(),
-  compatibilityOnly: z.boolean().optional()
+  compatibilityOnly: z.boolean().optional(),
+  evidence: artifactEvidenceSchema.optional()
 }) satisfies z.ZodType<ArtifactInput>;
 
 export const surfaceSchema = z.object({
@@ -156,7 +260,8 @@ export const surfaceSchema = z.object({
   runtimePath: nonEmptyStringSchema,
   title: nonEmptyStringSchema.optional(),
   intro: z.array(contentBlockSchema).optional(),
-  preamble: z.array(contentBlockSchema).optional()
+  preamble: z.array(contentBlockSchema).optional(),
+  requiredSectionSlugs: z.array(sectionSlugSchema).min(1).optional()
 }) satisfies z.ZodType<SurfaceInput>;
 
 export const surfaceSectionSchema = z.object({
@@ -230,6 +335,8 @@ export const setupSchema = z.object({
   id: idSchema,
   name: nonEmptyStringSchema,
   description: nonEmptyStringSchema.optional(),
+  catalogs: z.array(catalogSchema).optional(),
+  registries: z.array(registrySchema).optional(),
   roles: z.array(roleSchema).optional(),
   workflowSteps: z.array(workflowStepSchema).optional(),
   reviewGates: z.array(reviewGateSchema).optional(),

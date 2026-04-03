@@ -1,10 +1,54 @@
 import type {
   AuthoredContentBlock,
   ArtifactClass,
+  AuthoredCatalogInlineRefDef,
+  AuthoredNodeInlineRefDef,
+  AuthoredSectionInlineRefDef,
+  CatalogKind,
   LinkKind,
   ReferenceClass,
+  RegistryEntryRefDef,
   SurfaceClass
 } from "../core/defs.js";
+
+export type RegistryEntryRefInput = RegistryEntryRefDef;
+export type AuthoredInlineRefInput = AuthoredNodeInlineRefDef | AuthoredSectionInlineRefDef | AuthoredCatalogInlineRefDef;
+
+export interface CatalogEntryInput {
+  id: string;
+  display: string;
+  description?: string | undefined;
+}
+
+export interface CatalogInput {
+  kind: CatalogKind;
+  entries: CatalogEntryInput[];
+}
+
+export interface RegistryEntryInput {
+  id: string;
+  label: string;
+  description?: string | undefined;
+}
+
+export interface RegistryInput {
+  id: string;
+  name: string;
+  description?: string | undefined;
+  entries: RegistryEntryInput[];
+}
+
+export interface ArtifactEvidenceClaimInput {
+  id: string;
+  label: string;
+  description?: string | undefined;
+  allowedValue?: RegistryEntryRefInput | undefined;
+}
+
+export interface ArtifactEvidenceInput {
+  requiredArtifactIds?: string[] | undefined;
+  requiredClaims?: ArtifactEvidenceClaimInput[] | undefined;
+}
 
 export interface RoleInput {
   id: string;
@@ -47,6 +91,7 @@ export interface ArtifactInput {
   runtimePath?: string | undefined;
   conceptualOnly?: boolean | undefined;
   compatibilityOnly?: boolean | undefined;
+  evidence?: ArtifactEvidenceInput | undefined;
 }
 
 export interface SurfaceInput {
@@ -56,6 +101,7 @@ export interface SurfaceInput {
   title?: string | undefined;
   intro?: AuthoredContentBlock[] | undefined;
   preamble?: AuthoredContentBlock[] | undefined;
+  requiredSectionSlugs?: string[] | undefined;
 }
 
 export interface SurfaceSectionInput {
@@ -104,6 +150,8 @@ export interface SetupInput {
   id: string;
   name: string;
   description?: string | undefined;
+  catalogs?: CatalogInput[] | undefined;
+  registries?: RegistryInput[] | undefined;
   roles?: RoleInput[] | undefined;
   workflowSteps?: WorkflowStepInput[] | undefined;
   reviewGates?: ReviewGateInput[] | undefined;
@@ -118,6 +166,56 @@ export interface SetupInput {
 
 export function defineSetup<const T extends SetupInput>(setup: T): T {
   return setup;
+}
+
+export function artifactRef(id: string): AuthoredInlineRefInput {
+  return {
+    kind: "ref",
+    refKind: "artifact",
+    id
+  };
+}
+
+export function surfaceRef(id: string): AuthoredInlineRefInput {
+  return {
+    kind: "ref",
+    refKind: "surface",
+    id
+  };
+}
+
+export function roleRef(id: string): AuthoredInlineRefInput {
+  return {
+    kind: "ref",
+    refKind: "role",
+    id
+  };
+}
+
+export function sectionRef(input: { surfaceId: string; stableSlug: string }): AuthoredInlineRefInput {
+  return {
+    kind: "ref",
+    refKind: "section",
+    surfaceId: input.surfaceId,
+    stableSlug: input.stableSlug
+  };
+}
+
+export function commandRef(id: string): AuthoredInlineRefInput {
+  return {
+    kind: "ref",
+    refKind: "catalog_entry",
+    catalogKind: "command",
+    entryId: id
+  };
+}
+
+export function command(id: string, display: string, description?: string): CatalogEntryInput {
+  return {
+    id,
+    display,
+    ...(description !== undefined ? { description } : {})
+  };
 }
 
 export function defineRole<const T extends RoleInput>(role: T): T {

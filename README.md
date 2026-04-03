@@ -3,8 +3,10 @@
 `paperzod` is a doctrine compiler for Paperclip systems.
 
 It lets you define one structured source of truth for roles, workflow steps,
-packet contracts, standards, gates, references, and runtime doctrine surfaces,
-then compile the markdown that agents actually read.
+packet contracts, standards, gates, references, constrained vocab registries,
+artifact evidence contracts, typed doctrine refs, required section contracts,
+and runtime doctrine surfaces, then compile the markdown that agents actually
+read.
 
 The point is simple: if a setup has ten role guides, a shared workflow owner,
 packet workflow docs, critic standards, gate rules, and a few technical
@@ -30,6 +32,15 @@ Generated markdown is runtime output.
   how-to guides, coordination docs, and any other surface family
 - setup-local roles, workflow steps, packet contracts, artifacts, read order,
   handoff rules, stop lines, and output paths
+- setup-level registries for sanctioned runtime vocab
+- setup-level catalogs for sanctioned operational references, starting with
+  commands
+- artifact-level evidence contracts for required support files and required
+  claims
+- typed refs inside TypeScript-authored doctrine blocks so important mentions
+  stop being raw strings
+- required section contracts on generated surfaces so canonical document
+  families fail loudly when omitted
 - authored markdown fragments for the sections where humans should write the
   prose directly
 - graph validation for ownership, reads, routes, trust rules, gate checks, and
@@ -111,6 +122,7 @@ const roleHome = defineRoleHomeTemplate({
     { key: "outputs", title: "Outputs" },
     { key: "stopLine", title: "Stop Line" },
   ] as const,
+  requiredSections: ["readFirst", "yourJob"] as const,
 });
 
 const workflowOwner = defineWorkflowOwnerTemplate({
@@ -121,6 +133,7 @@ const workflowOwner = defineWorkflowOwnerTemplate({
     { key: "handoffRules", title: "Handoff Rules" },
     { key: "sendBackRules", title: "Send Back Rules" },
   ] as const,
+  requiredSections: ["goal", "stepOrder", "handoffRules", "sendBackRules"] as const,
 });
 
 const draftQuality = defineStandardTemplate({
@@ -254,7 +267,128 @@ The long prose still lives in plain markdown files such as:
 - `fragments/workflow/send_back_rules.md`
 
 TypeScript owns the graph, ids, paths, routing, and validation.
+
+## Typed Doctrine Refs
+
+When one line inside doctrine is important enough that it should not drift as a
+raw string, keep that line in a TypeScript-authored block and use typed refs.
+
+```ts
+import {
+  artifactRef,
+  command,
+  commandRef,
+  defineSetup,
+  sectionRef,
+} from "paperzod";
+
+defineSetup({
+  id: "typed_runtime_law",
+  name: "Typed Runtime Law",
+  catalogs: [
+    { kind: "command", entries: [command("paperclip_status", "./paperclip status")] },
+  ],
+  surfaces: [
+    {
+      id: "author_home",
+      surfaceClass: "role_home",
+      runtimePath: "generated/author/AGENTS.md",
+      preamble: [
+        {
+          kind: "paragraph",
+          text: [
+            "Read ",
+            artifactRef("action_authority"),
+            " and then run ",
+            commandRef("paperclip_status"),
+            ".",
+          ],
+        },
+        {
+          kind: "paragraph",
+          text: [
+            "If routing is unclear, open ",
+            sectionRef({ surfaceId: "workflow_surface", stableSlug: "owner-map" }),
+            ".",
+          ],
+        },
+      ],
+    },
+  ],
+});
+```
+
+Fragments stay plain in v1.
+If a fragment line is drift-sensitive, move that line into a TypeScript-authored
+block first instead of expecting the fragment loader to understand semantic
+refs.
+
+See:
+
+- `docs/example_editorial.md`
+- `docs/example_typed_runtime_law.md`
 Markdown owns the prose humans should write directly.
+
+## Typed Runtime Law
+
+Some runtime law is too important to leave as freeform prose:
+
+- sanctioned vocab that downstream docs should not restate differently
+- required evidence artifacts that a handoff artifact depends on
+- required claims whose allowed values should come from one canonical registry
+
+`paperzod` now models that law directly with:
+
+- `setup.registries[]`
+- `artifact.evidence`
+
+Small generic example:
+
+```ts
+defineSetup({
+  id: "release_ops",
+  name: "Release Ops",
+  registries: [
+    {
+      id: "publish_result",
+      name: "Publish Result",
+      entries: [
+        { id: "approved", label: "Approved" },
+        { id: "revise", label: "Revise" },
+      ],
+    },
+  ],
+  artifacts: [
+    {
+      id: "authority_note",
+      name: "AUTHORITY_NOTE.md",
+      artifactClass: "required",
+      evidence: {
+        requiredArtifactIds: ["review_receipt"],
+        requiredClaims: [
+          {
+            id: "publish_decision",
+            label: "Publish decision",
+            allowedValue: { registryId: "publish_result", entryId: "approved" },
+          },
+        ],
+      },
+    },
+    { id: "review_receipt", name: "REVIEW_RECEIPT.md", artifactClass: "support" },
+  ],
+});
+```
+
+That surface stays intentionally small:
+
+- registries are setup-level lookup truth, not graph nodes
+- evidence stays attached to artifacts, not packets or prose fragments
+- inline prose refs, tool catalogs, and endpoint catalogs are still deferred
+
+For the smallest end-to-end walkthrough of that surface, see:
+
+- `docs/example_typed_runtime_law.md`
+- `test/fixtures/source/registry-evidence.ts`
 
 ## Current Helper Layer
 

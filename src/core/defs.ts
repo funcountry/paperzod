@@ -30,6 +30,48 @@ export type ReferenceClass =
   | "external_reference";
 
 export type ArtifactClass = "required" | "conditional" | "support" | "reference" | "legacy";
+export type CatalogKind = "command";
+
+export interface CatalogEntryDef {
+  id: string;
+  display: string;
+  description?: string;
+}
+
+export interface CatalogDef {
+  kind: CatalogKind;
+  entries: CatalogEntryDef[];
+}
+
+export interface RegistryEntryRefDef {
+  registryId: string;
+  entryId: string;
+}
+
+export interface RegistryEntryDef {
+  id: string;
+  label: string;
+  description?: string;
+}
+
+export interface RegistryDef {
+  id: string;
+  name: string;
+  description?: string;
+  entries: RegistryEntryDef[];
+}
+
+export interface ArtifactEvidenceClaimDef {
+  id: string;
+  label: string;
+  description?: string;
+  allowedValue?: RegistryEntryRefDef;
+}
+
+export interface ArtifactEvidenceDef {
+  requiredArtifactIds?: string[];
+  requiredClaims?: ArtifactEvidenceClaimDef[];
+}
 
 export type LinkKind =
   | "owns"
@@ -45,22 +87,50 @@ export type LinkKind =
   | "maps_to_runtime"
   | "generated_from";
 
+export interface AuthoredNodeInlineRefDef {
+  kind: "ref";
+  refKind: "artifact" | "surface" | "role";
+  id: string;
+}
+
+export interface AuthoredSectionInlineRefDef {
+  kind: "ref";
+  refKind: "section";
+  surfaceId: string;
+  stableSlug: string;
+}
+
+export interface AuthoredCatalogInlineRefDef {
+  kind: "ref";
+  refKind: "catalog_entry";
+  catalogKind: CatalogKind;
+  entryId: string;
+}
+
+export type AuthoredInlineRefDef =
+  | AuthoredNodeInlineRefDef
+  | AuthoredSectionInlineRefDef
+  | AuthoredCatalogInlineRefDef;
+
+export type AuthoredInlineTextSegmentDef = string | AuthoredInlineRefDef;
+export type AuthoredInlineTextDef = string | AuthoredInlineTextSegmentDef[];
+
 export interface AuthoredListItem {
-  text: string;
+  text: AuthoredInlineTextDef;
   children?: AuthoredListEntry[] | undefined;
 }
 
-export type AuthoredListEntry = string | AuthoredListItem;
+export type AuthoredListEntry = AuthoredInlineTextDef | AuthoredListItem;
 
 export interface AuthoredDefinitionListItem {
-  term: string;
+  term: AuthoredInlineTextDef;
   definitions: AuthoredListEntry[];
 }
 
 export type AuthoredSimpleContentBlock =
   | {
       kind: "paragraph";
-      text: string;
+      text: AuthoredInlineTextDef;
     }
   | {
       kind: "unordered_list";
@@ -169,6 +239,7 @@ export interface ArtifactDef {
   runtimePath?: string;
   conceptualOnly?: boolean;
   compatibilityOnly?: boolean;
+  evidence?: ArtifactEvidenceDef;
 }
 
 export interface SurfaceDef {
@@ -180,6 +251,7 @@ export interface SurfaceDef {
   title?: string;
   intro?: AuthoredContentBlock[];
   preamble?: AuthoredContentBlock[];
+  requiredSectionSlugs?: string[];
 }
 
 export interface SurfaceSectionDef {
@@ -244,6 +316,8 @@ export type DoctrineNodeDef =
 
 export interface SetupDef {
   setup: SetupMetaDef;
+  catalogs: CatalogDef[];
+  registries: RegistryDef[];
   roles: RoleDef[];
   workflowSteps: WorkflowStepDef[];
   reviewGates: ReviewGateDef[];

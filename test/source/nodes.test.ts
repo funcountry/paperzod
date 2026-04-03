@@ -2,9 +2,13 @@ import { describe, expect, it } from "vitest";
 
 import {
   artifactSchema,
+  artifactEvidenceSchema,
   generatedTargetSchema,
+  catalogSchema,
+  inlineTextSchema,
   packetContractSchema,
   referenceSchema,
+  registrySchema,
   reviewGateSchema,
   roleSchema,
   setupSchema,
@@ -66,6 +70,45 @@ describe("source node schemas", () => {
   it("validates artifacts", () => {
     expect(artifactSchema.safeParse({ id: "artifact_1", name: "Artifact", artifactClass: "required" }).success).toBe(true);
     expect(artifactSchema.safeParse({ id: "artifact_1", name: "Artifact", artifactClass: "bogus" }).success).toBe(false);
+    expect(
+      artifactSchema.safeParse({
+        id: "artifact_2",
+        name: "Authority Note",
+        artifactClass: "required",
+        evidence: {
+          requiredArtifactIds: ["pre_publish_audit"],
+          requiredClaims: [
+            {
+              id: "result",
+              label: "Result",
+              allowedValue: { registryId: "publish_result", entryId: "pass" }
+            }
+          ]
+        }
+      }).success
+    ).toBe(true);
+    expect(artifactSchema.safeParse({ id: "artifact_2", name: "Authority Note", artifactClass: "required", evidence: {} }).success).toBe(false);
+  });
+
+  it("validates registries and evidence contracts", () => {
+    expect(
+      registrySchema.safeParse({
+        id: "publish_result",
+        name: "Publish Result",
+        entries: [
+          { id: "pass", label: "PASS" },
+          { id: "fail", label: "FAIL" }
+        ]
+      }).success
+    ).toBe(true);
+    expect(registrySchema.safeParse({ id: "publish_result", name: "Publish Result", entries: [] }).success).toBe(false);
+    expect(
+      artifactEvidenceSchema.safeParse({
+        requiredArtifactIds: ["pre_publish_audit"],
+        requiredClaims: [{ id: "result", label: "Result" }]
+      }).success
+    ).toBe(true);
+    expect(artifactEvidenceSchema.safeParse({}).success).toBe(false);
   });
 
   it("validates surfaces", () => {
@@ -74,6 +117,7 @@ describe("source node schemas", () => {
         id: "surface_1",
         surfaceClass: "role_home",
         runtimePath: "generated/AGENTS.md",
+        requiredSectionSlugs: ["read-first", "role-contract"],
         preamble: [
           { kind: "paragraph", text: "Start here." },
           {
@@ -201,5 +245,38 @@ describe("source node schemas", () => {
       generatedTargetSchema.safeParse({ id: "target_1", path: "generated/WORKFLOW.md", sourceIds: ["step_1"], sectionId: "section_1" }).success
     ).toBe(true);
     expect(generatedTargetSchema.safeParse({ id: "target_1", path: "", sourceIds: [] }).success).toBe(false);
+  });
+
+  it("validates setup-level registries", () => {
+    expect(
+      setupSchema.safeParse({
+        id: "setup_1",
+        name: "Setup 1",
+        registries: [{ id: "publish_result", name: "Publish Result", entries: [{ id: "pass", label: "PASS" }] }]
+      }).success
+    ).toBe(true);
+  });
+
+  it("validates inline text refs and command catalogs", () => {
+    expect(
+      inlineTextSchema.safeParse([
+        "Read ",
+        { kind: "ref", refKind: "artifact", id: "action_authority" },
+        " before taking final action."
+      ]).success
+    ).toBe(true);
+    expect(
+      inlineTextSchema.safeParse([
+        "Run ",
+        { kind: "ref", refKind: "catalog_entry", catalogKind: "command", entryId: "paperclip_status" }
+      ]).success
+    ).toBe(true);
+    expect(
+      inlineTextSchema.safeParse([{ kind: "ref", refKind: "section", surfaceId: "workflow_surface", stableSlug: "read-first" }]).success
+    ).toBe(true);
+    expect(
+      inlineTextSchema.safeParse([{ kind: "ref", refKind: "section", surfaceId: "workflow_surface", stableSlug: "Read First" }]).success
+    ).toBe(false);
+    expect(catalogSchema.safeParse({ kind: "command", entries: [{ id: "paperclip_status", display: "./paperclip status" }] }).success).toBe(true);
   });
 });

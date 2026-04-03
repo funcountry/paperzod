@@ -1,5 +1,7 @@
 import { createDiagnostic } from "../core/diagnostics.js";
-import type { ArtifactDef, Diagnostic, DoctrineGraph, DoctrineNodeDef } from "../core/index.js";
+import type { ArtifactDef, AuthoredContentBlock, AuthoredInlineRefDef, Diagnostic, DoctrineGraph, DoctrineNodeDef } from "../core/index.js";
+import { findDuplicateIds, visitInlineRefsInBlocks } from "../core/index.js";
+import { getCatalog, getCatalogEntry, getSurfaceSectionByStableSlug } from "../graph/index.js";
 import type { CheckRule } from "./registry.js";
 
 const semanticDocumentTargetKinds = new Set<DoctrineNodeDef["kind"]>([
@@ -164,6 +166,122 @@ function createCheckDiagnostic(input: Omit<Diagnostic, "phase" | "severity">): D
     phase: "check",
     ...input
   });
+}
+
+function validateInlineRef(graph: DoctrineGraph, ownerNodeId: string, ref: AuthoredInlineRefDef): Diagnostic[] {
+  switch (ref.refKind) {
+    case "artifact":
+    case "surface":
+    case "role": {
+      const node = graph.nodeById[ref.id];
+      if (!node) {
+        return [
+          createCheckDiagnostic({
+            code: "check.inline_ref.missing_node",
+            message: `Doctrine unit "${ownerNodeId}" references missing ${ref.refKind} "${ref.id}".`,
+            nodeId: ownerNodeId,
+            relatedIds: [ref.id]
+          })
+        ];
+      }
+
+      if (node.kind !== ref.refKind) {
+        return [
+          createCheckDiagnostic({
+            code: "check.inline_ref.wrong_kind",
+            message: `Doctrine unit "${ownerNodeId}" expected ${ref.refKind} "${ref.id}" but found ${node.kind}.`,
+            nodeId: ownerNodeId,
+            relatedIds: [ref.id]
+          })
+        ];
+      }
+
+      return [];
+    }
+    case "section": {
+      if (getSurfaceSectionByStableSlug(graph, ref.surfaceId, ref.stableSlug)) {
+        return [];
+      }
+
+      return [
+        createCheckDiagnostic({
+          code: "check.inline_ref.missing_section",
+          message: `Doctrine unit "${ownerNodeId}" references missing section "${ref.surfaceId}::${ref.stableSlug}".`,
+          nodeId: ownerNodeId,
+          relatedIds: [ref.surfaceId, ref.stableSlug]
+        })
+      ];
+    }
+    case "catalog_entry": {
+      const catalog = getCatalog(graph, ref.catalogKind);
+      if (!catalog) {
+        return [
+          createCheckDiagnostic({
+            code: "check.inline_ref.missing_catalog",
+            message: `Doctrine unit "${ownerNodeId}" references missing ${ref.catalogKind} catalog.`,
+            nodeId: ownerNodeId,
+            relatedIds: [ref.catalogKind]
+          })
+        ];
+      }
+
+      if (getCatalogEntry(graph, ref.catalogKind, ref.entryId)) {
+        return [];
+      }
+
+      return [
+        createCheckDiagnostic({
+          code: "check.inline_ref.missing_catalog_entry",
+          message: `Doctrine unit "${ownerNodeId}" references missing ${ref.catalogKind} "${ref.entryId}".`,
+          nodeId: ownerNodeId,
+          relatedIds: [ref.catalogKind, ref.entryId]
+        })
+      ];
+    }
+  }
+}
+
+function collectInlineRefDiagnostics(
+  graph: DoctrineGraph,
+  ownerNodeId: string,
+  blocks: readonly AuthoredContentBlock[]
+): Diagnostic[] {
+  const diagnostics: Diagnostic[] = [];
+
+  // Typed refs are setup truth and must fail in check, not at markdown emission time.
+  visitInlineRefsInBlocks(blocks, (ref) => {
+    diagnostics.push(...validateInlineRef(graph, ownerNodeId, ref));
+  });
+
+  return diagnostics;
+}
+
+function findArtifactEvidenceCycle(
+  startArtifactId: string,
+  dependencyIdsByArtifactId: Record<string, string[]>,
+  trail: string[] = [startArtifactId]
+): string[] | undefined {
+  const currentArtifactId = trail[trail.length - 1];
+  if (!currentArtifactId) {
+    return undefined;
+  }
+
+  for (const dependencyId of dependencyIdsByArtifactId[currentArtifactId] ?? []) {
+    if (dependencyId === startArtifactId) {
+      return [...trail, dependencyId];
+    }
+
+    if (trail.includes(dependencyId)) {
+      continue;
+    }
+
+    const cycle = findArtifactEvidenceCycle(startArtifactId, dependencyIdsByArtifactId, [...trail, dependencyId]);
+    if (cycle) {
+      return cycle;
+    }
+  }
+
+  return undefined;
 }
 
 export const workflowContractsRule: CheckRule = {
@@ -573,12 +691,165 @@ export const artifactAndPacketSemanticsRule: CheckRule = {
   }
 };
 
+export const registryAndEvidenceSemanticsRule: CheckRule = {
+  id: "registry_and_evidence_semantics",
+  run(graph) {
+    const diagnostics: Diagnostic[] = [];
+    const duplicateCatalogKinds = findDuplicateIds(graph.catalogs.map((catalog) => catalog.kind));
+    const duplicateRegistryIds = findDuplicateIds(graph.registries.map((registry) => registry.id));
+    const evidenceDependencyIdsByArtifactId: Record<string, string[]> = {};
+
+    for (const catalogKind of duplicateCatalogKinds) {
+      diagnostics.push(
+        createCheckDiagnostic({
+          code: "check.catalog.duplicate_kind",
+          message: `Catalog kind "${catalogKind}" is declared more than once.`,
+          nodeId: catalogKind
+        })
+      );
+    }
+
+    for (const catalog of graph.catalogs) {
+      const duplicateEntryIds = findDuplicateIds(catalog.entries.map((entry) => entry.id));
+
+      for (const entryId of duplicateEntryIds) {
+        diagnostics.push(
+          createCheckDiagnostic({
+            code: "check.catalog.duplicate_entry_id",
+            message: `Catalog "${catalog.kind}" declares entry id "${entryId}" more than once.`,
+            nodeId: catalog.kind,
+            relatedIds: [entryId]
+          })
+        );
+      }
+    }
+
+    for (const registryId of duplicateRegistryIds) {
+      diagnostics.push(
+        createCheckDiagnostic({
+          code: "check.registry.duplicate_registry_id",
+          message: `Registry id "${registryId}" is declared more than once.`,
+          nodeId: registryId
+        })
+      );
+    }
+
+    for (const registry of graph.registries) {
+      const duplicateEntryIds = findDuplicateIds(registry.entries.map((entry) => entry.id));
+
+      for (const entryId of duplicateEntryIds) {
+        diagnostics.push(
+          createCheckDiagnostic({
+            code: "check.registry.duplicate_entry_id",
+            message: `Registry "${registry.id}" declares entry id "${entryId}" more than once.`,
+            nodeId: registry.id,
+            relatedIds: [entryId]
+          })
+        );
+      }
+    }
+
+    for (const artifactId of graph.nodeIdsByKind.artifact) {
+      const artifact = graph.nodeById[artifactId];
+      if (!artifact || artifact.kind !== "artifact" || !artifact.evidence) {
+        continue;
+      }
+
+      const dependencyIds: string[] = [];
+
+      for (const requiredArtifactId of artifact.evidence.requiredArtifactIds ?? []) {
+        const requiredArtifact = graph.nodeById[requiredArtifactId];
+        if (!requiredArtifact || requiredArtifact.kind !== "artifact") {
+          diagnostics.push(
+            createCheckDiagnostic({
+              code: "check.artifact_evidence.unknown_required_artifact",
+              message: `Artifact "${artifact.id}" references missing or invalid required evidence artifact "${requiredArtifactId}".`,
+              nodeId: artifact.id,
+              relatedIds: [requiredArtifactId]
+            })
+          );
+          continue;
+        }
+
+        dependencyIds.push(requiredArtifactId);
+      }
+
+      evidenceDependencyIdsByArtifactId[artifact.id] = dependencyIds;
+
+      for (const claim of artifact.evidence.requiredClaims ?? []) {
+        const allowedValue = claim.allowedValue;
+        if (!allowedValue) {
+          continue;
+        }
+
+        const registry = graph.registryById[allowedValue.registryId];
+        if (!registry) {
+          diagnostics.push(
+            createCheckDiagnostic({
+              code: "check.registry.unknown_allowed_value_registry",
+              message: `Artifact "${artifact.id}" claim "${claim.id}" references unknown registry "${allowedValue.registryId}".`,
+              nodeId: artifact.id,
+              relatedIds: [claim.id, allowedValue.registryId]
+            })
+          );
+          continue;
+        }
+
+        const entry = registry.entries.find((candidate) => candidate.id === allowedValue.entryId);
+        if (!entry) {
+          diagnostics.push(
+            createCheckDiagnostic({
+              code: "check.registry.unknown_allowed_value_entry",
+              message: `Artifact "${artifact.id}" claim "${claim.id}" references unknown registry entry "${allowedValue.entryId}" in "${registry.id}".`,
+              nodeId: artifact.id,
+              relatedIds: [claim.id, registry.id, allowedValue.entryId]
+            })
+          );
+        }
+      }
+    }
+
+    for (const artifactId of graph.nodeIdsByKind.artifact) {
+      const cycle = findArtifactEvidenceCycle(artifactId, evidenceDependencyIdsByArtifactId);
+      if (!cycle) {
+        continue;
+      }
+
+      diagnostics.push(
+        createCheckDiagnostic({
+          code: "check.artifact_evidence.circular_dependency",
+          message: `Artifact "${artifactId}" participates in a circular evidence dependency chain.`,
+          nodeId: artifactId,
+          relatedIds: cycle
+        })
+      );
+    }
+
+    return diagnostics;
+  }
+};
+
 export const surfaceAndReferenceSemanticsRule: CheckRule = {
   id: "surface_and_reference_semantics",
   run(graph) {
     const diagnostics: Diagnostic[] = [];
     const seenSlugs = new Map<string, string>();
     const sectionOrder = new Map(graph.nodeIdsByKind.surface_section.map((sectionId, index) => [sectionId, index]));
+
+    for (const surfaceId of graph.nodeIdsByKind.surface) {
+      const surface = graph.nodeById[surfaceId];
+      if (!surface || surface.kind !== "surface") {
+        continue;
+      }
+
+      if (surface.intro) {
+        diagnostics.push(...collectInlineRefDiagnostics(graph, surface.id, surface.intro));
+      }
+
+      if (surface.preamble) {
+        diagnostics.push(...collectInlineRefDiagnostics(graph, surface.id, surface.preamble));
+      }
+    }
 
     for (const sectionId of graph.nodeIdsByKind.surface_section) {
       const section = graph.nodeById[sectionId];
@@ -653,6 +924,10 @@ export const surfaceAndReferenceSemanticsRule: CheckRule = {
       const hasCheckers = (graph.indexes.checkerIdsByNodeId[section.id] ?? []).length > 0;
       const hasChildren = (graph.indexes.childSectionIdsBySectionId[section.id] ?? []).length > 0;
 
+      if (section.body) {
+        diagnostics.push(...collectInlineRefDiagnostics(graph, section.id, section.body));
+      }
+
       if (!hasOutgoingDocuments && !hasReaders && !hasOwners && !hasCheckers && !hasChildren) {
         diagnostics.push(
           createCheckDiagnostic({
@@ -692,6 +967,34 @@ export const surfaceAndReferenceSemanticsRule: CheckRule = {
           break;
         }
         currentId = parentSectionId;
+      }
+    }
+
+    for (const surfaceId of graph.nodeIdsByKind.surface) {
+      const surface = graph.nodeById[surfaceId];
+      if (!surface || surface.kind !== "surface" || !surface.requiredSectionSlugs?.length) {
+        continue;
+      }
+
+      const sectionIds = graph.indexes.surfaceSectionIdsBySurfaceId[surface.id] ?? [];
+      const declaredSlugs = new Set(
+        sectionIds
+          .map((sectionId) => graph.nodeById[sectionId])
+          .filter((section): section is Extract<DoctrineNodeDef, { kind: "surface_section" }> => section?.kind === "surface_section")
+          .map((section) => section.stableSlug)
+      );
+
+      for (const requiredSlug of [...new Set(surface.requiredSectionSlugs)]) {
+        if (!declaredSlugs.has(requiredSlug)) {
+          diagnostics.push(
+            createCheckDiagnostic({
+              code: "check.surface.missing_required_section",
+              message: `Surface "${surface.id}" is missing required section slug "${requiredSlug}".`,
+              nodeId: surface.id,
+              relatedIds: [requiredSlug]
+            })
+          );
+        }
       }
     }
 
@@ -869,5 +1172,6 @@ export const surfaceAndReferenceSemanticsRule: CheckRule = {
 export const coreCheckRules: readonly CheckRule[] = [
   workflowContractsRule,
   artifactAndPacketSemanticsRule,
+  registryAndEvidenceSemanticsRule,
   surfaceAndReferenceSemanticsRule
 ];

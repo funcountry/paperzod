@@ -1,9 +1,15 @@
 import type {
   ArtifactDef,
+  ArtifactEvidenceClaimDef,
+  ArtifactEvidenceDef,
+  CatalogDef,
+  CatalogEntryDef,
   GeneratedTargetDef,
   LinkDef,
   PacketContractDef,
   ReferenceDef,
+  RegistryDef,
+  RegistryEntryDef,
   ReviewGateDef,
   RoleDef,
   SetupDef,
@@ -16,10 +22,16 @@ import type { ValidationResult } from "./schemas.js";
 import { setupSchema, validateWithSchema } from "./schemas.js";
 import type {
   ArtifactInput,
+  ArtifactEvidenceClaimInput,
+  ArtifactEvidenceInput,
+  CatalogEntryInput,
+  CatalogInput,
   GeneratedTargetInput,
   LinkInput,
   PacketContractInput,
   ReferenceInput,
+  RegistryEntryInput,
+  RegistryInput,
   ReviewGateInput,
   RoleInput,
   SetupInput,
@@ -34,6 +46,54 @@ function normalizeSetupMeta(input: SetupInput): SetupMetaDef {
     id: input.id,
     name: input.name,
     ...(input.description ? { description: input.description } : {})
+  };
+}
+
+function normalizeCatalogEntries(entries: readonly CatalogEntryInput[]): CatalogEntryDef[] {
+  return entries.map((entry) => ({
+    id: entry.id,
+    display: entry.display,
+    ...(entry.description ? { description: entry.description } : {})
+  }));
+}
+
+function normalizeCatalogs(catalogs: readonly CatalogInput[]): CatalogDef[] {
+  return catalogs.map((catalog) => ({
+    kind: catalog.kind,
+    entries: normalizeCatalogEntries(catalog.entries)
+  }));
+}
+
+function normalizeRegistryEntries(entries: readonly RegistryEntryInput[]): RegistryEntryDef[] {
+  return entries.map((entry) => ({
+    id: entry.id,
+    label: entry.label,
+    ...(entry.description ? { description: entry.description } : {})
+  }));
+}
+
+function normalizeRegistries(registries: readonly RegistryInput[]): RegistryDef[] {
+  return registries.map((registry) => ({
+    id: registry.id,
+    name: registry.name,
+    ...(registry.description ? { description: registry.description } : {}),
+    entries: normalizeRegistryEntries(registry.entries)
+  }));
+}
+
+function normalizeArtifactEvidenceClaim(claim: ArtifactEvidenceClaimInput): ArtifactEvidenceClaimDef {
+  return {
+    id: claim.id,
+    label: claim.label,
+    ...(claim.description ? { description: claim.description } : {}),
+    ...(claim.allowedValue ? { allowedValue: claim.allowedValue } : {})
+  };
+}
+
+function normalizeArtifactEvidence(evidence: ArtifactEvidenceInput): ArtifactEvidenceDef {
+  return {
+    ...(evidence.requiredArtifactIds ? { requiredArtifactIds: evidence.requiredArtifactIds } : {}),
+    ...(evidence.requiredClaims ? { requiredClaims: evidence.requiredClaims.map(normalizeArtifactEvidenceClaim) } : {})
   };
 }
 
@@ -96,7 +156,8 @@ function normalizeArtifacts(setupId: string, artifacts: readonly ArtifactInput[]
     artifactClass: artifact.artifactClass,
     ...(artifact.runtimePath ? { runtimePath: artifact.runtimePath } : {}),
     ...(artifact.conceptualOnly !== undefined ? { conceptualOnly: artifact.conceptualOnly } : {}),
-    ...(artifact.compatibilityOnly !== undefined ? { compatibilityOnly: artifact.compatibilityOnly } : {})
+    ...(artifact.compatibilityOnly !== undefined ? { compatibilityOnly: artifact.compatibilityOnly } : {}),
+    ...(artifact.evidence ? { evidence: normalizeArtifactEvidence(artifact.evidence) } : {})
   }));
 }
 
@@ -109,7 +170,8 @@ function normalizeSurfaces(setupId: string, surfaces: readonly SurfaceInput[]): 
     runtimePath: surface.runtimePath,
     ...(surface.title !== undefined ? { title: surface.title } : {}),
     ...(surface.intro !== undefined ? { intro: surface.intro } : {}),
-    ...(surface.preamble !== undefined ? { preamble: surface.preamble } : {})
+    ...(surface.preamble !== undefined ? { preamble: surface.preamble } : {}),
+    ...(surface.requiredSectionSlugs !== undefined ? { requiredSectionSlugs: surface.requiredSectionSlugs } : {})
   }));
 }
 
@@ -174,6 +236,8 @@ export function normalizeSetup(input: unknown): ValidationResult<SetupDef> {
     success: true,
     data: {
       setup: normalizeSetupMeta(setup),
+      catalogs: normalizeCatalogs(setup.catalogs ?? []),
+      registries: normalizeRegistries(setup.registries ?? []),
       roles: normalizeRoles(setupId, setup.roles ?? []),
       workflowSteps: normalizeWorkflowSteps(setupId, setup.workflowSteps ?? []),
       reviewGates: normalizeReviewGates(setupId, setup.reviewGates ?? []),

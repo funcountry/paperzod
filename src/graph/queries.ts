@@ -1,8 +1,12 @@
 import type { DoctrineGraph } from "../core/graph.js";
 import type {
+  CatalogDef,
+  CatalogEntryDef,
   DoctrineNodeDef,
   LinkDef,
   LinkKind,
+  RegistryDef,
+  RegistryEntryDef,
   SurfaceDef,
   SurfaceSectionDef
 } from "../core/index.js";
@@ -13,6 +17,22 @@ function isLink(value: LinkDef | undefined): value is LinkDef {
 
 export function getNode(graph: DoctrineGraph, id: string): DoctrineNodeDef | undefined {
   return graph.nodeById[id];
+}
+
+export function getCatalog(graph: DoctrineGraph, kind: CatalogDef["kind"]): CatalogDef | undefined {
+  return graph.catalogByKind[kind];
+}
+
+export function getCatalogEntry(graph: DoctrineGraph, kind: CatalogDef["kind"], entryId: string): CatalogEntryDef | undefined {
+  return graph.catalogByKind[kind]?.entries.find((entry) => entry.id === entryId);
+}
+
+export function getRegistry(graph: DoctrineGraph, id: string): RegistryDef | undefined {
+  return graph.registryById[id];
+}
+
+export function getRegistryEntry(graph: DoctrineGraph, registryId: string, entryId: string): RegistryEntryDef | undefined {
+  return graph.registryById[registryId]?.entries.find((entry) => entry.id === entryId);
 }
 
 export function getNodesByKind<K extends DoctrineNodeDef["kind"]>(
@@ -52,6 +72,16 @@ export function getReadTargets(graph: DoctrineGraph, readerId: string): Array<Su
   return (graph.indexes.readTargetIdsByReaderId[readerId] ?? [])
     .map((id) => graph.nodeById[id])
     .filter(isReadableTarget);
+}
+
+export function getSurfaceSectionByStableSlug(
+  graph: DoctrineGraph,
+  surfaceId: string,
+  stableSlug: string
+): SurfaceSectionDef | undefined {
+  const sectionId = graph.indexes.sectionIdBySurfaceIdAndStableSlug[surfaceId]?.[stableSlug];
+  const section = sectionId ? graph.nodeById[sectionId] : undefined;
+  return isSurfaceSection(section) ? section : undefined;
 }
 
 export function getReadSections(graph: DoctrineGraph, readerId: string): SurfaceSectionDef[] {

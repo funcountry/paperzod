@@ -129,9 +129,7 @@ Use \`Specialist Turn Shape\` as the shared specialist-turn contract.
 ",
     "brief_researcher_home": "# Brief Researcher
 
-You are the Brief Researcher.
-
-Your repo-owned role home is \`paperclip_home/agents/brief_researcher/AGENTS.md\`.
+Core job: Define the editorial brief and produce the source packet the next lane can trust.
 
 <a id="read-first"></a>
 ## Read First
@@ -143,8 +141,6 @@ Read these shared doctrine surfaces before taking a turn.
 
 <a id="role-contract"></a>
 ## Role Contract
-
-Define the editorial brief and produce the source packet the next lane can trust.
 
 - Do not choose final publication copy.
 - Do not silently collapse runtime bundle drift.
@@ -249,9 +245,7 @@ Use this section as the shared quality bar the critic and downstream lanes shoul
 ",
     "story_architect_home": "# Story Architect
 
-You are the Story Architect.
-
-Your repo-owned role home is \`paperclip_home/agents/story_architect/AGENTS.md\`.
+Core job: Turn the editorial brief into a concrete story outline for one publishable slot.
 
 <a id="read-first"></a>
 ## Read First
@@ -262,8 +256,6 @@ Read these shared doctrine surfaces before taking a turn.
 
 <a id="role-contract"></a>
 ## Role Contract
-
-Turn the editorial brief into a concrete story outline for one publishable slot.
 
 - Do not change locked upstream concepts.
 - Do not invent downstream assets outside the accepted scope.

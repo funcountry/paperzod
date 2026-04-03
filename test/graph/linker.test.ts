@@ -27,6 +27,7 @@ describe("graph linker", () => {
 
     expect({
       setupId: result.data.setup.id,
+      registryIds: result.data.registries.map((registry) => registry.id),
       nodeIds: Object.keys(result.data.nodeById).sort(),
       linkIds: Object.keys(result.data.linkById).sort(),
       outgoingFromDraftPacket: result.data.outgoingLinkIdsByNodeId.draft_packet,
@@ -65,9 +66,36 @@ describe("graph linker", () => {
           "step_supports_notes",
           "step_produces_packet",
         ],
+        "registryIds": [],
         "setupId": "demo_minimal",
       }
     `);
+  });
+
+  it("exposes registries as graph-adjacent lookup truth", () => {
+    const setup = requireNormalizedSetup({
+      id: "registry_lookup",
+      name: "Registry Lookup",
+      registries: [
+        {
+          id: "publish_result",
+          name: "Publish Result",
+          entries: [
+            { id: "pass", label: "PASS" },
+            { id: "revise", label: "Revise" }
+          ]
+        }
+      ]
+    });
+    const result = buildGraph(setup);
+
+    expect(result.success).toBe(true);
+    if (!result.success) {
+      return;
+    }
+
+    expect(result.data.registries.map((registry) => registry.id)).toEqual(["publish_result"]);
+    expect(result.data.registryById.publish_result?.entries.map((entry) => entry.id)).toEqual(["pass", "revise"]);
   });
 
   it("rejects duplicate node ids within a setup", () => {

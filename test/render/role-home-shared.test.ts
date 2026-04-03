@@ -4,6 +4,8 @@ import { buildGraph } from "../../src/graph/index.js";
 import { renderPlannedDocument } from "../../src/markdown/index.js";
 import { buildCompilePlan } from "../../src/plan/index.js";
 import { normalizeSetup } from "../../src/source/index.js";
+import registryEvidenceSeed from "../fixtures/source/registry-evidence.js";
+import typedDoctrineRefsSeed from "../fixtures/source/typed-doctrine-refs.js";
 
 function renderDocument(input: unknown, documentId: string): string {
   const normalized = normalizeSetup(input);
@@ -62,9 +64,7 @@ describe("role-home and shared renderers", () => {
     expect(markdown).toMatchInlineSnapshot(`
       "# Author
 
-      You are the Author.
-
-      Your repo-owned role home is \`generated/roles/author/AGENTS.md\`.
+      Core job: Create the packet.
 
       <a id="read-first"></a>
       ## Read First
@@ -75,8 +75,6 @@ describe("role-home and shared renderers", () => {
 
       <a id="role-contract"></a>
       ## Role Contract
-
-      Create the packet.
 
       - Do not skip the stop line.
       - Do not rewrite shared doctrine.
@@ -131,6 +129,36 @@ describe("role-home and shared renderers", () => {
       - Hand off to gate: Gate 1
       "
     `);
+  });
+
+  it("renders artifact evidence summaries from structured truth", () => {
+    const markdown = renderDocument(registryEvidenceSeed, "shared_evidence_surface");
+
+    expect(markdown).toMatchInlineSnapshot(`
+      "# Evidence Registry Fixture
+
+      This shared entrypoint introduces the setup-wide doctrine surface.
+
+      <a id="evidence-contract"></a>
+      ## Evidence Contract
+
+      This shared entrypoint points to \`Authority Note\` as supporting runtime material.
+
+      - Artifact role: required
+      - Runtime path: generated/AUTHORITY_NOTE.md
+      - Required evidence artifacts: Review Receipt
+      - Required evidence claim: Publish decision. Allowed value: Publish Result -> Approved. Note: Record the final release call before work moves on.
+      "
+    `);
+  });
+
+  it("renders typed doctrine refs before the doc AST boundary", () => {
+    const markdown = renderDocument(typedDoctrineRefsSeed, "author_home");
+
+    expect(markdown).toContain("Read ACTION_AUTHORITY.md before asking Author to take final action.");
+    expect(markdown).toContain("Run `./paperclip status` before changing runtime docs.");
+    expect(markdown).toContain("- Owner Map");
+    expect(markdown).toContain("Start with Owner Map.");
   });
 
   it("renders a project-home root document with a doctrine map", () => {

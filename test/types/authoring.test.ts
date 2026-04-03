@@ -2,6 +2,9 @@ import { expectTypeOf, test } from "vitest";
 
 import type { AuthoredContentBlock } from "../../src/core/defs.js";
 import {
+  artifactRef,
+  command,
+  commandRef,
   composeSetup,
   defineSetupModule,
   defineGateTemplate,
@@ -12,6 +15,9 @@ import {
   defineSurface,
   defineWorkflowStep,
   loadFragments,
+  roleRef,
+  sectionRef,
+  surfaceRef,
   type SetupInput
 } from "../../src/source/index.js";
 
@@ -19,6 +25,13 @@ test("authoring dsl is type-safe", () => {
   const setup = defineSetup({
     id: "typed_setup",
     name: "Typed Setup",
+    registries: [
+      {
+        id: "publish_result",
+        name: "Publish Result",
+        entries: [{ id: "pass", label: "PASS" }]
+      }
+    ],
     roles: [defineRole({ id: "role_1", name: "Role 1", purpose: "Do the work." })],
     workflowSteps: [
       defineWorkflowStep({
@@ -75,7 +88,25 @@ test("helper-based authoring stays type-safe and lowers to SetupInput", () => {
         })
       ],
       reviewGates: [{ id: "review_gate", name: "Review Gate", purpose: "Check the draft.", checkIds: ["draft_packet"] }],
-      artifacts: [{ id: "draft_packet", name: "DRAFT.md", artifactClass: "required" }]
+      registries: [
+        {
+          id: "publish_result",
+          name: "Publish Result",
+          entries: [{ id: "pass", label: "PASS" }]
+        }
+      ],
+      artifacts: [
+        {
+          id: "draft_packet",
+          name: "DRAFT.md",
+          artifactClass: "required",
+          evidence: {
+            requiredArtifactIds: ["review_receipt"],
+            requiredClaims: [{ id: "result", label: "Result", allowedValue: { registryId: "publish_result", entryId: "pass" } }]
+          }
+        },
+        { id: "review_receipt", name: "REVIEW_RECEIPT.md", artifactClass: "support" }
+      ]
     }),
     roleHome.document({
       surfaceId: "writer_home",
@@ -101,6 +132,40 @@ test("helper-based authoring stays type-safe and lowers to SetupInput", () => {
 
   expectTypeOf(setup).toMatchTypeOf<SetupInput>();
   expectTypeOf(fragments.goal).toEqualTypeOf<AuthoredContentBlock[]>();
+});
+
+test("typed doctrine ref helpers stay type-safe inside authored TS blocks", () => {
+  const setup = defineSetup({
+    id: "typed_refs",
+    name: "Typed Refs",
+    catalogs: [{ kind: "command", entries: [command("paperclip_status", "./paperclip status")] }],
+    roles: [defineRole({ id: "author", name: "Author", purpose: "Author the doctrine." })],
+    artifacts: [{ id: "action_authority", name: "ACTION_AUTHORITY.md", artifactClass: "required" }],
+    surfaces: [
+      defineSurface({
+        id: "author_home",
+        surfaceClass: "role_home",
+        runtimePath: "generated/author/AGENTS.md",
+        requiredSectionSlugs: ["read-first", "role-contract"],
+        preamble: [
+          {
+            kind: "paragraph",
+            text: ["Read ", artifactRef("action_authority"), " before asking ", roleRef("author"), " to act."]
+          },
+          {
+            kind: "paragraph",
+            text: ["Then open ", sectionRef({ surfaceId: "workflow_surface", stableSlug: "owner-map" }), " in ", surfaceRef("workflow_surface"), "."]
+          },
+          {
+            kind: "paragraph",
+            text: ["Run ", commandRef("paperclip_status"), " before changing runtime docs."]
+          }
+        ]
+      })
+    ]
+  });
+
+  expectTypeOf(setup).toMatchTypeOf<SetupInput>();
 });
 
 test("setup module authoring stays type-safe", () => {

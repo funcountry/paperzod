@@ -1,6 +1,8 @@
 import type {
   AuthoredContentBlock,
   AuthoredDefinitionListItem,
+  AuthoredInlineRefDef,
+  AuthoredInlineTextDef,
   AuthoredListEntry,
   CompilePlan,
   DoctrineGraph,
@@ -9,7 +11,8 @@ import type {
   SurfaceDef,
   WorkflowStepDef
 } from "../../core/index.js";
-import { getOutgoingLinks } from "../../graph/index.js";
+import { toInlineTextSegments } from "../../core/index.js";
+import { getCatalogEntry, getOutgoingLinks, getSurfaceSectionByStableSlug } from "../../graph/index.js";
 import { codeBlock, doc, listItem, orderedList, paragraph, section, table, unorderedList } from "../../doc/index.js";
 import type { ListItemNode, NonSectionDocBlockNode, ParagraphNode, SectionNode } from "../../doc/index.js";
 
@@ -128,16 +131,54 @@ function formatNodeRefs(graph: DoctrineGraph, label: string, ids: readonly strin
   return formatLabel(label, ids.map((id) => getNodeDisplayName(graph, id)));
 }
 
-function toListItemNodes(entries: readonly AuthoredListEntry[]): ListItemNode[] {
+function resolveInlineRefText(graph: DoctrineGraph, ref: AuthoredInlineRefDef): string {
+  switch (ref.refKind) {
+    case "artifact":
+    case "surface":
+    case "role": {
+      const node = graph.nodeById[ref.id];
+      if (!node || node.kind !== ref.refKind) {
+        throw new Error(`Expected typed ref to resolve to ${ref.refKind} "${ref.id}".`);
+      }
+      return getNodeDisplayName(graph, ref.id);
+    }
+    case "section": {
+      const section = getSurfaceSectionByStableSlug(graph, ref.surfaceId, ref.stableSlug);
+      if (!section) {
+        throw new Error(`Expected typed ref to resolve to section "${ref.surfaceId}::${ref.stableSlug}".`);
+      }
+      return section.title;
+    }
+    case "catalog_entry": {
+      const entry = getCatalogEntry(graph, ref.catalogKind, ref.entryId);
+      if (!entry) {
+        throw new Error(`Expected typed ref to resolve to ${ref.catalogKind} "${ref.entryId}".`);
+      }
+      return ref.catalogKind === "command" ? `\`${entry.display}\`` : entry.display;
+    }
+  }
+}
+
+function renderInlineText(graph: DoctrineGraph, value: AuthoredInlineTextDef): string {
+  return toInlineTextSegments(value)
+    .map((segment) => (typeof segment === "string" ? segment : resolveInlineRefText(graph, segment)))
+    .join("");
+}
+
+function isListItemEntry(entry: AuthoredListEntry): entry is Extract<AuthoredListEntry, { text: AuthoredInlineTextDef }> {
+  return typeof entry === "object" && !Array.isArray(entry);
+}
+
+function toListItemNodes(graph: DoctrineGraph, entries: readonly AuthoredListEntry[]): ListItemNode[] {
   return entries.map((entry) =>
-    typeof entry === "string"
-      ? listItem(entry)
-      : listItem(entry.text, entry.children ? toListItemNodes(entry.children) : undefined)
+    isListItemEntry(entry)
+      ? listItem(renderInlineText(graph, entry.text), entry.children ? toListItemNodes(graph, entry.children) : undefined)
+      : listItem(renderInlineText(graph, entry))
   );
 }
 
-function definitionItemsToListItemNodes(items: readonly AuthoredDefinitionListItem[]): ListItemNode[] {
-  return items.map((item) => listItem(item.term, toListItemNodes(item.definitions)));
+function definitionItemsToListItemNodes(graph: DoctrineGraph, items: readonly AuthoredDefinitionListItem[]): ListItemNode[] {
+  return items.map((item) => listItem(renderInlineText(graph, item.term), toListItemNodes(graph, item.definitions)));
 }
 
 function exampleCaseTitle(label: string, title: string | undefined): string {
@@ -150,32 +191,32 @@ export function getDocumentedNodes(graph: DoctrineGraph, nodeId: string): Doctri
     .filter((node): node is DoctrineGraph["nodes"][number] => node !== undefined);
 }
 
-export function authoredBlocksToDocBlocks(blocks: readonly AuthoredContentBlock[]): NonSectionDocBlockNode[] {
+export function authoredBlocksToDocBlocks(graph: DoctrineGraph, blocks: readonly AuthoredContentBlock[]): NonSectionDocBlockNode[] {
   return blocks.flatMap((block) => {
     switch (block.kind) {
       case "paragraph":
-        return [paragraph(block.text)];
+        return [paragraph(renderInlineText(graph, block.text))];
       case "unordered_list":
-        return [unorderedList(toListItemNodes(block.items))];
+        return [unorderedList(toListItemNodes(graph, block.items))];
       case "ordered_list":
       case "ordered_steps":
-        return [orderedList(toListItemNodes(block.items))];
+        return [orderedList(toListItemNodes(graph, block.items))];
       case "rule_list":
-        return [unorderedList(toListItemNodes(block.items))];
+        return [unorderedList(toListItemNodes(graph, block.items))];
       case "definition_list":
-        return [unorderedList(definitionItemsToListItemNodes(block.items))];
+        return [unorderedList(definitionItemsToListItemNodes(graph, block.items))];
       case "table":
         return [table(block.headers, block.rows)];
       case "code_block":
         return [codeBlock(block.language, block.code)];
       case "example":
-        return [paragraph(exampleCaseTitle("Example", block.title)), ...authoredBlocksToDocBlocks(block.blocks)];
+        return [paragraph(exampleCaseTitle("Example", block.title)), ...authoredBlocksToDocBlocks(graph, block.blocks)];
       case "good_bad_examples":
         return [
           paragraph("Good examples"),
-          ...block.good.flatMap((item) => [paragraph(exampleCaseTitle("Good", item.title)), ...authoredBlocksToDocBlocks(item.blocks)]),
+          ...block.good.flatMap((item) => [paragraph(exampleCaseTitle("Good", item.title)), ...authoredBlocksToDocBlocks(graph, item.blocks)]),
           paragraph("Bad examples"),
-          ...block.bad.flatMap((item) => [paragraph(exampleCaseTitle("Bad", item.title)), ...authoredBlocksToDocBlocks(item.blocks)])
+          ...block.bad.flatMap((item) => [paragraph(exampleCaseTitle("Bad", item.title)), ...authoredBlocksToDocBlocks(graph, item.blocks)])
         ];
     }
   });
@@ -218,7 +259,46 @@ function describeWorkflowStep(graph: DoctrineGraph, step: WorkflowStepDef): NonS
   return [paragraph(step.purpose), unorderedList(getWorkflowStepFacts(graph, step))];
 }
 
-function describeArtifactForSurface(surface: SurfaceDef, node: Extract<DoctrineGraph["nodes"][number], { kind: "artifact" }>): NonSectionDocBlockNode[] {
+function formatAllowedRegistryValue(graph: DoctrineGraph, registryId: string, entryId: string): string {
+  const registry = graph.registryById[registryId];
+  const entry = registry?.entries.find((candidate) => candidate.id === entryId);
+  if (!registry || !entry) {
+    return `${registryId} -> ${entryId}`;
+  }
+
+  return `${registry.name} -> ${entry.label}`;
+}
+
+function describeArtifactEvidence(
+  graph: DoctrineGraph,
+  node: Extract<DoctrineGraph["nodes"][number], { kind: "artifact" }>
+): string[] {
+  if (!node.evidence) {
+    return [];
+  }
+
+  return compactLines([
+    node.evidence.requiredArtifactIds?.length
+      ? formatNodeRefs(graph, "Required evidence artifacts", node.evidence.requiredArtifactIds)
+      : undefined,
+    ...(node.evidence.requiredClaims ?? []).map((claim) => {
+      const clauses = [`Required evidence claim: ${claim.label}`];
+      if (claim.allowedValue) {
+        clauses.push(`Allowed value: ${formatAllowedRegistryValue(graph, claim.allowedValue.registryId, claim.allowedValue.entryId)}`);
+      }
+      if (claim.description) {
+        clauses.push(`Note: ${claim.description}`);
+      }
+      return clauses.join(". ");
+    })
+  ]);
+}
+
+function describeArtifactForSurface(
+  graph: DoctrineGraph,
+  surface: SurfaceDef,
+  node: Extract<DoctrineGraph["nodes"][number], { kind: "artifact" }>
+): NonSectionDocBlockNode[] {
   const leadBySurface: Record<SurfaceDef["surfaceClass"], string> = {
     role_home: `This role home points to \`${node.name}\` as a role-local artifact.`,
     project_home_root: `This project-home surface points to \`${node.name}\` as a project artifact.`,
@@ -240,7 +320,8 @@ function describeArtifactForSurface(surface: SurfaceDef, node: Extract<DoctrineG
         node.runtimePath ? `Runtime path: ${node.runtimePath}` : undefined,
         node.conceptualOnly ? "Treat this artifact as conceptual-only; do not expect a runtime file." : undefined,
         node.compatibilityOnly ? "Treat this artifact as a compatibility bridge, not the canonical runtime file." : undefined,
-        !node.runtimePath && !node.conceptualOnly && !node.compatibilityOnly ? "No extra runtime qualifiers are declared yet." : undefined
+        !node.runtimePath && !node.conceptualOnly && !node.compatibilityOnly ? "No extra runtime qualifiers are declared yet." : undefined,
+        ...describeArtifactEvidence(graph, node)
       ])
     )
   ];
@@ -305,7 +386,7 @@ function describeNodeForSurface(
         ])
       ];
     case "artifact":
-      return describeArtifactForSurface(surface, node);
+      return describeArtifactForSurface(graph, surface, node);
     case "reference":
       return describeReferenceForSurface(surface, node);
     case "generated_target":
@@ -320,7 +401,7 @@ function describeNodeForSurface(
 function getSectionBlocks(graph: DoctrineGraph, surface: SurfaceDef, sectionId: string): NonSectionDocBlockNode[] {
   const surfaceSection = graph.nodeById[sectionId];
   if (surfaceSection?.kind === "surface_section" && surfaceSection.body && surfaceSection.body.length > 0) {
-    return authoredBlocksToDocBlocks(surfaceSection.body);
+    return authoredBlocksToDocBlocks(graph, surfaceSection.body);
   }
 
   const documentedNodes = getDocumentedNodes(graph, sectionId);
@@ -403,11 +484,12 @@ function resolveSurfaceTitle(surface: SurfaceDef, graph: DoctrineGraph, fallback
 }
 
 function resolveSurfaceIntroBlocks(
+  graph: DoctrineGraph,
   surface: SurfaceDef,
   fallbackIntroBlocks: NonSectionDocBlockNode[] | undefined
 ): NonSectionDocBlockNode[] {
   if (surface.intro && surface.intro.length > 0) {
-    return authoredBlocksToDocBlocks(surface.intro);
+    return authoredBlocksToDocBlocks(graph, surface.intro);
   }
 
   return fallbackIntroBlocks ?? [getIntro(surface.surfaceClass)];
@@ -426,8 +508,8 @@ export function renderSurfaceDocumentAst(
 
   const sectionNodes = buildPlannedSectionTree(graph, plan, document.id, undefined, 2, options);
 
-  const preambleBlocks = surface.preamble ? authoredBlocksToDocBlocks(surface.preamble) : [];
-  const introBlocks = resolveSurfaceIntroBlocks(surface, options?.introBlocks);
+  const preambleBlocks = surface.preamble ? authoredBlocksToDocBlocks(graph, surface.preamble) : [];
+  const introBlocks = resolveSurfaceIntroBlocks(graph, surface, options?.introBlocks);
 
   return doc(resolveSurfaceTitle(surface, graph, options?.title), [...introBlocks, ...preambleBlocks, ...sectionNodes]);
 }

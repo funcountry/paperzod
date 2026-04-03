@@ -22,7 +22,8 @@ describe("document-shape helpers", () => {
         { key: "goal", title: "Goal" },
         { key: "handoffRules", title: "Handoff Rules" },
         { key: "sendBackRules", title: "Send Back Rules", parentKey: "handoffRules" }
-      ] as const
+      ] as const,
+      requiredSections: ["goal", "sendBackRules"] as const
     });
 
     const part = workflowTemplate.document({
@@ -45,6 +46,7 @@ describe("document-shape helpers", () => {
       surfaces: [
         {
           id: "workflow_doc",
+          requiredSectionSlugs: ["goal", "send-back-rules"],
           surfaceClass: "workflow_owner",
           runtimePath: "generated/WORKFLOW.md",
           title: "Editorial Workflow"

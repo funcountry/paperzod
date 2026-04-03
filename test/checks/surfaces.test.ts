@@ -213,4 +213,25 @@ describe("surface and reference checks", () => {
 
     expect(diagnostics.map((diagnostic) => diagnostic.code)).toEqual(["check.surface_section.parent_declared_after_child"]);
   });
+
+  it("rejects surfaces that omit required canonical sections", () => {
+    const diagnostics = runChecksFor({
+      id: "surface_required_sections",
+      name: "Surface Required Sections",
+      surfaces: [
+        {
+          id: "author_home",
+          surfaceClass: "role_home",
+          runtimePath: "generated/author/AGENTS.md",
+          requiredSectionSlugs: ["read-first", "role-contract"]
+        }
+      ],
+      surfaceSections: [{ id: "read_first", surfaceId: "author_home", stableSlug: "read-first", title: "Read First" }]
+    });
+
+    expect(diagnostics.map((diagnostic) => diagnostic.code)).toEqual([
+      "check.surface_section.orphaned",
+      "check.surface.missing_required_section"
+    ]);
+  });
 });

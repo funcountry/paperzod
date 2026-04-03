@@ -39,6 +39,7 @@ describe("setup normalization", () => {
             "setupId": "demo_minimal",
           },
         ],
+        "catalogs": [],
         "generatedTargets": [
           {
             "id": "author_home_target",
@@ -118,6 +119,7 @@ describe("setup normalization", () => {
           },
         ],
         "references": [],
+        "registries": [],
         "reviewGates": [
           {
             "checkIds": [
@@ -476,5 +478,129 @@ describe("setup normalization", () => {
         parentSectionId: "poker_items"
       }
     ]);
+  });
+
+  it("normalizes registries and artifact evidence contracts", () => {
+    const result = normalizeSetup({
+      id: "registry_evidence_setup",
+      name: "Registry Evidence Setup",
+      registries: [
+        {
+          id: "publish_result",
+          name: "Publish Result",
+          description: "Allowed result values.",
+          entries: [
+            { id: "pass", label: "PASS" },
+            { id: "fail", label: "FAIL", description: "The check failed." }
+          ]
+        }
+      ],
+      artifacts: [
+        {
+          id: "authority_note",
+          name: "Authority Note",
+          artifactClass: "required",
+          evidence: {
+            requiredArtifactIds: ["pre_publish_audit"],
+            requiredClaims: [
+              {
+                id: "result",
+                label: "Result",
+                allowedValue: { registryId: "publish_result", entryId: "pass" }
+              }
+            ]
+          }
+        }
+      ]
+    });
+
+    expect(result.success).toBe(true);
+    if (!result.success) {
+      return;
+    }
+
+    expect(result.data.registries).toEqual([
+      {
+        id: "publish_result",
+        name: "Publish Result",
+        description: "Allowed result values.",
+        entries: [
+          { id: "pass", label: "PASS" },
+          { id: "fail", label: "FAIL", description: "The check failed." }
+        ]
+      }
+    ]);
+    expect(result.data.artifacts).toEqual([
+      {
+        kind: "artifact",
+        id: "authority_note",
+        setupId: "registry_evidence_setup",
+        name: "Authority Note",
+        artifactClass: "required",
+        evidence: {
+          requiredArtifactIds: ["pre_publish_audit"],
+          requiredClaims: [
+            {
+              id: "result",
+              label: "Result",
+              allowedValue: { registryId: "publish_result", entryId: "pass" }
+            }
+          ]
+        }
+      }
+    ]);
+  });
+
+  it("normalizes command catalogs, required section contracts, and typed inline refs without rendering them early", () => {
+    const result = normalizeSetup({
+      id: "typed_refs_normalize",
+      name: "Typed Refs Normalize",
+      catalogs: [{ kind: "command", entries: [{ id: "paperclip_status", display: "./paperclip status" }] }],
+      artifacts: [{ id: "action_authority", name: "ACTION_AUTHORITY.md", artifactClass: "required" }],
+      surfaces: [
+        {
+          id: "author_home",
+          surfaceClass: "role_home",
+          runtimePath: "generated/author/AGENTS.md",
+          requiredSectionSlugs: ["read-first", "role-contract"],
+          preamble: [
+            {
+              kind: "paragraph",
+              text: ["Read ", { kind: "ref", refKind: "artifact", id: "action_authority" }, " before taking final action."]
+            }
+          ]
+        }
+      ],
+      surfaceSections: [
+        {
+          id: "read_first",
+          surfaceId: "author_home",
+          stableSlug: "read-first",
+          title: "Read First",
+          body: [
+            {
+              kind: "paragraph",
+              text: ["Run ", { kind: "ref", refKind: "catalog_entry", catalogKind: "command", entryId: "paperclip_status" }, " first."]
+            }
+          ]
+        }
+      ]
+    });
+
+    expect(result.success).toBe(true);
+    if (!result.success) {
+      return;
+    }
+
+    expect(result.data.catalogs).toEqual([{ kind: "command", entries: [{ id: "paperclip_status", display: "./paperclip status" }] }]);
+    expect(result.data.surfaces[0]?.requiredSectionSlugs).toEqual(["read-first", "role-contract"]);
+    expect(result.data.surfaces[0]?.preamble?.[0]).toEqual({
+      kind: "paragraph",
+      text: ["Read ", { kind: "ref", refKind: "artifact", id: "action_authority" }, " before taking final action."]
+    });
+    expect(result.data.surfaceSections[0]?.body?.[0]).toEqual({
+      kind: "paragraph",
+      text: ["Run ", { kind: "ref", refKind: "catalog_entry", catalogKind: "command", entryId: "paperclip_status" }, " first."]
+    });
   });
 });

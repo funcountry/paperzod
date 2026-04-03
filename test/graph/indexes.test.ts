@@ -3,11 +3,13 @@ import { describe, expect, it } from "vitest";
 import {
   buildGraph,
   getCheckTargets,
+  getCatalogEntry,
   getReadSections,
   getReadSurfaces,
   getReadTargets,
   getReadersOfSection,
-  getReadersOfSurface
+  getReadersOfSurface,
+  getSurfaceSectionByStableSlug
 } from "../../src/graph/index.js";
 import { normalizeSetup } from "../../src/source/index.js";
 import demoMinimalSeed from "../fixtures/source/demo-minimal.js";
@@ -243,5 +245,20 @@ describe("graph indexes", () => {
     expect(graph.indexes.childSectionIdsBySectionId.poker_items).toEqual(["lesson_root"]);
     expect(graph.indexes.parentSectionIdBySectionId.workflow_items).toBe("terms");
     expect(graph.indexes.parentSectionIdBySectionId.lesson_root).toBe("poker_items");
+  });
+
+  it("indexes command catalogs and section families for typed refs", () => {
+    const graph = requireGraph({
+      id: "index_typed_refs",
+      name: "Index Typed Refs",
+      catalogs: [{ kind: "command", entries: [{ id: "paperclip_status", display: "./paperclip status" }] }],
+      surfaces: [{ id: "workflow_surface", surfaceClass: "workflow_owner", runtimePath: "generated/WORKFLOW.md" }],
+      surfaceSections: [{ id: "owner_map", surfaceId: "workflow_surface", stableSlug: "owner-map", title: "Owner Map" }]
+    });
+
+    expect(graph.catalogByKind.command?.entries).toEqual([{ id: "paperclip_status", display: "./paperclip status" }]);
+    expect(getCatalogEntry(graph, "command", "paperclip_status")).toEqual({ id: "paperclip_status", display: "./paperclip status" });
+    expect(graph.indexes.sectionIdBySurfaceIdAndStableSlug.workflow_surface?.["owner-map"]).toBe("owner_map");
+    expect(getSurfaceSectionByStableSlug(graph, "workflow_surface", "owner-map")?.title).toBe("Owner Map");
   });
 });

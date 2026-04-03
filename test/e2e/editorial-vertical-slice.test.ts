@@ -89,9 +89,7 @@ describe("editorial_vertical_slice e2e", () => {
             "id": "brief_researcher_home",
             "markdown": "# Brief Researcher
 
-      You are the Brief Researcher.
-
-      Your repo-owned role home is \`paperclip_home/agents/brief_researcher/AGENTS.md\`.
+      Core job: Own the editorial brief lane and produce the editorial brief packet.
 
       <a id="read-first"></a>
       ## Read First
@@ -102,8 +100,6 @@ describe("editorial_vertical_slice e2e", () => {
 
       <a id="role-contract"></a>
       ## Role Contract
-
-      Own the editorial brief lane and produce the editorial brief packet.
 
       - Do not prewrite downstream story structure.
       - Do not rename locked editorial concepts in later lanes.

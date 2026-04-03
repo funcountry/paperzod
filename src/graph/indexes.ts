@@ -71,6 +71,7 @@ export function buildGraphIndexes(setup: SetupDef, links: readonly LinkDef[]): D
     childSectionIdsBySectionId: {},
     surfaceIdBySectionId: {},
     parentSectionIdBySectionId: {},
+    sectionIdBySurfaceIdAndStableSlug: {},
     documentedByNodeId: {},
     groundingReferenceIdsByNodeId: {},
     referenceIdsByNodeId: {},
@@ -124,6 +125,8 @@ export function buildGraphIndexes(setup: SetupDef, links: readonly LinkDef[]): D
   for (const section of setup.surfaceSections) {
     addToIndex(indexes.surfaceSectionIdsBySurfaceId, section.surfaceId, section.id, { preserveOrder: true });
     indexes.surfaceIdBySectionId[section.id] = section.surfaceId;
+    indexes.sectionIdBySurfaceIdAndStableSlug[section.surfaceId] ??= {};
+    indexes.sectionIdBySurfaceIdAndStableSlug[section.surfaceId]![section.stableSlug] ??= section.id;
     if (section.parentSectionId) {
       addToIndex(indexes.childSectionIdsBySectionId, section.parentSectionId, section.id, { preserveOrder: true });
       indexes.parentSectionIdBySectionId[section.id] = section.parentSectionId;
@@ -219,6 +222,7 @@ export function summarizeGraphIndexes(graph: DoctrineGraph): Record<string, unkn
     checkerIdsByNodeId: graph.indexes.checkerIdsByNodeId,
     routeTargetIdsByNodeId: graph.indexes.routeTargetIdsByNodeId,
     surfaceSectionIdsBySurfaceId: graph.indexes.surfaceSectionIdsBySurfaceId,
+    sectionIdBySurfaceIdAndStableSlug: graph.indexes.sectionIdBySurfaceIdAndStableSlug,
     rootSectionIdsBySurfaceId: graph.indexes.rootSectionIdsBySurfaceId,
     childSectionIdsBySectionId: graph.indexes.childSectionIdsBySectionId
   };

@@ -49,9 +49,7 @@ export function renderRoleHomeDocument(graph: DoctrineGraph, plan: CompilePlan, 
 
   return renderSurfaceDocumentAst(graph, plan, document, {
     title: role?.name ?? "Role Home",
-    introBlocks: role
-      ? [paragraph(`You are the ${role.name}.`), paragraph(`Your repo-owned role home is \`${surface.runtimePath}\`.`)]
-      : undefined,
+    introBlocks: role ? [paragraph(`Core job: ${role.purpose}`)] : undefined,
     renderSectionBlocks: ({ document, surfaceSection }) => {
       if (!role || surfaceSection.body?.length) {
         return undefined;
@@ -59,9 +57,7 @@ export function renderRoleHomeDocument(graph: DoctrineGraph, plan: CompilePlan, 
 
       switch (surfaceSection.stableSlug) {
         case "read-first": {
-          const hasRoleContract = documentHasSection(plan, document.id, "role-contract");
           return [
-            ...(hasRoleContract ? [] : [paragraph(role.purpose)]),
             paragraph("Read these shared doctrine surfaces before taking a turn."),
             unorderedList(describeReadTarget(graph, role.id))
           ];
@@ -73,7 +69,7 @@ export function renderRoleHomeDocument(graph: DoctrineGraph, plan: CompilePlan, 
             ...(readFirstIsFallback ? [] : describeReadTarget(graph, role.id))
           ];
 
-          return [paragraph(role.purpose), unorderedList(items)];
+          return [unorderedList(items)];
         }
         default:
           return undefined;

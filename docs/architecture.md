@@ -45,10 +45,23 @@ This is the plain canonical internal model:
 - JSON-serializable
 - function-free
 - snapshot-friendly
+- includes setup-level registries, setup-level catalogs, artifact-level
+  evidence contracts, typed inline refs, and surface-level required section
+  contracts
 
 ### Resolved graph
 
 This is where ids, ownership, section lookups, and workflow indexes are linked.
+
+Registries and catalogs stay graph-adjacent lookup truth in this phase:
+
+- `graph.catalogs`
+- `graph.catalogByKind`
+- `graph.registries`
+- `graph.registryById`
+- `graph.indexes.sectionIdBySurfaceIdAndStableSlug`
+
+They do not widen into routed graph nodes.
 
 ### Compile plan
 
@@ -71,7 +84,8 @@ The repo keeps each compiler phase local:
 - `src/source/**` for authoring helpers, modules, composition, fragments, and
   normalization
 - `src/graph/**` for graph linking and indexes
-- `src/checks/**` for generic checks and registry composition
+- `src/checks/**` for generic checks, typed-ref enforcement, composition
+  enforcement, and registry/catalog integrity
 - `src/plan/**` for document and target planning
 - `src/doc/**` and `src/markdown/**` for document AST and markdown renderers
 - `src/emit/**` for write behavior and prune enforcement
@@ -113,8 +127,24 @@ Behavior belongs deeper in the compiler when it changes:
 - plan construction
 - emission lifecycle
 
+That same rule is why constrained vocab, operational catalogs, evidence law,
+typed refs, and required section contracts live in the normalized model now.
+
 That is why setup-local checks and output ownership live in the source module
 envelope, while owned prune behavior lives in planning and emit layers.
+
+## Typed Refs And Composition Boundary
+
+The typed-ref and composition slice follows one strict boundary:
+
+- typed refs are allowed only in TypeScript-authored doctrine blocks in v1
+- renderers resolve those refs to plain markdown text before doc-node creation
+- fragments stay plain and string-only
+- required section contracts live on surfaces as stable slugs, not on helper
+  keys or generated section ids
+
+That keeps the public authoring surface small while still making the important
+drift classes compiler-visible.
 
 ## Output Ownership And Prune
 
@@ -139,12 +169,16 @@ Do not:
 - add setup-specific branches in `src/**`
 - let generated markdown become semantic input
 - smuggle ownership or checks into undocumented side channels
+- reopen fragment parsing just to make typed refs work inside markdown files
 
 Do:
 
 - keep setup-local truth under `setups/**`
 - keep `src/**` framework-only
 - ship docs, examples, and tests together when public authoring surfaces change
+- keep typed runtime law narrow
+- move drift-sensitive fragment lines into TypeScript-authored doctrine blocks
+  instead of pretending fragments are semantic
 
 ## Public Proof Surfaces
 
@@ -154,3 +188,11 @@ places:
 - docs that explain the system plainly
 - canonical example setups under `setups/**`
 - tests that prove manifests, plans, markdown, and diagnostics
+
+For small framework-first surfaces that should not be jammed into the canonical
+setups just to make the docs look complete, the repo may also use a synthetic
+fixture under `test/fixtures/source/**` and a matching example doc. That is
+the right pattern for:
+
+- `registries` and `artifact.evidence`
+- typed doctrine refs and required section contracts

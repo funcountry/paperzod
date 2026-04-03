@@ -14,17 +14,20 @@ const roleHomeTemplate = defineRoleHomeTemplate({
   sections: [
     { key: "readFirst", id: "coordinator_read_first", stableSlug: "read-first", title: "Read First" },
     { key: "roleContract", id: "coordinator_role_contract", stableSlug: "role-contract", title: "Role Contract" }
-  ] as const
+  ] as const,
+  requiredSections: ["readFirst", "roleContract"] as const
 });
 
 const sharedEntrypointTemplate = defineSharedEntrypointTemplate({
   id: "release_ops_shared_entrypoint",
-  sections: [{ key: "releaseOrder", id: "shared_release_order", stableSlug: "read-order", title: "Release Order" }] as const
+  sections: [{ key: "releaseOrder", id: "shared_release_order", stableSlug: "read-order", title: "Release Order" }] as const,
+  requiredSections: ["releaseOrder"] as const
 });
 
 const workflowOwnerTemplate = defineWorkflowOwnerTemplate({
   id: "release_ops_workflow_owner",
-  sections: [{ key: "releaseShape", id: "workflow_release_shape", stableSlug: "release-shape", title: "Release Shape" }] as const
+  sections: [{ key: "releaseShape", id: "workflow_release_shape", stableSlug: "release-shape", title: "Release Shape" }] as const,
+  requiredSections: ["releaseShape"] as const
 });
 
 const gateTemplate = defineGateTemplate({

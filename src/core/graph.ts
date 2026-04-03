@@ -1,4 +1,4 @@
-import type { DoctrineNodeDef, LinkDef, LinkKind, SetupMetaDef } from "./defs.js";
+import type { CatalogDef, CatalogKind, DoctrineNodeDef, LinkDef, LinkKind, RegistryDef, SetupMetaDef } from "./defs.js";
 
 export interface DoctrineGraphIndexes {
   roleIdByWorkflowStepId: Record<string, string>;
@@ -24,6 +24,7 @@ export interface DoctrineGraphIndexes {
   childSectionIdsBySectionId: Record<string, string[]>;
   surfaceIdBySectionId: Record<string, string>;
   parentSectionIdBySectionId: Record<string, string>;
+  sectionIdBySurfaceIdAndStableSlug: Record<string, Record<string, string>>;
   documentedByNodeId: Record<string, string[]>;
   groundingReferenceIdsByNodeId: Record<string, string[]>;
   referenceIdsByNodeId: Record<string, string[]>;
@@ -34,6 +35,11 @@ export interface DoctrineGraphIndexes {
 
 export interface DoctrineGraph {
   setup: SetupMetaDef;
+  catalogs: CatalogDef[];
+  catalogByKind: Partial<Record<CatalogKind, CatalogDef>>;
+  // Registries stay adjacent lookup truth rather than routed graph nodes.
+  registries: RegistryDef[];
+  registryById: Record<string, RegistryDef>;
   nodes: DoctrineNodeDef[];
   nodeById: Record<string, DoctrineNodeDef>;
   nodeIdsByKind: Record<DoctrineNodeDef["kind"], string[]>;

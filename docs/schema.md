@@ -30,6 +30,15 @@ The public ergonomic layer is additive:
 Those helpers lower back into plain setup arrays and links before
 normalization. They do not add new normalized node kinds.
 
+The public typed runtime-law layer is still intentionally small. It now
+includes:
+
+- `setup.registries[]` for sanctioned vocab
+- `setup.catalogs[]` for sanctioned operational refs, starting with commands
+- `artifact.evidence` for required support artifacts and required claims
+- typed inline refs inside TypeScript-authored doctrine blocks
+- `surface.requiredSectionSlugs` for required canonical section families
+
 ## Core Node Families
 
 The minimum useful semantic families are:
@@ -97,8 +106,127 @@ A useful setup must be able to express:
 - stop lines
 - next-step and next-gate routing
 - compatibility-only runtime artifacts where needed
+- setup-level constrained vocab registries
+- setup-level sanctioned operational catalogs
+- artifact-level evidence contracts
+- typed refs inside authored TypeScript doctrine blocks
+- required section contracts on surfaces
 - explicit links such as `documents`, `reads`, `owns`, `grounds`, and
   `references`
+
+## Typed Runtime-Law Rules
+
+The framework still keeps typed runtime law narrow and explicit.
+
+### Registries
+
+`setup.registries[]` models one setup-level catalog of sanctioned values.
+
+Each registry has:
+
+- `id`
+- `name`
+- optional `description`
+- `entries[]`
+
+Each entry has:
+
+- `id`
+- `label`
+- optional `description`
+
+Registries are lookup truth for checks and renderers. They are not routed graph
+nodes and they do not create a second link family.
+
+### Operational Catalogs
+
+`setup.catalogs[]` models sanctioned operational truth that should be
+referenced structurally instead of restated as raw prose.
+
+The first shipped catalog family is `command`.
+
+Each catalog has:
+
+- `kind`
+- `entries[]`
+
+Each entry has:
+
+- `id`
+- `display`
+- optional `description`
+
+The public rule is:
+
+- use one small catalog-backed ref seam
+- prove it with commands first
+- add more families later only if the same shape stays clean
+
+### Artifact Evidence
+
+`artifact.evidence` attaches proof-law to one artifact.
+
+It may declare:
+
+- `requiredArtifactIds[]`
+- `requiredClaims[]`
+
+Each required claim has:
+
+- `id`
+- `label`
+- optional `description`
+- optional `allowedValue: { registryId, entryId }`
+
+That is enough to say:
+
+- which support artifacts must exist before this artifact is trustworthy
+- which claims must be present
+- which claim values come from canonical setup-level vocab
+
+### Typed Doctrine Refs
+
+Typed refs are allowed in TypeScript-authored doctrine blocks where drift would
+matter.
+
+The supported v1 ref helpers are:
+
+- `artifactRef(id)`
+- `surfaceRef(id)`
+- `sectionRef({ surfaceId, stableSlug })`
+- `roleRef(id)`
+- `commandRef(id)`
+
+The supported v1 authored text fields are:
+
+- paragraph text
+- list item text
+- definition-list terms and definitions
+
+The important boundary is:
+
+- existence checks happen before render
+- display text comes from canonical truth
+- generated markdown stays plain
+- authored fragments stay plain and do not parse refs in v1
+
+### Required Surface Composition
+
+`surface.requiredSectionSlugs[]` is the compiler-owned contract for canonical
+section families that a realized surface must include.
+
+Template helpers may expose ergonomic `requiredSections` sugar keyed by local
+template section keys, but that sugar lowers to slug-based surface truth before
+normalization completes.
+
+### Explicit Non-Goals
+
+This slice does not add:
+
+- arbitrary markdown ref parsing
+- broad tool, env-var, or endpoint catalogs in the first cut
+- packet-level evidence aggregation
+- a general markdown interpolation language
 
 ## Stability Rules
 
@@ -122,6 +250,9 @@ The current supported authored block shapes are:
 The fragment loader is not a general markdown parser for arbitrary authored
 documents. Section ownership still lives in TypeScript source.
 
+If a fragment sentence is drift-sensitive, move that sentence into a
+TypeScript-authored doctrine block first.
+
 ## Source Module Rules
 
 `defineSetupModule(...)` is a source envelope around plain setup truth.
@@ -141,6 +272,8 @@ The schema should prefer:
 - one canonical owner over duplicated prose
 - section-level links over vague file-level references
 - conceptual contracts over accidental current file bundles
+- typed runtime law only where the value affects trust, routing, or required
+  evidence
 - additive helper sugar over normalized model widening
 
 The schema should reject:
@@ -159,3 +292,10 @@ The repo keeps two public examples in sync with this schema:
 
 `docs/example_editorial.md` is the readable walkthrough of the high-fidelity
 setup shape.
+
+The repo also keeps one small generic runtime-law walkthrough in sync with this
+schema:
+
+- `docs/example_typed_runtime_law.md`
+- `test/fixtures/source/registry-evidence.ts`
+- `test/fixtures/source/typed-doctrine-refs.ts`

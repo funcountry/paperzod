@@ -198,6 +198,74 @@ while still letting TypeScript decide:
 - which ids and paths they map to
 - which rules must still validate
 
+## One Small Typed Runtime-Law Example
+
+The product also needs a way to make important doctrine facts stop being raw
+strings.
+
+For example, instead of writing:
+
+```ts
+{ kind: "paragraph", text: "Read ACTION_AUTHORITY.md before taking final action." }
+```
+
+we want a setup author to be able to write:
+
+```ts
+{
+  kind: "paragraph",
+  text: ["Read ", artifactRef("action_authority"), " before taking final action."],
+}
+```
+
+and:
+
+```ts
+{
+  kind: "paragraph",
+  text: ["Run ", commandRef("paperclip_status"), " before changing runtime docs."],
+}
+```
+
+Then the compiler can:
+
+- verify that the target exists
+- render the display text from canonical truth
+- fail if the artifact, section, or command is renamed or removed
+
+## One Small Required-Composition Example
+
+The product also needs a way to say that some generated surfaces must include
+canonical section families.
+
+For example:
+
+```ts
+const roleHome = defineRoleHomeTemplate({
+  id: "role_home",
+  sections: [
+    { key: "readFirst", title: "Read First" },
+    { key: "roleContract", title: "Role Contract" },
+  ] as const,
+  requiredSections: ["readFirst", "roleContract"] as const,
+});
+```
+
+That lowers to slug-based surface truth and lets the checker fail loudly if a
+realized role home omits one of those families.
+
+## Registries And Evidence Still Matter
+
+The product also still needs one small way to express runtime law that should
+not drift in vocab or trust bundles.
+
+That is what setup registries and artifact evidence model:
+
+- the registry owns the sanctioned decision values
+- the artifact owns the proof law
+- prose stays prose unless one sentence needs a typed ref
+- the compiler can validate and render the contract directly
+
 ## The Markdown We Would Want Back
 
 ### Generated role guide

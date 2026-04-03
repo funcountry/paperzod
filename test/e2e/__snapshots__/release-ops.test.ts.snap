@@ -27,9 +27,7 @@ exports[`release_ops e2e > compiles the same pipeline for a non-editorial setup 
   "rendered": {
     "coordinator_home": "# Coordinator
 
-You are the Coordinator.
-
-Your repo-owned role home is \`paperclip_home/agents/coordinator/AGENTS.md\`.
+Core job: Coordinate the release workflow and keep the shared release operations doctrine coherent.
 
 <a id="read-first"></a>
 ## Read First
@@ -40,8 +38,6 @@ Read these shared doctrine surfaces before taking a turn.
 
 <a id="role-contract"></a>
 ## Role Contract
-
-Coordinate the release workflow and keep the shared release operations doctrine coherent.
 
 - No additional role boundaries are declared yet.
 ",

@@ -53,14 +53,10 @@ describe("shared_overrides e2e", () => {
               "id": "home",
               "markdown": "# Shared Role
 
-      You are the Shared Role.
-
-      Your repo-owned role home is \`generated/alpha/roles/shared_role/AGENTS.md\`.
+      Core job: Reusable role.
 
       <a id="role-contract"></a>
       ## Role Contract
-
-      Reusable role.
 
       - No additional role boundaries are declared yet.
       - No additional shared doctrine reads are declared yet.
@@ -118,14 +114,10 @@ describe("shared_overrides e2e", () => {
               "id": "home",
               "markdown": "# Shared Role
 
-      You are the Shared Role.
-
-      Your repo-owned role home is \`generated/beta/roles/shared_role/AGENTS.md\`.
+      Core job: Reusable role with beta-local wording.
 
       <a id="role-contract"></a>
       ## Role Contract
-
-      Reusable role with beta-local wording.
 
       - No additional role boundaries are declared yet.
       - No additional shared doctrine reads are declared yet.

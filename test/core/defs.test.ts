@@ -40,6 +40,8 @@ describe("core defs", () => {
         id: "demo_minimal",
         name: "Demo Minimal"
       },
+      catalogs: [],
+      registries: [],
       roles: [
         {
           kind: "role",
@@ -63,10 +65,12 @@ describe("core defs", () => {
     expect(setupDef).toMatchInlineSnapshot(`
       {
         "artifacts": [],
+        "catalogs": [],
         "generatedTargets": [],
         "links": [],
         "packetContracts": [],
         "references": [],
+        "registries": [],
         "reviewGates": [],
         "roles": [
           {

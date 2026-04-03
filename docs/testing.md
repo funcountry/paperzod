@@ -83,6 +83,32 @@ A second setup with a different path shape and a smaller surface mix.
 
 It proves the compiler is not hard-coded to the editorial example.
 
+### `registry_evidence`
+
+A small synthetic proving fixture for the new typed runtime-law slice.
+
+It proves:
+
+- setup-level registries can carry sanctioned vocab
+- artifact evidence contracts normalize into plain setup truth
+- graph and check layers can validate registry and evidence integrity
+- renderers can emit evidence summaries from structured truth
+
+This fixture exists so the public proof can show the feature clearly without
+forcing it into the editorial setup just for demonstration value.
+
+### `typed_doctrine_refs`
+
+A small synthetic proving fixture for typed refs and required composition.
+
+It proves:
+
+- typed refs work in TypeScript-authored doctrine blocks
+- paragraphs, list items, and definition-list terms can resolve refs
+- command-backed operational refs render from catalog truth
+- required section contracts fail loudly in checks
+- generated markdown stays plain even though authored doctrine carried typed refs
+
 ## Suite Expectations
 
 The repo should keep meaningful coverage across:
@@ -98,6 +124,20 @@ The repo should keep meaningful coverage across:
 - CLI tests
 - stability tests
 - performance sanity tests
+
+When typed runtime-law surfaces change, the smallest honest proof usually
+includes:
+
+- `test/types/authoring.test.ts`
+- `test/source/nodes.test.ts`
+- `test/source/normalize.test.ts`
+- `test/graph/indexes.test.ts`
+- `test/checks/registry.test.ts`
+- `test/checks/typed-inline-refs.test.ts`
+- `test/checks/surfaces.test.ts`
+- `test/render/role-home-shared.test.ts`
+- `test/e2e/authored-content.test.ts`
+- `test/source/templates.test.ts`
 
 ## Required Commands
 
@@ -141,6 +181,8 @@ The target state for that scrub search is no hits in tracked public files.
 We should only say the repo is ready when:
 
 - the canonical editorial and release-ops setups both pass
+- the generic `registry_evidence` and `typed_doctrine_refs` fixtures still
+  prove the typed runtime-law surface cleanly
 - targeted suites for changed layers pass
 - the full suite passes
 - snapshot updates were reviewed, not churned blindly

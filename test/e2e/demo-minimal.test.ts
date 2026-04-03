@@ -111,14 +111,10 @@ describe("demo_minimal e2e", () => {
             "id": "author_home",
             "markdown": "# Author
 
-      You are the Author.
-
-      Your repo-owned role home is \`generated/roles/author/AGENTS.md\`.
+      Core job: Create the artifact.
 
       <a id="role-contract"></a>
       ## Role Contract
-
-      Create the artifact.
 
       - No additional role boundaries are declared yet.
       - No additional shared doctrine reads are declared yet.

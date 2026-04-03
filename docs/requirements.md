@@ -40,8 +40,13 @@ The system must represent:
 - review gates
 - packet contracts
 - artifacts
+- setup-level registries
+- setup-level operational catalogs
+- artifact evidence contracts
+- typed doctrine refs inside TypeScript-authored blocks
 - runtime surfaces
 - exact surface sections
+- required section contracts on surfaces
 - references
 - generated targets
 - typed links between those units
@@ -56,6 +61,11 @@ The system must express:
 - section-level reads
 - single ownership where single ownership is expected
 - compatibility residue where conceptual contracts and runtime bundles differ
+- sanctioned vocab where runtime law should come from one canonical setup-level
+  source
+- sanctioned operational refs where runtime law should not drift in prose
+- required evidence artifacts and required claims for trust-sensitive artifacts
+- required canonical section families for generated surfaces
 
 ## Runtime Requirements
 
@@ -71,9 +81,13 @@ The system must express:
 - Ergonomic helpers may exist on top of `SetupInput`, but they must lower back
   into the same normalized model.
 - Setup-local prose should stay easy to write in markdown fragments.
+- Drift-sensitive prose may move into TypeScript-authored blocks when it needs
+  typed refs; fragments stay plain in v1.
 - Shared document shapes should be reusable across setups.
 - Setup-local checks and output ownership should be declarative, not hidden in
   shell scripts.
+- Typed runtime law should stay small and explicit instead of leaking into
+  arbitrary prose conventions.
 
 ## Validation Requirements
 
@@ -86,6 +100,12 @@ The checker must reject:
 - missing required outputs
 - invalid gate checks
 - invalid runtime artifact mappings
+- duplicate registry ids and duplicate registry entry ids
+- duplicate catalog kinds and duplicate catalog entry ids
+- invalid registry references from artifact evidence claims
+- missing or circular artifact evidence dependencies
+- broken typed refs to missing or wrong-kind targets
+- missing required section families on realized surfaces
 - generated targets that do not map back to real source units
 
 The checker should make drift visible when:
@@ -120,6 +140,10 @@ The public proof should show:
   packet workflow docs, standards, gates, and references
 - a second setup with a different shape that uses the same compiler pipeline
 - setup-local wording, paths, and ownership without core compiler branches
+- one generic constrained-vocab, typed-ref, and artifact-evidence story that is
+  not tied to Lessons-specific nouns
+- a small synthetic proving fixture when a framework feature should be shown
+  clearly without being forced into the canonical setup packages
 
 ## Acceptance Checklist
 

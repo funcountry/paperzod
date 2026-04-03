@@ -134,7 +134,29 @@ function validateLinks(nodeById: Record<string, DoctrineNodeDef>, links: readonl
   return diagnostics;
 }
 
+function buildRegistryById(setup: SetupDef): DoctrineGraph["registryById"] {
+  const registryById: DoctrineGraph["registryById"] = {};
+
+  for (const registry of setup.registries) {
+    registryById[registry.id] ??= registry;
+  }
+
+  return registryById;
+}
+
+function buildCatalogByKind(setup: SetupDef): DoctrineGraph["catalogByKind"] {
+  const catalogByKind: DoctrineGraph["catalogByKind"] = {};
+
+  for (const catalog of setup.catalogs) {
+    catalogByKind[catalog.kind] ??= catalog;
+  }
+
+  return catalogByKind;
+}
+
 export function buildGraph(setup: SetupDef): GraphBuildResult {
+  const catalogs = [...setup.catalogs];
+  const registries = [...setup.registries];
   const nodes = collectNodes(setup);
   const links = [...setup.links];
   const nodeById = Object.fromEntries(nodes.map((node) => [node.id, node])) satisfies Record<string, DoctrineNodeDef>;
@@ -151,6 +173,10 @@ export function buildGraph(setup: SetupDef): GraphBuildResult {
     success: true,
     data: {
       setup: setup.setup,
+      catalogs,
+      catalogByKind: buildCatalogByKind(setup),
+      registries,
+      registryById: buildRegistryById(setup),
       nodes,
       nodeById,
       nodeIdsByKind: buildNodeIdsByKind(nodes),
