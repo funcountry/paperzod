@@ -234,4 +234,33 @@ describe("surface and reference checks", () => {
       "check.surface.missing_required_section"
     ]);
   });
+
+  it("rejects empty role-home sections that are not canonical fallback sections", () => {
+    const diagnostics = runChecksFor({
+      id: "role_home_empty_optional_section",
+      name: "Role Home Empty Optional Section",
+      roles: [{ id: "author", name: "Author", purpose: "Do work." }],
+      surfaces: [
+        {
+          id: "author_home",
+          surfaceClass: "role_home",
+          runtimePath: "generated/author/AGENTS.md",
+          requiredSectionSlugs: ["read-first", "role-contract"]
+        }
+      ],
+      surfaceSections: [
+        { id: "read_first", surfaceId: "author_home", stableSlug: "read-first", title: "Read First" },
+        { id: "role_contract", surfaceId: "author_home", stableSlug: "role-contract", title: "Role Contract" },
+        { id: "copy_standards", surfaceId: "author_home", stableSlug: "copy-standards", title: "Copy Standards" }
+      ],
+      links: [
+        { id: "surface_documents_author", kind: "documents", from: "author_home", to: "author" },
+        { id: "read_first_documents_author", kind: "documents", from: "read_first", to: "author" },
+        { id: "role_contract_documents_author", kind: "documents", from: "role_contract", to: "author" },
+        { id: "copy_standards_documents_author", kind: "documents", from: "copy_standards", to: "author" }
+      ]
+    });
+
+    expect(diagnostics.map((diagnostic) => diagnostic.code)).toEqual(["check.role_home.empty_section"]);
+  });
 });

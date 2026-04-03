@@ -37,7 +37,14 @@ describe("emit layer", () => {
         id: "emit_manual_edit",
         name: "Emit Manual Edit",
         roles: [{ id: "role_1", name: "Role 1", purpose: "Own the generated workflow surface." }],
-        surfaces: [{ id: "surface_1", surfaceClass: "role_home", runtimePath: "generated/WORKFLOW.md" }],
+        surfaces: [
+          {
+            id: "surface_1",
+            surfaceClass: "role_home",
+            runtimePath: "generated/WORKFLOW.md",
+            requiredSectionSlugs: ["read-first"]
+          }
+        ],
         surfaceSections: [{ id: "section_1", surfaceId: "surface_1", stableSlug: "read-first", title: "Read First" }],
         generatedTargets: [{ id: "target_1", path: "generated/WORKFLOW.md", sourceIds: ["role_1"], sectionId: "section_1" }],
         links: [
@@ -91,7 +98,12 @@ describe("emit layer", () => {
           }
         ],
         surfaces: [
-          { id: "author_home", surfaceClass: "role_home", runtimePath: "generated/roles/author/AGENTS.md" },
+          {
+            id: "author_home",
+            surfaceClass: "role_home",
+            runtimePath: "generated/roles/author/AGENTS.md",
+            requiredSectionSlugs: ["read-first"]
+          },
           { id: "shared_readme", surfaceClass: "shared_entrypoint", runtimePath: "generated/shared/README.md" }
         ],
         surfaceSections: [
@@ -123,7 +135,12 @@ describe("emit layer", () => {
           }
         ],
         surfaces: [
-          { id: "author_home", surfaceClass: "role_home", runtimePath: "generated/roles/author/AGENTS.md" },
+          {
+            id: "author_home",
+            surfaceClass: "role_home",
+            runtimePath: "generated/roles/author/AGENTS.md",
+            requiredSectionSlugs: ["read-first"]
+          },
           { id: "shared_readme", surfaceClass: "shared_entrypoint", runtimePath: "generated/shared/README.md" }
         ],
         surfaceSections: [

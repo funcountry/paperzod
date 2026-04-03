@@ -147,4 +147,73 @@ describe("hierarchical section authoring", () => {
       "
     `);
   });
+
+  it("renders bodyless wrapper parents with children and no fallback filler", () => {
+    const result = compile({
+      id: "hierarchical_wrapper_parent_flow",
+      name: "Hierarchical Wrapper Parent Flow",
+      roles: [{ id: "owner", name: "Owner", purpose: "Route readers through the doctrine map honestly." }],
+      surfaces: [
+        {
+          id: "shared_readme",
+          surfaceClass: "shared_entrypoint",
+          runtimePath: "paperclip_home/project_homes/editorial/shared/README.md"
+        }
+      ],
+      surfaceSections: [
+        {
+          id: "standards",
+          surfaceId: "shared_readme",
+          stableSlug: "standards-and-support",
+          title: "Standards And Support"
+        },
+        {
+          id: "copy_standards",
+          surfaceId: "shared_readme",
+          stableSlug: "copy-standards",
+          title: "Copy Standards",
+          parentSectionId: "standards",
+          body: [{ kind: "paragraph", text: "Use the approved copy checklist before publishing." }]
+        }
+      ],
+      generatedTargets: [
+        {
+          id: "standards_target",
+          path: "paperclip_home/project_homes/editorial/shared/README.md",
+          sourceIds: ["owner"],
+          sectionId: "standards"
+        },
+        {
+          id: "copy_standards_target",
+          path: "paperclip_home/project_homes/editorial/shared/README.md",
+          sourceIds: ["owner"],
+          sectionId: "copy_standards"
+        }
+      ],
+      links: [
+        { id: "standards_documents_owner", kind: "documents", from: "standards", to: "owner" },
+        { id: "copy_standards_documents_owner", kind: "documents", from: "copy_standards", to: "owner" }
+      ]
+    });
+
+    expect(result.success).toBe(true);
+    if (!result.success) {
+      return;
+    }
+
+    expect(result.data.documents[0]?.markdown).toMatchInlineSnapshot(`
+      "# Shared Entrypoint
+
+      This shared entrypoint introduces the setup-wide doctrine surface.
+
+      <a id="standards-and-support"></a>
+      ## Standards And Support
+
+      <a id="copy-standards"></a>
+      ### Copy Standards
+
+      Use the approved copy checklist before publishing.
+      "
+    `);
+  });
 });

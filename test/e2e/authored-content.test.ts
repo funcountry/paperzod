@@ -30,6 +30,7 @@ describe("authored doctrine content flow", () => {
           id: "author_home",
           surfaceClass: "role_home",
           runtimePath: "paperclip_home/agents/author/AGENTS.md",
+          requiredSectionSlugs: ["read-first", "role-contract"],
           preamble: [
             { kind: "paragraph", text: "Start here before opening any packet-specific doctrine." },
             {

@@ -402,10 +402,19 @@ function describeNodeForSurface(
   }
 }
 
-function getSectionBlocks(graph: DoctrineGraph, surface: SurfaceDef, sectionId: string): NonSectionDocBlockNode[] {
+function getSectionBlocks(
+  graph: DoctrineGraph,
+  surface: SurfaceDef,
+  sectionId: string,
+  hasChildSections: boolean
+): NonSectionDocBlockNode[] {
   const surfaceSection = graph.nodeById[sectionId];
   if (surfaceSection?.kind === "surface_section" && surfaceSection.body && surfaceSection.body.length > 0) {
     return authoredBlocksToDocBlocks(graph, surfaceSection.body);
+  }
+
+  if (hasChildSections) {
+    return [];
   }
 
   const documentedNodes = getDocumentedNodes(graph, sectionId);
@@ -429,7 +438,10 @@ function buildPlannedSectionTree(
     (sectionPlan) => sectionPlan.documentId === documentId && sectionPlan.parentSectionId === parentSectionId
   );
 
-  return sectionPlans.map((sectionPlan) => renderPlannedSection(graph, plan, sectionPlan, level, options));
+  return sectionPlans.flatMap((sectionPlan) => {
+    const sectionNode = renderPlannedSection(graph, plan, sectionPlan, level, options);
+    return sectionNode ? [sectionNode] : [];
+  });
 }
 
 function renderPlannedSection(
@@ -438,7 +450,7 @@ function renderPlannedSection(
   sectionPlan: PlannedSection,
   level: number,
   options?: SurfaceDocumentRenderOptions
-): SectionNode {
+): SectionNode | undefined {
   const surfaceSection = graph.nodeById[sectionPlan.surfaceSectionId];
   if (!surfaceSection || surfaceSection.kind !== "surface_section") {
     throw new Error(`Expected planned section "${sectionPlan.id}" to reference a surface section node.`);
@@ -457,11 +469,16 @@ function renderPlannedSection(
     surface,
     surfaceSection
   });
+  const sectionBlocks = customBlocks ?? getSectionBlocks(graph, surface, sectionPlan.surfaceSectionId, childSections.length > 0);
+
+  if (sectionBlocks.length === 0 && childSections.length === 0) {
+    return undefined;
+  }
 
   return section(
     surfaceSection.stableSlug,
     surfaceSection.title,
-    [...(customBlocks ?? getSectionBlocks(graph, surface, sectionPlan.surfaceSectionId)), ...childSections],
+    [...sectionBlocks, ...childSections],
     level
   );
 }

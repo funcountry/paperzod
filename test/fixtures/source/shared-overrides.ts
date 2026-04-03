@@ -35,7 +35,12 @@ const sharedSetup = defineSetup({
     }
   ],
   surfaces: [
-    { id: "home", surfaceClass: "role_home", runtimePath: "generated/shared/roles/shared_role/AGENTS.md" },
+    {
+      id: "home",
+      surfaceClass: "role_home",
+      runtimePath: "generated/shared/roles/shared_role/AGENTS.md",
+      requiredSectionSlugs: ["role-contract"]
+    },
     { id: "gate_surface", surfaceClass: "gate", runtimePath: "generated/shared/gates/shared_gate.md" },
     { id: "packet_surface", surfaceClass: "packet_workflow", runtimePath: "generated/shared/packets/contract.md" }
   ],

@@ -1,7 +1,9 @@
-import type { CompilePlan, DoctrineGraph, PlannedDocument } from "../../core/index.js";
+import type { CompilePlan, DoctrineGraph, PlannedDocument, SurfaceDef } from "../../core/index.js";
 import { paragraph, unorderedList } from "../../doc/index.js";
 import { getOutgoingLinks } from "../../graph/index.js";
 import { getDocumentedNodes, getNodeDisplayName, renderSurfaceDocumentAst } from "./common.js";
+
+const roleHomeFallbackSectionSlugs = new Set(["read-first", "role-contract"]);
 
 function describeReadTarget(graph: DoctrineGraph, roleId: string): string[] {
   const readLinks = getOutgoingLinks(graph, roleId, "reads");
@@ -39,6 +41,10 @@ function documentHasSection(plan: CompilePlan, documentId: string, stableSlug: s
   return plan.sections.some((candidate) => candidate.documentId === documentId && candidate.stableSlug === stableSlug);
 }
 
+function canUseRoleHomeFallback(surface: SurfaceDef, stableSlug: string): boolean {
+  return roleHomeFallbackSectionSlugs.has(stableSlug) && Boolean(surface.requiredSectionSlugs?.includes(stableSlug));
+}
+
 export function renderRoleHomeDocument(graph: DoctrineGraph, plan: CompilePlan, document: PlannedDocument) {
   const surface = graph.nodeById[document.surfaceId];
   if (!surface || surface.kind !== "surface") {
@@ -50,9 +56,18 @@ export function renderRoleHomeDocument(graph: DoctrineGraph, plan: CompilePlan, 
   return renderSurfaceDocumentAst(graph, plan, document, {
     title: role?.name ?? "Role Home",
     introBlocks: role ? [paragraph(`Core job: ${role.purpose}`)] : undefined,
-    renderSectionBlocks: ({ document, surfaceSection }) => {
-      if (!role || surfaceSection.body?.length) {
+    renderSectionBlocks: ({ document, surface, surfaceSection }) => {
+      if (surfaceSection.body?.length) {
         return undefined;
+      }
+
+      // Only canonical required role-home sections may synthesize fallback prose.
+      if (!canUseRoleHomeFallback(surface, surfaceSection.stableSlug)) {
+        return [];
+      }
+
+      if (!role) {
+        return [];
       }
 
       switch (surfaceSection.stableSlug) {
@@ -72,7 +87,7 @@ export function renderRoleHomeDocument(graph: DoctrineGraph, plan: CompilePlan, 
           return [unorderedList(items)];
         }
         default:
-          return undefined;
+          return [];
       }
     }
   });

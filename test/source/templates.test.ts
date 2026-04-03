@@ -429,4 +429,120 @@ describe("document-shape helpers", () => {
       ]
     });
   });
+
+  it("lowers whenConfigured sections only for configured destinations and auto-emits wrapper parents", () => {
+    const roleHomeTemplate = defineRoleHomeTemplate({
+      id: "role_home_sparse",
+      sections: [
+        { key: "readFirst", title: "Read First" },
+        { key: "roleContract", title: "Role Contract" },
+        { key: "standards", title: "Standards And Support", emissionPolicy: "whenConfigured" },
+        {
+          key: "copyStandards",
+          title: "Copy Standards",
+          parentKey: "standards",
+          emissionPolicy: "whenConfigured"
+        }
+      ] as const,
+      requiredSections: ["readFirst", "roleContract"] as const
+    });
+
+    const projectedHomes = projectDocumentSections(roleHomeTemplate, {
+      destinations: [
+        {
+          surfaceId: "writer_home",
+          runtimePath: "generated/writer/AGENTS.md",
+          roleId: "writer",
+          sections: {
+            copyStandards: {
+              body: [{ kind: "paragraph", text: "Use the approved copy checklist before publishing." }]
+            }
+          }
+        },
+        {
+          surfaceId: "critic_home",
+          runtimePath: "generated/critic/AGENTS.md",
+          roleId: "critic"
+        }
+      ]
+    });
+    expect(projectedHomes).toHaveLength(2);
+    const writerHome = projectedHomes[0];
+    const criticHome = projectedHomes[1];
+    expect(writerHome).toBeDefined();
+    expect(criticHome).toBeDefined();
+    if (!writerHome || !criticHome) {
+      throw new Error("Expected projected role-home documents for both destinations.");
+    }
+
+    expect(writerHome.surfaces).toEqual([
+      {
+        id: "writer_home",
+        requiredSectionSlugs: ["read-first", "role-contract"],
+        surfaceClass: "role_home",
+        runtimePath: "generated/writer/AGENTS.md"
+      }
+    ]);
+    expect(writerHome.surfaceSections).toEqual([
+      {
+        id: "writer_home_read_first",
+        surfaceId: "writer_home",
+        stableSlug: "read-first",
+        title: "Read First"
+      },
+      {
+        id: "writer_home_role_contract",
+        surfaceId: "writer_home",
+        stableSlug: "role-contract",
+        title: "Role Contract"
+      },
+      {
+        id: "writer_home_standards",
+        surfaceId: "writer_home",
+        stableSlug: "standards",
+        title: "Standards And Support"
+      },
+      {
+        id: "writer_home_copy_standards",
+        surfaceId: "writer_home",
+        stableSlug: "copy-standards",
+        title: "Copy Standards",
+        parentSectionId: "writer_home_standards",
+        body: [{ kind: "paragraph", text: "Use the approved copy checklist before publishing." }]
+      }
+    ]);
+    expect(writerHome.generatedTargets?.map((target) => target.sectionId)).toEqual([
+      "writer_home_read_first",
+      "writer_home_role_contract",
+      "writer_home_standards",
+      "writer_home_copy_standards"
+    ]);
+
+    expect(criticHome.surfaces).toEqual([
+      {
+        id: "critic_home",
+        requiredSectionSlugs: ["read-first", "role-contract"],
+        surfaceClass: "role_home",
+        runtimePath: "generated/critic/AGENTS.md"
+      }
+    ]);
+    expect(criticHome.surfaceSections).toEqual([
+      {
+        id: "critic_home_read_first",
+        surfaceId: "critic_home",
+        stableSlug: "read-first",
+        title: "Read First"
+      },
+      {
+        id: "critic_home_role_contract",
+        surfaceId: "critic_home",
+        stableSlug: "role-contract",
+        title: "Role Contract"
+      }
+    ]);
+    expect(criticHome.generatedTargets?.map((target) => target.sectionId)).toEqual([
+      "critic_home_read_first",
+      "critic_home_role_contract"
+    ]);
+  });
 });

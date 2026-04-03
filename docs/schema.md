@@ -40,6 +40,13 @@ includes:
 - typed inline refs inside TypeScript-authored doctrine blocks
 - `surface.requiredSectionSlugs` for required canonical section families
 
+Template-backed section helpers now have one explicit optionality seam:
+
+- `DocumentTemplateSection.emissionPolicy`
+  - `always` (default): the section always lowers into the realized surface
+  - `whenConfigured`: the section lowers only when that destination provides
+    section options, or when an emitted child needs the section as a wrapper
+
 ## Core Node Families
 
 The minimum useful semantic families are:
@@ -223,6 +230,21 @@ section families that a realized surface must include.
 Template helpers may expose ergonomic `requiredSections` sugar keyed by local
 template section keys, but that sugar lowers to slug-based surface truth before
 normalization completes.
+
+### Sparse Template Section Emission
+
+Template helpers decide section existence before normalization finishes.
+
+That means:
+
+- omitted `whenConfigured` sections do not become `surface_section` nodes
+- omitted sections do not reach planning, rendering, or generated-target
+  provenance
+- bodyless wrapper parents may still emit when an emitted child needs the
+  parent heading
+- role-home fallback prose is reserved for canonical required sections such as
+  `read-first` and `role-contract`; optional sections need authored body
+  content or emitted child sections
 
 ### Explicit Non-Goals
 

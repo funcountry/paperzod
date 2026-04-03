@@ -61,7 +61,8 @@ const editorialVerticalSliceSeed = defineSetup({
     {
       id: "brief_researcher_home",
       surfaceClass: "role_home",
-      runtimePath: "paperclip_home/agents/brief_researcher/AGENTS.md"
+      runtimePath: "paperclip_home/agents/brief_researcher/AGENTS.md",
+      requiredSectionSlugs: ["read-first", "role-contract"]
     },
     {
       id: "editorial_readme",

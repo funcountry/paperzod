@@ -2,12 +2,15 @@ import type { AuthoredContentBlock, SurfaceClass } from "../core/defs.js";
 import type { LinkInput, SetupInput, SurfaceInput, SurfaceSectionInput } from "./builders.js";
 import type { SetupPart } from "./compose.js";
 
+export type DocumentSectionEmissionPolicy = "always" | "whenConfigured";
+
 export interface DocumentTemplateSection<TKey extends string = string> {
   key: TKey;
   id?: string | undefined;
   title: string;
   stableSlug?: string | undefined;
   parentKey?: TKey | undefined;
+  emissionPolicy?: DocumentSectionEmissionPolicy | undefined;
 }
 
 export interface DocumentSectionOptions {
@@ -77,6 +80,7 @@ type NormalizedSection<TKey extends string> = {
   title: string;
   stableSlug: string;
   parentKey?: TKey | undefined;
+  emissionPolicy: DocumentSectionEmissionPolicy;
 };
 
 function uniqueIds(values: readonly string[]): string[] {
@@ -158,7 +162,8 @@ function normalizeSections<TKey extends string>(
       ...(section.id ? { id: section.id } : {}),
       title: section.title,
       stableSlug,
-      ...(section.parentKey ? { parentKey: section.parentKey } : {})
+      ...(section.parentKey ? { parentKey: section.parentKey } : {}),
+      emissionPolicy: section.emissionPolicy ?? "always"
     };
   });
 
@@ -173,6 +178,36 @@ function normalizeSections<TKey extends string>(
   }
 
   return normalized;
+}
+
+function resolveEmittedSectionKeys<TKey extends string>(
+  sections: readonly NormalizedSection<TKey>[],
+  sectionOptions: Partial<Record<TKey, DocumentSectionOptions>> | undefined
+): Set<TKey> {
+  const sectionByKey = new Map(sections.map((section) => [section.key, section]));
+  const emittedKeys = new Set<TKey>();
+
+  const emitSectionWithAncestors = (sectionKey: TKey): void => {
+    let currentSection = sectionByKey.get(sectionKey);
+    while (currentSection) {
+      if (emittedKeys.has(currentSection.key)) {
+        break;
+      }
+
+      emittedKeys.add(currentSection.key);
+      currentSection = currentSection.parentKey ? sectionByKey.get(currentSection.parentKey) : undefined;
+    }
+  };
+
+  // Section existence must resolve before helper lowering so planning and markdown never guess differently.
+  for (const section of sections) {
+    const isConfigured = sectionOptions?.[section.key] !== undefined;
+    if (section.emissionPolicy === "always" || isConfigured) {
+      emitSectionWithAncestors(section.key);
+    }
+  }
+
+  return emittedKeys;
 }
 
 function createSurface<TKey extends string>(
@@ -224,8 +259,10 @@ function createDocumentPart<TKey extends string>(
     sectionDocumentsTo: (sectionKey: TKey) => string[];
   }
 ): SetupPart {
+  const emittedSectionKeys = resolveEmittedSectionKeys(sections, options.sections);
+  const emittedSections = sections.filter((section) => emittedSectionKeys.has(section.key));
   const sectionIdByKey = new Map(
-    sections.map((section) => [section.key, buildSectionId(options.surfaceId, section as NormalizedSection<string>)])
+    emittedSections.map((section) => [section.key, buildSectionId(options.surfaceId, section as NormalizedSection<string>)])
   );
   const resolvedSurfaceDocumentsTo = resolveTargetIds(options.surfaceDocumentsTo, defaults.surfaceDocumentsTo);
   const sharedSourceIds = uniqueIds([...(options.sourceIds ?? [])]);
@@ -240,7 +277,7 @@ function createDocumentPart<TKey extends string>(
   const generatedTargets: NonNullable<SetupInput["generatedTargets"]> = [];
 
   // Templates are just authoring sugar. They always lower into ordinary setup arrays.
-  for (const section of sections) {
+  for (const section of emittedSections) {
     const sectionId = sectionIdByKey.get(section.key);
     if (!sectionId) {
       throw new Error(`Template section "${String(section.key)}" did not resolve to a section id.`);

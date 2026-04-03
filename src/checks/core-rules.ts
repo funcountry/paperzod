@@ -32,6 +32,7 @@ const referenceSourceKinds = new Set<DoctrineNodeDef["kind"]>([
   "surface",
   "surface_section"
 ]);
+const roleHomeFallbackSectionSlugs = new Set(["read-first", "role-contract"]);
 
 function isArtifactLike(node: DoctrineNodeDef | undefined): node is ArtifactDef {
   return node?.kind === "artifact";
@@ -99,6 +100,10 @@ function isMapsToRuntimeSourceNode(node: DoctrineNodeDef | undefined): boolean {
 
 function isMapsToRuntimeTargetNode(node: DoctrineNodeDef | undefined): boolean {
   return (node?.kind === "artifact" && Boolean(node.runtimePath)) || node?.kind === "surface";
+}
+
+function canUseRoleHomeFallback(surface: Extract<DoctrineNodeDef, { kind: "surface" }>, stableSlug: string): boolean {
+  return surface.surfaceClass === "role_home" && roleHomeFallbackSectionSlugs.has(stableSlug) && Boolean(surface.requiredSectionSlugs?.includes(stableSlug));
 }
 
 function uniqueOverlap(left: readonly string[], right: readonly string[]): string[] {
@@ -937,6 +942,23 @@ export const surfaceAndReferenceSemanticsRule: CheckRule = {
             code: "check.surface_section.orphaned",
             message: `Surface section "${section.id}" is not connected to any owner, reader, checker, or documented doctrine unit.`,
             nodeId: section.id
+          })
+        );
+      }
+
+      if (
+        surface?.kind === "surface" &&
+        surface.surfaceClass === "role_home" &&
+        !section.body?.length &&
+        !hasChildren &&
+        !canUseRoleHomeFallback(surface, section.stableSlug)
+      ) {
+        diagnostics.push(
+          createCheckDiagnostic({
+            code: "check.role_home.empty_section",
+            message: `Role-home section "${section.id}" must have authored body content or emitted child sections. Only required "read-first" and "role-contract" sections may rely on fallback prose.`,
+            nodeId: section.id,
+            relatedIds: [surface.id]
           })
         );
       }

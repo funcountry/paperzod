@@ -37,6 +37,8 @@ The release gate should prove:
 4. rendered markdown is readable and stable
 5. emission and prune behavior are explicit and fail loudly when needed
 6. the public docs, examples, and tests stay aligned
+7. sparse optional template sections do not survive into plans or markdown for
+   destinations that never configured them
 
 ## Canonical Fixture Families
 
@@ -117,6 +119,16 @@ It proves:
 - required section contracts fail loudly in checks
 - generated markdown stays plain even though authored doctrine carried typed refs
 
+### sparse role-home sections
+
+A small render-plus-plan proof should show that:
+
+- `whenConfigured` child sections only emit for destinations that configure
+  them
+- wrapper parents can render as headings with children and no filler prose
+- empty optional role-home sections fail loudly in checks instead of borrowing
+  generic fallback text
+
 ## Suite Expectations
 
 The repo should keep meaningful coverage across:
@@ -146,6 +158,8 @@ includes:
 - `test/render/role-home-shared.test.ts`
 - `test/e2e/authored-content.test.ts`
 - `test/source/templates.test.ts`
+- `test/plan/primitives.test.ts`
+- `test/e2e/hierarchical-sections.test.ts`
 
 ## Required Commands
 

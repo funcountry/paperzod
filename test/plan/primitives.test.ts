@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { buildGraph } from "../../src/graph/index.js";
 import { buildCompilePlan } from "../../src/plan/index.js";
-import { normalizeSetup } from "../../src/source/index.js";
+import { composeSetup, defineRoleHomeTemplate, defineSetup, normalizeSetup, projectDocumentSections } from "../../src/source/index.js";
 import demoMinimalSeed from "../fixtures/source/demo-minimal.js";
 
 function requireGraph(input: unknown) {
@@ -233,6 +233,82 @@ describe("compile plan primitives", () => {
       "plan.generated_from_source_invalid",
       "plan.generated_from_target_invalid",
       "plan.section_missing_generation_provenance"
+    ]);
+  });
+
+  it("omits sparse optional role-home sections from the compile plan when a destination does not configure them", () => {
+    const roleHomeTemplate = defineRoleHomeTemplate({
+      id: "role_home_sparse_plan",
+      sections: [
+        { key: "readFirst", title: "Read First" },
+        { key: "roleContract", title: "Role Contract" },
+        { key: "standards", title: "Standards And Support", emissionPolicy: "whenConfigured" },
+        {
+          key: "copyStandards",
+          title: "Copy Standards",
+          parentKey: "standards",
+          emissionPolicy: "whenConfigured"
+        }
+      ] as const,
+      requiredSections: ["readFirst", "roleContract"] as const
+    });
+
+    const graph = requireGraph(
+      composeSetup(
+        defineSetup({
+          id: "plan_sparse_role_home",
+          name: "Plan Sparse Role Home",
+          roles: [
+            { id: "writer", name: "Writer", purpose: "Draft the issue." },
+            { id: "critic", name: "Critic", purpose: "Review the issue." }
+          ]
+        }),
+        ...projectDocumentSections(roleHomeTemplate, {
+          destinations: [
+            {
+              surfaceId: "writer_home",
+              runtimePath: "generated/writer/AGENTS.md",
+              roleId: "writer",
+              sections: {
+                copyStandards: {
+                  body: [{ kind: "paragraph", text: "Use the approved copy checklist before publishing." }]
+                }
+              }
+            },
+            {
+              surfaceId: "critic_home",
+              runtimePath: "generated/critic/AGENTS.md",
+              roleId: "critic"
+            }
+          ]
+        })
+      )
+    );
+
+    const result = buildCompilePlan(graph);
+
+    expect(result.success).toBe(true);
+    if (!result.success) {
+      return;
+    }
+
+    expect(result.data.documents.map((document) => ({
+      id: document.id,
+      sectionIds: document.sectionIds
+    }))).toEqual([
+      {
+        id: "writer_home",
+        sectionIds: [
+          "writer_home_read_first",
+          "writer_home_role_contract",
+          "writer_home_standards",
+          "writer_home_copy_standards"
+        ]
+      },
+      {
+        id: "critic_home",
+        sectionIds: ["critic_home_read_first", "critic_home_role_contract"]
+      }
     ]);
   });
 });

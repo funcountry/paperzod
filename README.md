@@ -41,6 +41,9 @@ Generated markdown is runtime output.
   stop being raw strings
 - required section contracts on generated surfaces so canonical document
   families fail loudly when omitted
+- sparse template-section emission with `emissionPolicy: "whenConfigured"` so
+  shared optional sections only emit where a destination actually configures
+  them
 - authored markdown fragments for the sections where humans should write the
   prose directly
 - graph validation for ownership, reads, routes, trust rules, gate checks, and
@@ -96,6 +99,12 @@ That means a setup author does not hand-maintain ten slightly different
 `AGENTS.md` files.
 They define one role-home shape, reuse it for each role, and let the compiler
 keep the generated output aligned.
+
+When one shared role-home template has sections that are not universal, mark
+those sections with `emissionPolicy: "whenConfigured"`.
+`paperzod` will omit them for destinations that never configure them, and it
+will auto-emit a parent wrapper section when one configured child needs that
+wrapper in the final markdown.
 
 ## Small Example
 

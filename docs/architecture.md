@@ -49,6 +49,11 @@ This is the plain canonical internal model:
   evidence contracts, typed inline refs, and surface-level required section
   contracts
 
+Helper-only section optionality resolves before this layer.
+`whenConfigured` template sections either lower into ordinary surface sections
+and generated targets or disappear entirely. There is no second normalized
+model for "maybe present later" sections.
+
 ### Resolved graph
 
 This is where ids, ownership, section lookups, and workflow indexes are linked.
@@ -72,6 +77,10 @@ This is the concrete runtime output plan:
 - rendered paths
 - source traces
 - ownership and prune metadata
+
+Only emitted sections reach this layer. Sparse template sections that were not
+configured never appear in document section ids, source traces, or planned
+paths.
 
 ### Rendered documents
 
@@ -133,6 +142,9 @@ typed refs, and required section contracts live in the normalized model now.
 That is why setup-local checks and output ownership live in the source module
 envelope, while owned prune behavior lives in planning and emit layers.
 
+It is also why section-emission policy lives in `src/source/**`: section
+existence is source truth, not a renderer guess.
+
 ## Typed Refs And Composition Boundary
 
 The typed-ref and composition slice follows one strict boundary:
@@ -145,6 +157,14 @@ The typed-ref and composition slice follows one strict boundary:
 - helper composition carries setup-level lookup truth through the same plain
   `SetupInput` path:
   registries by `id`, catalogs by `kind`
+
+The same boundary now applies to sparse template sections:
+
+- helper-layer emission decides whether a section exists
+- checks validate that emitted role-home sections are trustworthy
+- plan and render only operate on emitted sections
+- wrapper parents with children render as headings plus child sections, not as
+  generic fallback prose
 
 That keeps the public authoring surface small while still making the important
 drift classes compiler-visible.

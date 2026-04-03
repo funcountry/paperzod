@@ -43,7 +43,14 @@ describe("role-home and shared renderers", () => {
             boundaries: ["Do not skip the stop line.", "Do not rewrite shared doctrine."]
           }
         ],
-        surfaces: [{ id: "author_home", surfaceClass: "role_home", runtimePath: "generated/roles/author/AGENTS.md" }],
+        surfaces: [
+          {
+            id: "author_home",
+            surfaceClass: "role_home",
+            runtimePath: "generated/roles/author/AGENTS.md",
+            requiredSectionSlugs: ["read-first", "role-contract"]
+          }
+        ],
         surfaceSections: [
           { id: "read_first", surfaceId: "author_home", stableSlug: "read-first", title: "Read First" },
           { id: "role_contract", surfaceId: "author_home", stableSlug: "role-contract", title: "Role Contract" }
@@ -264,6 +271,98 @@ describe("role-home and shared renderers", () => {
       1. Start with \`paperclip_home/project_homes/editorial/shared/README.md\` for the shared doctrine entrypoint.
       2. Use \`paperclip_home/project_homes/editorial/shared/AUTHORITATIVE_EDITORIAL_WORKFLOW.md\` as the authoritative workflow owner for routing and handoff decisions.
       3. Use \`paperclip_home/agents/<role>/AGENTS.md\` for role-local guidance.
+      "
+    `);
+  });
+
+  it("renders wrapper parents without generic fallback and omits unsafe empty optional role-home sections", () => {
+    const markdown = renderDocument(
+      {
+        id: "render_sparse_role_home",
+        name: "Render Sparse Role Home",
+        roles: [
+          {
+            id: "author",
+            name: "Author",
+            purpose: "Ship the issue.",
+            boundaries: ["Do not improvise release criteria."]
+          }
+        ],
+        surfaces: [
+          {
+            id: "author_home",
+            surfaceClass: "role_home",
+            runtimePath: "generated/roles/author/AGENTS.md",
+            requiredSectionSlugs: ["read-first", "role-contract"]
+          }
+        ],
+        surfaceSections: [
+          { id: "read_first", surfaceId: "author_home", stableSlug: "read-first", title: "Read First" },
+          { id: "role_contract", surfaceId: "author_home", stableSlug: "role-contract", title: "Role Contract" },
+          { id: "standards", surfaceId: "author_home", stableSlug: "standards-and-support", title: "Standards And Support" },
+          {
+            id: "copy_standards",
+            surfaceId: "author_home",
+            stableSlug: "copy-standards",
+            title: "Copy Standards",
+            parentSectionId: "standards",
+            body: [{ kind: "paragraph", text: "Use the approved copy checklist before publishing." }]
+          },
+          {
+            id: "publish_followthrough",
+            surfaceId: "author_home",
+            stableSlug: "publish-and-followthrough",
+            title: "Publish And Followthrough"
+          }
+        ],
+        generatedTargets: [
+          { id: "read_first_target", path: "generated/roles/author/AGENTS.md", sourceIds: ["author"], sectionId: "read_first" },
+          { id: "role_contract_target", path: "generated/roles/author/AGENTS.md", sourceIds: ["author"], sectionId: "role_contract" },
+          { id: "standards_target", path: "generated/roles/author/AGENTS.md", sourceIds: ["author"], sectionId: "standards" },
+          { id: "copy_standards_target", path: "generated/roles/author/AGENTS.md", sourceIds: ["author"], sectionId: "copy_standards" },
+          {
+            id: "publish_followthrough_target",
+            path: "generated/roles/author/AGENTS.md",
+            sourceIds: ["author"],
+            sectionId: "publish_followthrough"
+          }
+        ],
+        links: [
+          { id: "author_home_documents_role", kind: "documents", from: "author_home", to: "author" },
+          { id: "read_first_documents_role", kind: "documents", from: "read_first", to: "author" },
+          { id: "role_contract_documents_role", kind: "documents", from: "role_contract", to: "author" },
+          { id: "standards_documents_role", kind: "documents", from: "standards", to: "author" },
+          { id: "copy_standards_documents_role", kind: "documents", from: "copy_standards", to: "author" },
+          { id: "publish_followthrough_documents_role", kind: "documents", from: "publish_followthrough", to: "author" }
+        ]
+      },
+      "author_home"
+    );
+
+    expect(markdown).toMatchInlineSnapshot(`
+      "# Author
+
+      Core job: Ship the issue.
+
+      <a id="read-first"></a>
+      ## Read First
+
+      Read these shared doctrine surfaces before taking a turn.
+
+      - No additional shared doctrine reads are declared yet.
+
+      <a id="role-contract"></a>
+      ## Role Contract
+
+      - Do not improvise release criteria.
+
+      <a id="standards-and-support"></a>
+      ## Standards And Support
+
+      <a id="copy-standards"></a>
+      ### Copy Standards
+
+      Use the approved copy checklist before publishing.
       "
     `);
   });

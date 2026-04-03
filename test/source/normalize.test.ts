@@ -175,6 +175,9 @@ describe("setup normalization", () => {
           {
             "id": "author_home",
             "kind": "surface",
+            "requiredSectionSlugs": [
+              "role-contract",
+            ],
             "runtimePath": "generated/roles/author/AGENTS.md",
             "setupId": "demo_minimal",
             "surfaceClass": "role_home",

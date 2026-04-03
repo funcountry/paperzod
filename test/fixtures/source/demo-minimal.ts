@@ -41,7 +41,12 @@ const demoMinimalSeed = defineSetup({
     { id: "packet_v1", name: "PACKET_V1.md", artifactClass: "required", runtimePath: "generated/PACKET_V1.md" }
   ],
   surfaces: [
-    { id: "author_home", surfaceClass: "role_home", runtimePath: "generated/roles/author/AGENTS.md" },
+    {
+      id: "author_home",
+      surfaceClass: "role_home",
+      runtimePath: "generated/roles/author/AGENTS.md",
+      requiredSectionSlugs: ["role-contract"]
+    },
     { id: "workflow_surface", surfaceClass: "workflow_owner", runtimePath: "generated/WORKFLOW.md" }
   ],
   surfaceSections: [
