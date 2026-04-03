@@ -17,6 +17,13 @@ describe("shared overrides normalization", () => {
 
     expect(alpha.data.roles[0]?.purpose).toBe("Reusable role.");
     expect(beta.data.roles[0]?.purpose).toBe("Reusable role with beta-local wording.");
+    expect(alpha.data.catalogs.find((catalog) => catalog.kind === "command")?.entries.map((entry) => entry.id)).toEqual([
+      "doctor",
+      "alpha_doctor"
+    ]);
+    expect(beta.data.catalogs.find((catalog) => catalog.kind === "env_var")?.entries[0]?.display).toBe("BETA_SHARED_API_URL");
+    expect(alpha.data.registries[0]?.entries.map((entry) => entry.id)).toEqual(["pass", "alpha_hold"]);
+    expect(beta.data.registries[0]?.entries.map((entry) => entry.id)).toEqual(["pass", "beta_revise"]);
     expect(beta.data.packetContracts[0]?.runtimeArtifactIds).toEqual(["packet_runtime"]);
     expect(beta.data.artifacts[1]?.compatibilityOnly).toBe(true);
     expect(beta.data.artifacts[1]?.runtimePath).toBe("generated/beta/PACKET.md");

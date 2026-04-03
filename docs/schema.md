@@ -34,7 +34,8 @@ The public typed runtime-law layer is still intentionally small. It now
 includes:
 
 - `setup.registries[]` for sanctioned vocab
-- `setup.catalogs[]` for sanctioned operational refs, starting with commands
+- `setup.catalogs[]` for sanctioned operational refs, currently `command` and
+  `env_var`
 - `artifact.evidence` for required support artifacts and required claims
 - typed inline refs inside TypeScript-authored doctrine blocks
 - `surface.requiredSectionSlugs` for required canonical section families
@@ -159,7 +160,7 @@ Each entry has:
 The public rule is:
 
 - use one small catalog-backed ref seam
-- prove it with commands first
+- prove it with one or two boring operational families first
 - add more families later only if the same shape stays clean
 
 ### Artifact Evidence
@@ -195,7 +196,11 @@ The supported v1 ref helpers are:
 - `surfaceRef(id)`
 - `sectionRef({ surfaceId, stableSlug })`
 - `roleRef(id)`
+- `reviewGateRef(id)`
+- `packetContractRef(id)`
+- `referenceRef(id)`
 - `commandRef(id)`
+- `envVarRef(id)`
 
 The supported v1 authored text fields are:
 
@@ -224,7 +229,7 @@ normalization completes.
 This slice does not add:
 
 - arbitrary markdown ref parsing
-- broad tool, env-var, or endpoint catalogs in the first cut
+- path or endpoint catalogs in this cut
 - packet-level evidence aggregation
 - a general markdown interpolation language
 
@@ -233,7 +238,8 @@ This slice does not add:
 - Stable ids belong to source truth, not to generated headings.
 - Generated anchors are derived from explicit section identity.
 - Helper sugar must preserve those stable ids.
-- Keyed overrides must replace by stable identity, not by array position.
+- Keyed overrides must replace by stable identity, not by array position:
+  registries by `id`, catalogs by `kind`.
 
 ## Fragment Rules
 

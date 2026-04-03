@@ -1,4 +1,4 @@
-import { applyKeyedOverrides, defineRole, defineSetup } from "../../../src/source/index.js";
+import { applyKeyedOverrides, command, defineRole, defineSetup, envVar } from "../../../src/source/index.js";
 
 export const sharedRole = defineRole({
   id: "shared_role",
@@ -9,6 +9,11 @@ export const sharedRole = defineRole({
 const sharedSetup = defineSetup({
   id: "shared_base",
   name: "Shared Base",
+  catalogs: [
+    { kind: "command", entries: [command("doctor", "./paperclip doctor")] },
+    { kind: "env_var", entries: [envVar("shared_api_url", "SHARED_API_URL")] }
+  ],
+  registries: [{ id: "publish_result", name: "Publish Result", entries: [{ id: "pass", label: "PASS" }] }],
   roles: [sharedRole],
   reviewGates: [
     {
@@ -56,6 +61,24 @@ const sharedSetup = defineSetup({
 
 export const alpha = defineSetup({
   ...applyKeyedOverrides(sharedSetup, {
+    catalogs: [
+      {
+        kind: "command",
+        replace: (current) => ({
+          ...current,
+          entries: [...current.entries, command("alpha_doctor", "./paperclip doctor --alpha")]
+        })
+      }
+    ],
+    registries: [
+      {
+        id: "publish_result",
+        replace: (current) => ({
+          ...current,
+          entries: [...current.entries, { id: "alpha_hold", label: "ALPHA_HOLD" }]
+        })
+      }
+    ],
     reviewGates: [
       {
         id: "shared_gate",
@@ -113,6 +136,24 @@ export const alpha = defineSetup({
 
 export const beta = defineSetup({
   ...applyKeyedOverrides(sharedSetup, {
+    catalogs: [
+      {
+        kind: "env_var",
+        replace: (current) => ({
+          ...current,
+          entries: [envVar("shared_api_url", "BETA_SHARED_API_URL")]
+        })
+      }
+    ],
+    registries: [
+      {
+        id: "publish_result",
+        replace: (current) => ({
+          ...current,
+          entries: [...current.entries, { id: "beta_revise", label: "BETA_REVISE" }]
+        })
+      }
+    ],
     roles: [
       {
         id: "shared_role",

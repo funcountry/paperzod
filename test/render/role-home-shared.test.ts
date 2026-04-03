@@ -155,8 +155,10 @@ describe("role-home and shared renderers", () => {
   it("renders typed doctrine refs before the doc AST boundary", () => {
     const markdown = renderDocument(typedDoctrineRefsSeed, "author_home");
 
-    expect(markdown).toContain("Read ACTION_AUTHORITY.md before asking Author to take final action.");
-    expect(markdown).toContain("Run `./paperclip status` before changing runtime docs.");
+    expect(markdown).toContain(
+      "Read ACTION_AUTHORITY.md, trust Publish Packet, pass Publish Gate, and ask Author to take final action with grounding from Runtime Reference."
+    );
+    expect(markdown).toContain("Run `./paperclip status` with `PAPERCLIP_API_URL` before changing runtime docs.");
     expect(markdown).toContain("- Owner Map");
     expect(markdown).toContain("Start with Owner Map.");
   });

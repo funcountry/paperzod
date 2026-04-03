@@ -2,6 +2,7 @@ import { expectTypeOf, test } from "vitest";
 
 import type { AuthoredContentBlock } from "../../src/core/defs.js";
 import {
+  applyKeyedOverrides,
   artifactRef,
   command,
   commandRef,
@@ -14,7 +15,12 @@ import {
   defineSharedEntrypointTemplate,
   defineSurface,
   defineWorkflowStep,
+  envVar,
+  envVarRef,
   loadFragments,
+  packetContractRef,
+  referenceRef,
+  reviewGateRef,
   roleRef,
   sectionRef,
   surfaceRef,
@@ -138,9 +144,15 @@ test("typed doctrine ref helpers stay type-safe inside authored TS blocks", () =
   const setup = defineSetup({
     id: "typed_refs",
     name: "Typed Refs",
-    catalogs: [{ kind: "command", entries: [command("paperclip_status", "./paperclip status")] }],
+    catalogs: [
+      { kind: "command", entries: [command("paperclip_status", "./paperclip status")] },
+      { kind: "env_var", entries: [envVar("paperclip_api_url", "PAPERCLIP_API_URL")] }
+    ],
     roles: [defineRole({ id: "author", name: "Author", purpose: "Author the doctrine." })],
+    reviewGates: [{ id: "publish_gate", name: "Publish Gate", purpose: "Check final publish readiness.", checkIds: ["publish_packet"] }],
+    packetContracts: [{ id: "publish_packet", name: "Publish Packet", conceptualArtifactIds: ["action_authority"] }],
     artifacts: [{ id: "action_authority", name: "ACTION_AUTHORITY.md", artifactClass: "required" }],
+    references: [{ id: "runtime_reference", referenceClass: "runtime_reference", name: "Runtime Reference" }],
     surfaces: [
       defineSurface({
         id: "author_home",
@@ -150,7 +162,19 @@ test("typed doctrine ref helpers stay type-safe inside authored TS blocks", () =
         preamble: [
           {
             kind: "paragraph",
-            text: ["Read ", artifactRef("action_authority"), " before asking ", roleRef("author"), " to act."]
+            text: [
+              "Read ",
+              artifactRef("action_authority"),
+              ", trust ",
+              packetContractRef("publish_packet"),
+              ", pass ",
+              reviewGateRef("publish_gate"),
+              ", and ask ",
+              roleRef("author"),
+              " to act with grounding from ",
+              referenceRef("runtime_reference"),
+              "."
+            ]
           },
           {
             kind: "paragraph",
@@ -158,7 +182,7 @@ test("typed doctrine ref helpers stay type-safe inside authored TS blocks", () =
           },
           {
             kind: "paragraph",
-            text: ["Run ", commandRef("paperclip_status"), " before changing runtime docs."]
+            text: ["Run ", commandRef("paperclip_status"), " with ", envVarRef("paperclip_api_url"), " before changing runtime docs."]
           }
         ]
       })
@@ -186,4 +210,38 @@ test("setup module authoring stays type-safe", () => {
 
   expectTypeOf(module.setup).toMatchTypeOf<SetupInput>();
   expectTypeOf(module.outputOwnership).toMatchTypeOf<readonly { kind: "root"; path: string }[]>();
+});
+
+test("lookup helper composition and overrides stay type-safe", () => {
+  const setup = applyKeyedOverrides(
+    composeSetup(
+      defineSetup({
+        id: "lookup_setup",
+        name: "Lookup Setup"
+      }),
+      {
+        catalogs: [{ kind: "env_var", entries: [{ id: "paperclip_api_url", display: "PAPERCLIP_API_URL" }] }],
+        registries: [{ id: "publish_result", name: "Publish Result", entries: [{ id: "pass", label: "PASS" }] }]
+      }
+    ),
+    {
+      catalogs: [
+        {
+          kind: "env_var",
+          replace: (current) => ({
+            ...current,
+            entries: [...current.entries, { id: "paperclip_token", display: "PAPERCLIP_TOKEN" }]
+          })
+        }
+      ],
+      registries: [
+        {
+          id: "publish_result",
+          replace: (current) => ({ ...current, entries: [...current.entries, { id: "fail", label: "FAIL" }] })
+        }
+      ]
+    }
+  );
+
+  expectTypeOf(setup).toMatchTypeOf<SetupInput>();
 });

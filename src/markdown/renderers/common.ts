@@ -135,7 +135,10 @@ function resolveInlineRefText(graph: DoctrineGraph, ref: AuthoredInlineRefDef): 
   switch (ref.refKind) {
     case "artifact":
     case "surface":
-    case "role": {
+    case "role":
+    case "review_gate":
+    case "packet_contract":
+    case "reference": {
       const node = graph.nodeById[ref.id];
       if (!node || node.kind !== ref.refKind) {
         throw new Error(`Expected typed ref to resolve to ${ref.refKind} "${ref.id}".`);
@@ -154,7 +157,8 @@ function resolveInlineRefText(graph: DoctrineGraph, ref: AuthoredInlineRefDef): 
       if (!entry) {
         throw new Error(`Expected typed ref to resolve to ${ref.catalogKind} "${ref.entryId}".`);
       }
-      return ref.catalogKind === "command" ? `\`${entry.display}\`` : entry.display;
+      // Render display comes from canonical truth; path or policy projections belong to later deliberate features.
+      return `\`${entry.display}\``;
     }
   }
 }

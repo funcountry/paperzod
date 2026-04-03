@@ -142,6 +142,9 @@ The typed-ref and composition slice follows one strict boundary:
 - fragments stay plain and string-only
 - required section contracts live on surfaces as stable slugs, not on helper
   keys or generated section ids
+- helper composition carries setup-level lookup truth through the same plain
+  `SetupInput` path:
+  registries by `id`, catalogs by `kind`
 
 That keeps the public authoring surface small while still making the important
 drift classes compiler-visible.

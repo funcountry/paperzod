@@ -551,12 +551,18 @@ describe("setup normalization", () => {
     ]);
   });
 
-  it("normalizes command catalogs, required section contracts, and typed inline refs without rendering them early", () => {
+  it("normalizes supported catalogs, required section contracts, and typed inline refs without rendering them early", () => {
     const result = normalizeSetup({
       id: "typed_refs_normalize",
       name: "Typed Refs Normalize",
-      catalogs: [{ kind: "command", entries: [{ id: "paperclip_status", display: "./paperclip status" }] }],
+      catalogs: [
+        { kind: "command", entries: [{ id: "paperclip_status", display: "./paperclip status" }] },
+        { kind: "env_var", entries: [{ id: "paperclip_api_url", display: "PAPERCLIP_API_URL" }] }
+      ],
       artifacts: [{ id: "action_authority", name: "ACTION_AUTHORITY.md", artifactClass: "required" }],
+      reviewGates: [{ id: "publish_gate", name: "Publish Gate", purpose: "Check final publish readiness.", checkIds: ["action_authority"] }],
+      packetContracts: [{ id: "publish_packet", name: "Publish Packet", conceptualArtifactIds: ["action_authority"] }],
+      references: [{ id: "reference_doc", referenceClass: "runtime_reference", name: "Runtime Reference" }],
       surfaces: [
         {
           id: "author_home",
@@ -566,7 +572,17 @@ describe("setup normalization", () => {
           preamble: [
             {
               kind: "paragraph",
-              text: ["Read ", { kind: "ref", refKind: "artifact", id: "action_authority" }, " before taking final action."]
+              text: [
+                "Read ",
+                { kind: "ref", refKind: "artifact", id: "action_authority" },
+                ", then pass ",
+                { kind: "ref", refKind: "packet_contract", id: "publish_packet" },
+                " through ",
+                { kind: "ref", refKind: "review_gate", id: "publish_gate" },
+                " with grounding from ",
+                { kind: "ref", refKind: "reference", id: "reference_doc" },
+                "."
+              ]
             }
           ]
         }
@@ -580,7 +596,13 @@ describe("setup normalization", () => {
           body: [
             {
               kind: "paragraph",
-              text: ["Run ", { kind: "ref", refKind: "catalog_entry", catalogKind: "command", entryId: "paperclip_status" }, " first."]
+              text: [
+                "Run ",
+                { kind: "ref", refKind: "catalog_entry", catalogKind: "command", entryId: "paperclip_status" },
+                " with ",
+                { kind: "ref", refKind: "catalog_entry", catalogKind: "env_var", entryId: "paperclip_api_url" },
+                " first."
+              ]
             }
           ]
         }
@@ -592,15 +614,34 @@ describe("setup normalization", () => {
       return;
     }
 
-    expect(result.data.catalogs).toEqual([{ kind: "command", entries: [{ id: "paperclip_status", display: "./paperclip status" }] }]);
+    expect(result.data.catalogs).toEqual([
+      { kind: "command", entries: [{ id: "paperclip_status", display: "./paperclip status" }] },
+      { kind: "env_var", entries: [{ id: "paperclip_api_url", display: "PAPERCLIP_API_URL" }] }
+    ]);
     expect(result.data.surfaces[0]?.requiredSectionSlugs).toEqual(["read-first", "role-contract"]);
     expect(result.data.surfaces[0]?.preamble?.[0]).toEqual({
       kind: "paragraph",
-      text: ["Read ", { kind: "ref", refKind: "artifact", id: "action_authority" }, " before taking final action."]
+      text: [
+        "Read ",
+        { kind: "ref", refKind: "artifact", id: "action_authority" },
+        ", then pass ",
+        { kind: "ref", refKind: "packet_contract", id: "publish_packet" },
+        " through ",
+        { kind: "ref", refKind: "review_gate", id: "publish_gate" },
+        " with grounding from ",
+        { kind: "ref", refKind: "reference", id: "reference_doc" },
+        "."
+      ]
     });
     expect(result.data.surfaceSections[0]?.body?.[0]).toEqual({
       kind: "paragraph",
-      text: ["Run ", { kind: "ref", refKind: "catalog_entry", catalogKind: "command", entryId: "paperclip_status" }, " first."]
+      text: [
+        "Run ",
+        { kind: "ref", refKind: "catalog_entry", catalogKind: "command", entryId: "paperclip_status" },
+        " with ",
+        { kind: "ref", refKind: "catalog_entry", catalogKind: "env_var", entryId: "paperclip_api_url" },
+        " first."
+      ]
     });
   });
 });

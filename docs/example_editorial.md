@@ -125,7 +125,8 @@ shape, but it is still not the smallest place to learn typed doctrine refs.
 The new framework-first features live in plain setup truth:
 
 - `setup.registries[]` for sanctioned runtime vocab
-- `setup.catalogs[]` for sanctioned operational refs, starting with commands
+- `setup.catalogs[]` for sanctioned operational refs such as commands and env
+  vars
 - `artifact.evidence` for required support artifacts and required claims
 - typed refs in TypeScript-authored doctrine blocks
 - `surface.requiredSectionSlugs` for required section families

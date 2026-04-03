@@ -21,14 +21,20 @@ function runChecksFor(input: unknown) {
 }
 
 describe("typed inline ref checks", () => {
-  it("accepts valid graph-backed and command-backed refs", () => {
+  it("accepts valid graph-backed and catalog-backed refs", () => {
     expect(
       runChecksFor({
         id: "typed_ref_valid",
         name: "Typed Ref Valid",
-        catalogs: [{ kind: "command", entries: [{ id: "paperclip_status", display: "./paperclip status" }] }],
+        catalogs: [
+          { kind: "command", entries: [{ id: "paperclip_status", display: "./paperclip status" }] },
+          { kind: "env_var", entries: [{ id: "paperclip_api_url", display: "PAPERCLIP_API_URL" }] }
+        ],
         roles: [{ id: "author", name: "Author", purpose: "Author the doctrine." }],
+        reviewGates: [{ id: "publish_gate", name: "Publish Gate", purpose: "Check final publish readiness.", checkIds: ["publish_packet"] }],
+        packetContracts: [{ id: "publish_packet", name: "Publish Packet", conceptualArtifactIds: ["action_authority"] }],
         artifacts: [{ id: "action_authority", name: "ACTION_AUTHORITY.md", artifactClass: "required" }],
+        references: [{ id: "reference_doc", referenceClass: "runtime_reference", name: "Runtime Reference" }],
         surfaces: [
           {
             id: "author_home",
@@ -37,7 +43,17 @@ describe("typed inline ref checks", () => {
             preamble: [
               {
                 kind: "paragraph",
-                text: ["Read ", { kind: "ref", refKind: "artifact", id: "action_authority" }, " before acting."]
+                text: [
+                  "Read ",
+                  { kind: "ref", refKind: "artifact", id: "action_authority" },
+                  ", trust ",
+                  { kind: "ref", refKind: "packet_contract", id: "publish_packet" },
+                  ", pass ",
+                  { kind: "ref", refKind: "review_gate", id: "publish_gate" },
+                  ", and ground with ",
+                  { kind: "ref", refKind: "reference", id: "reference_doc" },
+                  "."
+                ]
               }
             ]
           },
@@ -59,8 +75,10 @@ describe("typed inline ref checks", () => {
                 text: [
                   "Then open ",
                   { kind: "ref", refKind: "section", surfaceId: "workflow_surface", stableSlug: "owner-map" },
-                  " and run ",
+                  ", run ",
                   { kind: "ref", refKind: "catalog_entry", catalogKind: "command", entryId: "paperclip_status" },
+                  ", and expect ",
+                  { kind: "ref", refKind: "catalog_entry", catalogKind: "env_var", entryId: "paperclip_api_url" },
                   "."
                 ]
               }
@@ -83,6 +101,7 @@ describe("typed inline ref checks", () => {
       name: "Typed Ref Conflicts",
       roles: [{ id: "author", name: "Author", purpose: "Author the doctrine." }],
       artifacts: [{ id: "action_authority", name: "ACTION_AUTHORITY.md", artifactClass: "required" }],
+      packetContracts: [{ id: "publish_packet", name: "Publish Packet", conceptualArtifactIds: ["action_authority"] }],
       surfaces: [
         {
           id: "author_home",
@@ -90,10 +109,10 @@ describe("typed inline ref checks", () => {
           runtimePath: "generated/author/AGENTS.md",
           preamble: [
             { kind: "paragraph", text: ["Read ", { kind: "ref", refKind: "artifact", id: "missing_artifact" }, "."] },
-            { kind: "paragraph", text: ["Open ", { kind: "ref", refKind: "surface", id: "action_authority" }, "."] },
+            { kind: "paragraph", text: ["Open ", { kind: "ref", refKind: "review_gate", id: "action_authority" }, "."] },
             {
               kind: "paragraph",
-              text: ["Use ", { kind: "ref", refKind: "catalog_entry", catalogKind: "command", entryId: "paperclip_status" }, "."]
+              text: ["Use ", { kind: "ref", refKind: "catalog_entry", catalogKind: "env_var", entryId: "paperclip_api_url" }, "."]
             }
           ]
         }
@@ -124,7 +143,7 @@ describe("typed inline ref checks", () => {
     ]);
   });
 
-  it("rejects missing command entries and duplicate catalog entries", () => {
+  it("rejects missing catalog entries and duplicate catalog entries", () => {
     const diagnostics = runChecksFor({
       id: "typed_ref_catalog_conflicts",
       name: "Typed Ref Catalog Conflicts",
@@ -134,6 +153,13 @@ describe("typed inline ref checks", () => {
           entries: [
             { id: "paperclip_status", display: "./paperclip status" },
             { id: "paperclip_status", display: "./paperclip status --verbose" }
+          ]
+        },
+        {
+          kind: "env_var",
+          entries: [
+            { id: "paperclip_api_url", display: "PAPERCLIP_API_URL" },
+            { id: "paperclip_api_url", display: "PAPERCLIP_API_HOST" }
           ]
         }
       ],
@@ -147,6 +173,10 @@ describe("typed inline ref checks", () => {
             {
               kind: "paragraph",
               text: ["Run ", { kind: "ref", refKind: "catalog_entry", catalogKind: "command", entryId: "missing_command" }, "."]
+            },
+            {
+              kind: "paragraph",
+              text: ["Expect ", { kind: "ref", refKind: "catalog_entry", catalogKind: "env_var", entryId: "missing_env_var" }, "."]
             }
           ]
         }
@@ -155,6 +185,8 @@ describe("typed inline ref checks", () => {
 
     expect(diagnostics.map((diagnostic) => diagnostic.code)).toEqual([
       "check.catalog.duplicate_entry_id",
+      "check.catalog.duplicate_entry_id",
+      "check.inline_ref.missing_catalog_entry",
       "check.inline_ref.missing_catalog_entry"
     ]);
   });

@@ -1,11 +1,30 @@
-import { artifactRef, command, commandRef, defineSetup, roleRef, sectionRef, surfaceRef } from "../../../src/source/index.js";
+import {
+  artifactRef,
+  command,
+  commandRef,
+  defineSetup,
+  envVar,
+  envVarRef,
+  packetContractRef,
+  referenceRef,
+  reviewGateRef,
+  roleRef,
+  sectionRef,
+  surfaceRef
+} from "../../../src/source/index.js";
 
 const typedDoctrineRefsSeed = defineSetup({
   id: "typed_doctrine_refs",
   name: "Typed Doctrine Refs",
-  catalogs: [{ kind: "command", entries: [command("paperclip_status", "./paperclip status")] }],
+  catalogs: [
+    { kind: "command", entries: [command("paperclip_status", "./paperclip status")] },
+    { kind: "env_var", entries: [envVar("paperclip_api_url", "PAPERCLIP_API_URL")] }
+  ],
   roles: [{ id: "author", name: "Author", purpose: "Author the runtime doctrine honestly." }],
+  reviewGates: [{ id: "publish_gate", name: "Publish Gate", purpose: "Check final publish readiness.", checkIds: ["publish_packet"] }],
+  packetContracts: [{ id: "publish_packet", name: "Publish Packet", conceptualArtifactIds: ["action_authority"] }],
   artifacts: [{ id: "action_authority", name: "ACTION_AUTHORITY.md", artifactClass: "required" }],
+  references: [{ id: "runtime_reference", referenceClass: "runtime_reference", name: "Runtime Reference" }],
   surfaces: [
     {
       id: "author_home",
@@ -14,12 +33,24 @@ const typedDoctrineRefsSeed = defineSetup({
       preamble: [
         {
           kind: "paragraph",
-          text: ["Read ", artifactRef("action_authority"), " before asking ", roleRef("author"), " to take final action."]
+          text: [
+            "Read ",
+            artifactRef("action_authority"),
+            ", trust ",
+            packetContractRef("publish_packet"),
+            ", pass ",
+            reviewGateRef("publish_gate"),
+            ", and ask ",
+            roleRef("author"),
+            " to take final action with grounding from ",
+            referenceRef("runtime_reference"),
+            "."
+          ]
         },
         {
           kind: "rule_list",
           items: [
-            ["Run ", commandRef("paperclip_status"), " before changing runtime docs."],
+            ["Run ", commandRef("paperclip_status"), " with ", envVarRef("paperclip_api_url"), " before changing runtime docs."],
             {
               text: ["Then open ", sectionRef({ surfaceId: "workflow_surface", stableSlug: "owner-map" }), "."],
               children: [["If routing is still unclear, read ", surfaceRef("workflow_surface"), " end to end."]]

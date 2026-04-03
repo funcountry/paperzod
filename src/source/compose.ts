@@ -1,6 +1,8 @@
 import type { SetupInput } from "./builders.js";
 
 const setupCollectionKeys = [
+  "catalogs",
+  "registries",
   "roles",
   "workflowSteps",
   "reviewGates",

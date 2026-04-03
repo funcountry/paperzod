@@ -172,7 +172,10 @@ function validateInlineRef(graph: DoctrineGraph, ownerNodeId: string, ref: Autho
   switch (ref.refKind) {
     case "artifact":
     case "surface":
-    case "role": {
+    case "role":
+    case "review_gate":
+    case "packet_contract":
+    case "reference": {
       const node = graph.nodeById[ref.id];
       if (!node) {
         return [

@@ -257,7 +257,7 @@ describe("source node schemas", () => {
     ).toBe(true);
   });
 
-  it("validates inline text refs and command catalogs", () => {
+  it("validates inline text refs and supported catalog kinds", () => {
     expect(
       inlineTextSchema.safeParse([
         "Read ",
@@ -265,10 +265,19 @@ describe("source node schemas", () => {
         " before taking final action."
       ]).success
     ).toBe(true);
+    expect(inlineTextSchema.safeParse([{ kind: "ref", refKind: "review_gate", id: "publish_gate" }]).success).toBe(true);
+    expect(inlineTextSchema.safeParse([{ kind: "ref", refKind: "packet_contract", id: "publish_packet" }]).success).toBe(true);
+    expect(inlineTextSchema.safeParse([{ kind: "ref", refKind: "reference", id: "reference_doc" }]).success).toBe(true);
     expect(
       inlineTextSchema.safeParse([
         "Run ",
         { kind: "ref", refKind: "catalog_entry", catalogKind: "command", entryId: "paperclip_status" }
+      ]).success
+    ).toBe(true);
+    expect(
+      inlineTextSchema.safeParse([
+        "Expect ",
+        { kind: "ref", refKind: "catalog_entry", catalogKind: "env_var", entryId: "paperclip_api_url" }
       ]).success
     ).toBe(true);
     expect(
@@ -278,5 +287,6 @@ describe("source node schemas", () => {
       inlineTextSchema.safeParse([{ kind: "ref", refKind: "section", surfaceId: "workflow_surface", stableSlug: "Read First" }]).success
     ).toBe(false);
     expect(catalogSchema.safeParse({ kind: "command", entries: [{ id: "paperclip_status", display: "./paperclip status" }] }).success).toBe(true);
+    expect(catalogSchema.safeParse({ kind: "env_var", entries: [{ id: "paperclip_api_url", display: "PAPERCLIP_API_URL" }] }).success).toBe(true);
   });
 });

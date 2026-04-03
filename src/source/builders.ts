@@ -192,6 +192,30 @@ export function roleRef(id: string): AuthoredInlineRefInput {
   };
 }
 
+export function reviewGateRef(id: string): AuthoredInlineRefInput {
+  return {
+    kind: "ref",
+    refKind: "review_gate",
+    id
+  };
+}
+
+export function packetContractRef(id: string): AuthoredInlineRefInput {
+  return {
+    kind: "ref",
+    refKind: "packet_contract",
+    id
+  };
+}
+
+export function referenceRef(id: string): AuthoredInlineRefInput {
+  return {
+    kind: "ref",
+    refKind: "reference",
+    id
+  };
+}
+
 export function sectionRef(input: { surfaceId: string; stableSlug: string }): AuthoredInlineRefInput {
   return {
     kind: "ref",
@@ -210,7 +234,24 @@ export function commandRef(id: string): AuthoredInlineRefInput {
   };
 }
 
+export function envVarRef(id: string): AuthoredInlineRefInput {
+  return {
+    kind: "ref",
+    refKind: "catalog_entry",
+    catalogKind: "env_var",
+    entryId: id
+  };
+}
+
 export function command(id: string, display: string, description?: string): CatalogEntryInput {
+  return {
+    id,
+    display,
+    ...(description !== undefined ? { description } : {})
+  };
+}
+
+export function envVar(id: string, display: string, description?: string): CatalogEntryInput {
   return {
     id,
     display,

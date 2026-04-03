@@ -30,7 +30,7 @@ export type ReferenceClass =
   | "external_reference";
 
 export type ArtifactClass = "required" | "conditional" | "support" | "reference" | "legacy";
-export type CatalogKind = "command";
+export type CatalogKind = "command" | "env_var";
 
 export interface CatalogEntryDef {
   id: string;
@@ -89,7 +89,7 @@ export type LinkKind =
 
 export interface AuthoredNodeInlineRefDef {
   kind: "ref";
-  refKind: "artifact" | "surface" | "role";
+  refKind: "artifact" | "surface" | "role" | "review_gate" | "packet_contract" | "reference";
   id: string;
 }
 

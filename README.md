@@ -279,6 +279,11 @@ import {
   command,
   commandRef,
   defineSetup,
+  envVar,
+  envVarRef,
+  packetContractRef,
+  referenceRef,
+  reviewGateRef,
   sectionRef,
 } from "paperzod";
 
@@ -287,7 +292,11 @@ defineSetup({
   name: "Typed Runtime Law",
   catalogs: [
     { kind: "command", entries: [command("paperclip_status", "./paperclip status")] },
+    { kind: "env_var", entries: [envVar("paperclip_api_url", "PAPERCLIP_API_URL")] },
   ],
+  reviewGates: [{ id: "publish_gate", name: "Publish Gate", purpose: "Check final publish readiness.", checkIds: ["publish_packet"] }],
+  packetContracts: [{ id: "publish_packet", name: "Publish Packet", conceptualArtifactIds: ["action_authority"] }],
+  references: [{ id: "runtime_reference", referenceClass: "runtime_reference", name: "Runtime Reference" }],
   surfaces: [
     {
       id: "author_home",
@@ -299,8 +308,16 @@ defineSetup({
           text: [
             "Read ",
             artifactRef("action_authority"),
-            " and then run ",
+            ", trust ",
+            packetContractRef("publish_packet"),
+            ", pass ",
+            reviewGateRef("publish_gate"),
+            ", and run ",
             commandRef("paperclip_status"),
+            " with ",
+            envVarRef("paperclip_api_url"),
+            " using guidance from ",
+            referenceRef("runtime_reference"),
             ".",
           ],
         },
@@ -383,7 +400,8 @@ That surface stays intentionally small:
 
 - registries are setup-level lookup truth, not graph nodes
 - evidence stays attached to artifacts, not packets or prose fragments
-- inline prose refs, tool catalogs, and endpoint catalogs are still deferred
+- path and endpoint catalogs are still deferred
+- typed prose refs stay in TypeScript-authored blocks, not fragments
 
 For the smallest end-to-end walkthrough of that surface, see:
 
@@ -405,8 +423,9 @@ used by the canonical proving setups:
   `coordination`.
 - `projectDocumentSections(...)` lowers one shared section catalog into many
   ordinary document parts without widening the semantic model.
-- `applyKeyedOverrides(...)` gives setup authors an explicit replace-by-id
-  helper while keeping `composeSetup(...)` append-only.
+- `applyKeyedOverrides(...)` gives setup authors an explicit stable-selector
+  helper while keeping `composeSetup(...)` append-only:
+  registries are selected by `id`, catalogs by `kind`.
 - `loadFragments(new URL("./fragments/.../", import.meta.url), spec)` loads
   repo-local markdown fragments from an explicit base directory.
 - The fragment loader currently supports paragraphs, nested ordered or

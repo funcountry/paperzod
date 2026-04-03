@@ -157,4 +157,6 @@ The project meets this requirements doc when all of the following are true:
 6. Setup-local checks, owned output scopes, shared projection, keyed overrides,
    and narrow markdown fragments all work without widening the normalized node
    model.
+   `applyKeyedOverrides(...)` remains collection-aware and stable-selector based:
+   registries by `id`, catalogs by `kind`.
 7. The repo-level docs, examples, and tests all tell the same public story.

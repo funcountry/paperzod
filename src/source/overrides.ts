@@ -1,7 +1,8 @@
 import type { SetupInput } from "./builders.js";
 import { composeSetup } from "./compose.js";
 
-const setupCollectionKeys = [
+const idOverrideCollectionKeys = [
+  "registries",
   "roles",
   "workflowSteps",
   "reviewGates",
@@ -14,18 +15,30 @@ const setupCollectionKeys = [
   "links"
 ] as const satisfies readonly (keyof Omit<SetupInput, "id" | "name" | "description">)[];
 
-type SetupCollectionKey = (typeof setupCollectionKeys)[number];
-type CollectionItem<TKey extends SetupCollectionKey> = NonNullable<SetupInput[TKey]>[number];
-type ReplacementValue<T extends { id: string }> = T | ((current: T) => T);
+const kindOverrideCollectionKeys = ["catalogs"] as const satisfies readonly (keyof Omit<SetupInput, "id" | "name" | "description">)[];
+
+type IdOverrideCollectionKey = (typeof idOverrideCollectionKeys)[number];
+type KindOverrideCollectionKey = (typeof kindOverrideCollectionKeys)[number];
+type IdCollectionItem<TKey extends IdOverrideCollectionKey> = NonNullable<SetupInput[TKey]>[number];
+type KindCollectionItem<TKey extends KindOverrideCollectionKey> = NonNullable<SetupInput[TKey]>[number];
+type ReplacementValue<T> = T | ((current: T) => T);
 
 export interface KeyedOverride<T extends { id: string }> {
   id: T["id"];
   replace: ReplacementValue<T>;
 }
 
+export interface KindOverride<T extends { kind: string }> {
+  kind: T["kind"];
+  replace: ReplacementValue<T>;
+}
+
 export type SetupOverrides = Partial<{
-  [TKey in SetupCollectionKey]: readonly KeyedOverride<CollectionItem<TKey>>[] | undefined;
-}>;
+  [TKey in IdOverrideCollectionKey]: readonly KeyedOverride<IdCollectionItem<TKey>>[] | undefined;
+}> &
+  Partial<{
+    [TKey in KindOverrideCollectionKey]: readonly KindOverride<KindCollectionItem<TKey>>[] | undefined;
+  }>;
 
 function duplicateIds(values: readonly string[]): string[] {
   const seen = new Set<string>();
@@ -43,12 +56,12 @@ function duplicateIds(values: readonly string[]): string[] {
   return [...duplicates].sort();
 }
 
-function applyCollectionOverrides<TKey extends SetupCollectionKey>(
+function applyIdCollectionOverrides<TKey extends IdOverrideCollectionKey>(
   setup: SetupInput,
   key: TKey,
-  overrides: readonly KeyedOverride<CollectionItem<TKey>>[]
+  overrides: readonly KeyedOverride<IdCollectionItem<TKey>>[]
 ): void {
-  const collection = setup[key] as CollectionItem<TKey>[] | undefined;
+  const collection = setup[key] as IdCollectionItem<TKey>[] | undefined;
   if (!collection || collection.length === 0) {
     throw new Error(`Override collection "${key}" is empty, so keyed replacement is not available.`);
   }
@@ -76,7 +89,7 @@ function applyCollectionOverrides<TKey extends SetupCollectionKey>(
 
     const next =
       typeof override.replace === "function"
-        ? override.replace(structuredClone(current) as CollectionItem<TKey>)
+        ? override.replace(structuredClone(current) as IdCollectionItem<TKey>)
         : override.replace;
 
     if (next.id !== override.id) {
@@ -87,21 +100,79 @@ function applyCollectionOverrides<TKey extends SetupCollectionKey>(
   }
 }
 
-function applyOverridesForKey<TKey extends SetupCollectionKey>(setup: SetupInput, overrides: SetupOverrides, key: TKey): void {
-  const collectionOverrides = overrides[key];
+function applyKindCollectionOverrides<TKey extends KindOverrideCollectionKey>(
+  setup: SetupInput,
+  key: TKey,
+  overrides: readonly KindOverride<KindCollectionItem<TKey>>[]
+): void {
+  const collection = setup[key] as KindCollectionItem<TKey>[] | undefined;
+  if (!collection || collection.length === 0) {
+    throw new Error(`Override collection "${key}" is empty, so keyed replacement is not available.`);
+  }
+
+  const ambiguousKinds = duplicateIds(collection.map((item) => item.kind));
+  if (ambiguousKinds.length > 0) {
+    throw new Error(`Override collection "${key}" contains duplicate kinds: ${ambiguousKinds.join(", ")}.`);
+  }
+
+  const duplicateOverrideKinds = duplicateIds(overrides.map((override) => override.kind));
+  if (duplicateOverrideKinds.length > 0) {
+    throw new Error(`Override collection "${key}" reuses override kinds: ${duplicateOverrideKinds.join(", ")}.`);
+  }
+
+  for (const override of overrides) {
+    const index = collection.findIndex((item) => item.kind === override.kind);
+    if (index === -1) {
+      throw new Error(`Override collection "${key}" references missing kind "${override.kind}".`);
+    }
+
+    const current = collection[index];
+    if (!current) {
+      throw new Error(`Override collection "${key}" could not resolve kind "${override.kind}".`);
+    }
+
+    const next =
+      typeof override.replace === "function"
+        ? override.replace(structuredClone(current) as KindCollectionItem<TKey>)
+        : override.replace;
+
+    if (next.kind !== override.kind) {
+      throw new Error(`Override collection "${key}" may not change stable kind "${override.kind}".`);
+    }
+
+    collection[index] = next;
+  }
+}
+
+function applyIdOverridesForKey<TKey extends IdOverrideCollectionKey>(setup: SetupInput, overrides: SetupOverrides, key: TKey): void {
+  const collectionOverrides = overrides[key] as readonly KeyedOverride<IdCollectionItem<TKey>>[] | undefined;
   if (!collectionOverrides || collectionOverrides.length === 0) {
     return;
   }
 
-  applyCollectionOverrides(setup, key, collectionOverrides);
+  applyIdCollectionOverrides(setup, key, collectionOverrides);
+}
+
+function applyKindOverridesForKey<TKey extends KindOverrideCollectionKey>(setup: SetupInput, overrides: SetupOverrides, key: TKey): void {
+  const collectionOverrides = overrides[key] as readonly KindOverride<KindCollectionItem<TKey>>[] | undefined;
+  if (!collectionOverrides || collectionOverrides.length === 0) {
+    return;
+  }
+
+  // Catalog identity is compiler-owned by `kind`, so the override helper must stay equally plain.
+  applyKindCollectionOverrides(setup, key, collectionOverrides);
 }
 
 export function applyKeyedOverrides(baseSetup: SetupInput, overrides: SetupOverrides): SetupInput {
-  // Stable ids are the only legal selector surface for override behavior.
+  // Stable selectors are the only legal override surface for setup composition.
   const result = composeSetup(baseSetup);
 
-  for (const key of setupCollectionKeys) {
-    applyOverridesForKey(result, overrides, key);
+  for (const key of idOverrideCollectionKeys) {
+    applyIdOverridesForKey(result, overrides, key);
+  }
+
+  for (const key of kindOverrideCollectionKeys) {
+    applyKindOverridesForKey(result, overrides, key);
   }
 
   return result;

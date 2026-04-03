@@ -79,15 +79,54 @@ describe("composeSetup", () => {
     ]);
   });
 
+  it("includes catalogs and registries when setup parts contribute lookup truth", () => {
+    const baseSetup: SetupInput = {
+      id: "lookup_base",
+      name: "Lookup Base",
+      catalogs: [{ kind: "command", entries: [{ id: "status", display: "./paperclip status" }] }]
+    };
+
+    const lookupPart: SetupPart = {
+      catalogs: [{ kind: "command", entries: [{ id: "refresh", display: "./paperclip refresh" }] }],
+      registries: [{ id: "publish_result", name: "Publish Result", entries: [{ id: "pass", label: "PASS" }] }]
+    };
+
+    const composed = composeSetup(baseSetup, lookupPart);
+
+    expect(composed.catalogs).toEqual([
+      { kind: "command", entries: [{ id: "status", display: "./paperclip status" }] },
+      { kind: "command", entries: [{ id: "refresh", display: "./paperclip refresh" }] }
+    ]);
+    expect(composed.registries).toEqual([{ id: "publish_result", name: "Publish Result", entries: [{ id: "pass", label: "PASS" }] }]);
+    expect(composed.catalogs).not.toBe(baseSetup.catalogs);
+  });
+
   it("applies explicit keyed overrides without mutating the base setup", () => {
     const baseSetup: SetupInput = {
       id: "shared",
       name: "Shared",
+      catalogs: [{ kind: "command", entries: [{ id: "paperclip_api_url", display: "./paperclip api-url" }] }],
+      registries: [{ id: "publish_result", name: "Publish Result", entries: [{ id: "pass", label: "PASS" }] }],
       roles: [{ id: "writer", name: "Writer", purpose: "Write the draft." }],
       surfaces: [{ id: "writer_home", surfaceClass: "role_home", runtimePath: "generated/writer/AGENTS.md" }]
     };
 
     const overridden = applyKeyedOverrides(baseSetup, {
+      catalogs: [
+        {
+          kind: "command",
+          replace: (current) => ({
+            ...current,
+            entries: [...current.entries, { id: "paperclip_token", display: "./paperclip token" }]
+          })
+        }
+      ],
+      registries: [
+        {
+          id: "publish_result",
+          replace: (current) => ({ ...current, entries: [...current.entries, { id: "fail", label: "FAIL" }] })
+        }
+      ],
       roles: [
         {
           id: "writer",
@@ -105,12 +144,33 @@ describe("composeSetup", () => {
     expect(overridden).toEqual({
       id: "shared",
       name: "Shared",
+      catalogs: [
+        {
+          kind: "command",
+          entries: [
+            { id: "paperclip_api_url", display: "./paperclip api-url" },
+            { id: "paperclip_token", display: "./paperclip token" }
+          ]
+        }
+      ],
+      registries: [
+        {
+          id: "publish_result",
+          name: "Publish Result",
+          entries: [
+            { id: "pass", label: "PASS" },
+            { id: "fail", label: "FAIL" }
+          ]
+        }
+      ],
       roles: [{ id: "writer", name: "Writer", purpose: "Write the draft with local constraints." }],
       surfaces: [{ id: "writer_home", surfaceClass: "role_home", runtimePath: "generated/local/writer/AGENTS.md" }]
     });
     expect(baseSetup).toEqual({
       id: "shared",
       name: "Shared",
+      catalogs: [{ kind: "command", entries: [{ id: "paperclip_api_url", display: "./paperclip api-url" }] }],
+      registries: [{ id: "publish_result", name: "Publish Result", entries: [{ id: "pass", label: "PASS" }] }],
       roles: [{ id: "writer", name: "Writer", purpose: "Write the draft." }],
       surfaces: [{ id: "writer_home", surfaceClass: "role_home", runtimePath: "generated/writer/AGENTS.md" }]
     });
@@ -120,6 +180,8 @@ describe("composeSetup", () => {
     const baseSetup: SetupInput = {
       id: "shared",
       name: "Shared",
+      catalogs: [{ kind: "command", entries: [{ id: "paperclip_api_url", display: "./paperclip api-url" }] }],
+      registries: [{ id: "publish_result", name: "Publish Result", entries: [{ id: "pass", label: "PASS" }] }],
       roles: [{ id: "writer", name: "Writer", purpose: "Write the draft." }]
     };
 
@@ -143,5 +205,26 @@ describe("composeSetup", () => {
         roles: [{ id: "writer", replace: { id: "critic", name: "Writer", purpose: "Wrong id." } }]
       })
     ).toThrow('Override collection "roles" may not change stable id "writer".');
+
+    expect(() =>
+      applyKeyedOverrides(baseSetup, {
+        registries: [{ id: "missing_registry", replace: { id: "missing_registry", name: "Missing", entries: [] } }]
+      })
+    ).toThrow('Override collection "registries" references missing id "missing_registry".');
+
+    expect(() =>
+      applyKeyedOverrides(baseSetup, {
+        catalogs: [
+          { kind: "command", replace: { kind: "command", entries: [] } },
+          { kind: "command", replace: { kind: "command", entries: [{ id: "refresh", display: "./paperclip refresh" }] } }
+        ]
+      })
+    ).toThrow('Override collection "catalogs" reuses override kinds: command.');
+
+    expect(() =>
+      applyKeyedOverrides(baseSetup, {
+        catalogs: [{ kind: "command", replace: { kind: "env_var", entries: [] } as never }]
+      })
+    ).toThrow('Override collection "catalogs" may not change stable kind "command".');
   });
 });

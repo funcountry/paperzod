@@ -8,7 +8,7 @@ surface that now ships in `paperzod`.
 It focuses on four small framework-first capabilities:
 
 - `setup.registries[]`
-- `setup.catalogs[]`, starting with `command`
+- `setup.catalogs[]`, currently `command` and `env_var`
 - typed refs in TypeScript-authored doctrine blocks
 - required section contracts on generated surfaces
 
@@ -27,7 +27,9 @@ convention:
 
 - sanctioned decision values that should not drift
 - support artifacts and claims required before another artifact is trustworthy
-- doctrine mentions like "read this artifact" or "run this command"
+- doctrine mentions like "read this artifact", "trust this packet contract",
+  "pass this gate", "ground this in this reference", or "run this command with
+  this env var"
 - canonical document families that a generated surface may not omit
 
 Before this slice, many of those facts still lived in raw strings or template
@@ -37,7 +39,8 @@ checks and rendering.
 ## Small Typed-Ref Example
 
 The typed-ref proving fixture models one role home, one workflow owner, one
-artifact, and one sanctioned command:
+artifact, one packet contract, one review gate, one grounding reference, and
+two sanctioned operational refs:
 
 ```ts
 defineSetup({
@@ -48,9 +51,16 @@ defineSetup({
       kind: "command",
       entries: [{ id: "paperclip_status", display: "./paperclip status" }],
     },
+    {
+      kind: "env_var",
+      entries: [{ id: "paperclip_api_url", display: "PAPERCLIP_API_URL" }],
+    },
   ],
   roles: [{ id: "author", name: "Author", purpose: "Author the runtime doctrine honestly." }],
+  reviewGates: [{ id: "publish_gate", name: "Publish Gate", purpose: "Check final publish readiness.", checkIds: ["publish_packet"] }],
+  packetContracts: [{ id: "publish_packet", name: "Publish Packet", conceptualArtifactIds: ["action_authority"] }],
   artifacts: [{ id: "action_authority", name: "ACTION_AUTHORITY.md", artifactClass: "required" }],
+  references: [{ id: "runtime_reference", referenceClass: "runtime_reference", name: "Runtime Reference" }],
   surfaces: [
     {
       id: "author_home",
@@ -62,15 +72,21 @@ defineSetup({
           text: [
             "Read ",
             artifactRef("action_authority"),
-            " before asking ",
+            ", trust ",
+            packetContractRef("publish_packet"),
+            ", pass ",
+            reviewGateRef("publish_gate"),
+            ", and ask ",
             roleRef("author"),
-            " to take final action.",
+            " to take final action with grounding from ",
+            referenceRef("runtime_reference"),
+            ".",
           ],
         },
         {
           kind: "rule_list",
           items: [
-            ["Run ", commandRef("paperclip_status"), " before changing runtime docs."],
+            ["Run ", commandRef("paperclip_status"), " with ", envVarRef("paperclip_api_url"), " before changing runtime docs."],
             {
               text: ["Then open ", sectionRef({ surfaceId: "workflow_surface", stableSlug: "owner-map" }), "."],
               children: [["If routing is still unclear, read ", surfaceRef("workflow_surface"), " end to end."]],
@@ -159,6 +175,8 @@ That proves the broader product rule:
 - put trust-sensitive proof law on artifacts
 - put drift-sensitive doctrine mentions in typed authored blocks
 - put canonical section families on surfaces
+- keep helper composition honest by letting shared setup parts carry catalogs and
+  registries and overriding them with stable selectors
 
 ## What The Compiler Enforces
 
@@ -171,14 +189,18 @@ The checker now rejects:
 - typed refs to missing nodes
 - typed refs to the wrong node kind
 - typed refs to missing sections by `surfaceId + stableSlug`
-- typed refs to missing command catalogs or command entries
+- typed refs to missing command or env-var catalogs or catalog entries
 - surfaces that omit declared required section slugs
+- helper overrides that target the wrong stable selector or try to change
+  collection identity
 
 The main proof lives in:
 
 - `test/types/authoring.test.ts`
 - `test/source/nodes.test.ts`
 - `test/source/normalize.test.ts`
+- `test/source/compose.test.ts`
+- `test/source/shared-overrides.test.ts`
 - `test/graph/indexes.test.ts`
 - `test/checks/registry.test.ts`
 - `test/checks/typed-inline-refs.test.ts`
@@ -191,9 +213,9 @@ Renderers now receive canonical truth and emit plain markdown from it.
 The typed-ref proving fixture renders lines like:
 
 ```md
-Read ACTION_AUTHORITY.md before asking Author to take final action.
+Read ACTION_AUTHORITY.md, trust Publish Packet, pass Publish Gate, and ask Author to take final action with grounding from Runtime Reference.
 
-- Run `./paperclip status` before changing runtime docs.
+- Run `./paperclip status` with `PAPERCLIP_API_URL` before changing runtime docs.
 - Then open Owner Map.
   - If routing is still unclear, read Workflow Owner end to end.
 ```
@@ -220,7 +242,8 @@ The current feature set does not add:
 - AI-style prose interpretation
 - author-provided display overrides for refs
 - a doc-AST rewrite
-- broad env-var, path, or endpoint families in the first cut
+- path or endpoint families in this cut
+- richer section-law assertions beyond required slug presence
 
 Fragments stay plain in v1.
 If one fragment sentence is drift-sensitive, move that sentence into a

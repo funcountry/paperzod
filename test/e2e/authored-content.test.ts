@@ -174,9 +174,9 @@ describe("authored doctrine content flow", () => {
 
       Core job: Author the runtime doctrine honestly.
 
-      Read ACTION_AUTHORITY.md before asking Author to take final action.
+      Read ACTION_AUTHORITY.md, trust Publish Packet, pass Publish Gate, and ask Author to take final action with grounding from Runtime Reference.
 
-      - Run \`./paperclip status\` before changing runtime docs.
+      - Run \`./paperclip status\` with \`PAPERCLIP_API_URL\` before changing runtime docs.
       - Then open Owner Map.
         - If routing is still unclear, read Workflow Owner end to end.
 

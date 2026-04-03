@@ -38,7 +38,7 @@ const sectionSlugSchema = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
 const nodeInlineRefSchema = z
   .object({
     kind: z.literal("ref"),
-    refKind: z.enum(["artifact", "surface", "role"]),
+    refKind: z.enum(["artifact", "surface", "role", "review_gate", "packet_contract", "reference"]),
     id: idSchema
   })
   .strict() satisfies z.ZodType<AuthoredNodeInlineRefDef>;
@@ -54,7 +54,7 @@ const catalogInlineRefSchema = z
   .object({
     kind: z.literal("ref"),
     refKind: z.literal("catalog_entry"),
-    catalogKind: z.enum(["command"]),
+    catalogKind: z.enum(["command", "env_var"]),
     entryId: idSchema
   })
   .strict() satisfies z.ZodType<AuthoredCatalogInlineRefDef>;
@@ -219,7 +219,7 @@ export const catalogEntrySchema = z
 
 export const catalogSchema = z
   .object({
-    kind: z.enum(["command"]),
+    kind: z.enum(["command", "env_var"]),
     entries: z.array(catalogEntrySchema).min(1)
   })
   .strict() satisfies z.ZodType<CatalogInput>;

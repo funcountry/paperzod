@@ -48,6 +48,12 @@ Fast happy-path debugging with very little noise.
 
 Proof that reusable parts and setup-local keyed overrides work together.
 
+It also proves:
+
+- shared setup parts can now carry `catalogs` and `registries`
+- keyed overrides stay collection-aware:
+  registries by `id`, catalogs by `kind`
+
 ### `editorial_vertical_slice`
 
 A narrow public slice of the high-fidelity editorial setup.
@@ -105,7 +111,9 @@ It proves:
 
 - typed refs work in TypeScript-authored doctrine blocks
 - paragraphs, list items, and definition-list terms can resolve refs
-- command-backed operational refs render from catalog truth
+- graph-backed refs can cover artifacts, surfaces, sections, roles, review
+  gates, packet contracts, and references
+- command-backed and env-var-backed operational refs render from catalog truth
 - required section contracts fail loudly in checks
 - generated markdown stays plain even though authored doctrine carried typed refs
 
